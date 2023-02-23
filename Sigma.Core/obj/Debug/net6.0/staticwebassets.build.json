@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "u6Fy80HPwFEIZ530gWPR/+uNlkIsyxj4DZrt31Hwlv4=",
+  "Source": "Sigma.Core",
+  "BasePath": "_content/Sigma.Core",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

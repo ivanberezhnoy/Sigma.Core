@@ -1,0 +1,7 @@
+C:\Users\Администратор\source\repos\Sigma.Core\Sigma.Core\obj\Debug\net5.0\Sigma.Core.csproj.AssemblyReference.cache
+C:\Users\Администратор\source\repos\Sigma.Core\Sigma.Core\obj\Debug\net5.0\Sigma.Core.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Администратор\source\repos\Sigma.Core\Sigma.Core\obj\Debug\net5.0\Sigma.Core.AssemblyInfoInputs.cache
+C:\Users\Администратор\source\repos\Sigma.Core\Sigma.Core\obj\Debug\net5.0\Sigma.Core.AssemblyInfo.cs
+C:\Users\Администратор\source\repos\Sigma.Core\Sigma.Core\obj\Debug\net5.0\Sigma.Core.csproj.CoreCompileInputs.cache
+C:\Users\Администратор\source\repos\Sigma.Core\Sigma.Core\obj\Debug\net5.0\Sigma.Core.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\Администратор\source\repos\Sigma.Core\Sigma.Core\obj\Debug\net5.0\Sigma.Core.MvcApplicationPartsAssemblyInfo.cache
