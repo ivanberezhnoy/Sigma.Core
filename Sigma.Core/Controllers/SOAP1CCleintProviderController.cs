@@ -12,7 +12,20 @@ namespace Sigma.Core.Controllers
 {
     using UserName = ConnectionID;
     using UserSessions = Tuple<UserEntity, HotelManagerPortTypeClient, HashSet<ConnectionID>>;
-    using UserClient = Tuple<UserEntity, HotelManagerPortTypeClient>;
+
+    public class UserClient
+    {
+        public UserEntity User { get; set; }
+
+        public HotelManagerPortTypeClient Client {get;set;}
+
+        public UserClient(UserEntity user, HotelManagerPortTypeClient client)
+        {
+            User = user;
+            Client = client;
+        }
+    }
+
     [ApiController]
     [Route("[controller]")]
     public class SOAP1CCleintProviderController: Controller
@@ -39,9 +52,9 @@ namespace Sigma.Core.Controllers
         {
             _logger.LogInformation("Try to connect user: {UserName}", userCredential.UserName);
 
-            HotelManagerPortTypeClient? client = GetClentForConnectionID(connectionID, false);
+            UserClient? userClient = GetClentForConnectionID(connectionID, false);
 
-            if (client != null)
+            if (userClient != null)
             {
                 return true;
             }
@@ -64,10 +77,16 @@ namespace Sigma.Core.Controllers
                 hotelManagerBinding.AllowCookies = true;
                 hotelManagerBinding.Security.Mode = System.ServiceModel.BasicHttpSecurityMode.TransportCredentialOnly;
                 hotelManagerBinding.Security.Transport.ClientCredentialType = System.ServiceModel.HttpClientCredentialType.Basic;
+#if DEBUG
+                var timeout = new TimeSpan(0, 30, 0);
+                hotelManagerBinding.OpenTimeout = timeout;
+                hotelManagerBinding.ReceiveTimeout = timeout;
+                hotelManagerBinding.CloseTimeout = timeout;
+#endif
 
                 var hotelManagerEndpoint = new System.ServiceModel.EndpointAddress("http://192.168.1.152/ApartmentDeveloper/ws/ws2.1cws");
 
-                client = new HotelManagerPortTypeClient(hotelManagerBinding, hotelManagerEndpoint);
+                HotelManagerPortTypeClient client = new HotelManagerPortTypeClient(hotelManagerBinding, hotelManagerEndpoint);
                 client.ClientCredentials.UserName.UserName = userCredential.UserName;
                 client.ClientCredentials.UserName.Password = userCredential.Password;
 
@@ -81,7 +100,7 @@ namespace Sigma.Core.Controllers
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError("Unable to connect with username {UserName}", userCredential.UserName);
+                    _logger.LogError("Unable to connect with username {UserName}, Exception: {Exception}", userCredential.UserName, ex.ToString());
                     return false;
                 }
 
@@ -144,31 +163,24 @@ namespace Sigma.Core.Controllers
         }
 
         [ApiExplorerSettings(IgnoreApi = true)]
-        public HotelManagerPortTypeClient? GetClentForConnectionID(ConnectionID? connectionID, bool logWarning = true)
+        public UserClient? GetClentForConnectionID(ConnectionID? connectionID, bool logWarning = true)
         {
-            HotelManagerPortTypeClient? result = null;
+            UserClient? result = null;
 
             if (connectionID == null || connectionID.Length == 0)
             {
                 return result;
             }
 
-            UserClient? userClient;
-
-            if (_usersConnections.TryGetValue(connectionID, out userClient))
+            if (!_usersConnections.TryGetValue(connectionID, out result))
             {
-                result = userClient.Item2;
-            }
-
 #if DEBUG
-            if (logWarning && ConnectClient(new CredentionalInfo("Service", "yandex"), connectionID))
-            {
-                if (_usersConnections.TryGetValue(connectionID, out userClient))
+                if (logWarning && ConnectClient(new CredentionalInfo("Іван Бережний", "Bi34#802"), connectionID))
                 {
-                    result = userClient.Item2;
+                    _usersConnections.TryGetValue(connectionID, out result);
                 }
-            }
 #endif
+            }
 
             if (result == null && logWarning)
             {

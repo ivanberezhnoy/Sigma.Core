@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using MySqlX.XDevAPI;
 using Sigma.Core.RemoteHotelEntry;
 using static Sigma.Core.Controllers.OrganizationController;
+using static Sigma.Core.Controllers.ProductController;
 using static Sigma.Core.Controllers.StoreController;
 
 namespace Sigma.Core.Controllers
@@ -25,6 +26,21 @@ namespace Sigma.Core.Controllers
             _httpContextAccessor = httpContextAccessor;
         }
 
+        [HttpGet(Name = "GetMyMoneyValue")]
+        public float? Get()
+        {
+            var session = _clientProvider.GetClentForConnectionID(HttpContext.Connection.Id);
+
+            if (session != null)
+            {
+                if (session.User.DefaultMoneyStore != null)
+                {
+                    return session.User.DefaultMoneyStore.GetMoneyValue(session.Client);
+                }
+            }
+            return null;
+        }
+
         private MoneyStoreEntity? fillMoneyStores(HotelManagerPortTypeClient session, string? moneyStoreID = null)
         {
             MoneyStoreEntity? result = null;
@@ -33,7 +49,7 @@ namespace Sigma.Core.Controllers
 
             if (_moneyStores != null)
             {
-                if (moneyStores.error.Length > 0)
+                if (moneyStores.error != null && moneyStores.error.Length > 0)
                 {
                     _logger.LogError("Failed to load money stores list. Error : {Error}, stores: {Organizations}", moneyStores.error, moneyStores);
                 }

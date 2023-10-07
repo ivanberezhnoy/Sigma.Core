@@ -30,11 +30,11 @@ namespace Sigma.Core.Controllers
         [HttpGet(Name = "GetProducts")]
         public ProductsDicrionary? Get()
         {
-            HotelManagerPortTypeClient? session = _clientProvider.GetClentForConnectionID(HttpContext.Connection.Id);
+            var session = _clientProvider.GetClentForConnectionID(HttpContext.Connection.Id);
 
             if (session != null)
             {
-                return getProducts(session);
+                return getProducts(session.Client);
             }
             return null;
         }

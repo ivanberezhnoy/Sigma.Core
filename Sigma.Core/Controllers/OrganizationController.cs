@@ -31,7 +31,7 @@ namespace Sigma.Core.Controllers
             {
                 OrganizationsList organizationsList = session.getOrganizationsList(null);
 
-                if (organizationsList.error.Length > 0)
+                if (organizationsList.error != null && organizationsList.error.Length > 0)
                 {
                     _logger.LogError("Failed to load organizations list. Error : {Error}, organizations: {Organizations}", organizationsList.error, organizationsList);
                 }

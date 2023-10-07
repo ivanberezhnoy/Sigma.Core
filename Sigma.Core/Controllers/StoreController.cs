@@ -33,7 +33,7 @@ namespace Sigma.Core.Controllers
             {
                 StoresList stores = session.getStoresList(storeID);
 
-                if (stores.error.Length > 0)
+                if (stores.error != null && stores.error.Length > 0)
                 {
                     _logger.LogError("Failed to load stores list. Error : {Error}, stores: {Organizations}", stores.error, stores);
                 }

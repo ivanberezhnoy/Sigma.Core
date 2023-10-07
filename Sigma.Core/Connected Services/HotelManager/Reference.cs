@@ -78,6 +78,15 @@ namespace HotelManager
         
         [System.ServiceModel.OperationContractAttribute(Action="HotelManager#HotelManager:getStoresList", ReplyAction="*")]
         System.Threading.Tasks.Task<HotelManager.getStoresListResponse> getStoresListAsync(HotelManager.getStoresListRequest request);
+        
+        // CODEGEN: Параметр "return" требует дополнительной информации о схеме, которую невозможно получить в режиме параметров. Указан атрибут "Microsoft.Xml.Serialization.XmlElementAttribute".
+        [System.ServiceModel.OperationContractAttribute(Action="HotelManager#HotelManager:getMoneyValue", ReplyAction="*")]
+        [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
+        [return: System.ServiceModel.MessageParameterAttribute(Name="return")]
+        HotelManager.getMoneyValueResponse getMoneyValue(HotelManager.getMoneyValueRequest request);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="HotelManager#HotelManager:getMoneyValue", ReplyAction="*")]
+        System.Threading.Tasks.Task<HotelManager.getMoneyValueResponse> getMoneyValueAsync(HotelManager.getMoneyValueRequest request);
     }
     
     /// <remarks/>
@@ -389,7 +398,9 @@ namespace HotelManager
         
         private float priceField;
         
-        private Unit unitField;
+        private string unitIDField;
+        
+        private string characteristicIDField;
         
         /// <remarks/>
         [System.Xml.Serialization.XmlElementAttribute(Order=0)]
@@ -435,15 +446,29 @@ namespace HotelManager
         
         /// <remarks/>
         [System.Xml.Serialization.XmlElementAttribute(Order=3)]
-        public Unit Unit
+        public string UnitID
         {
             get
             {
-                return this.unitField;
+                return this.unitIDField;
             }
             set
             {
-                this.unitField = value;
+                this.unitIDField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=4)]
+        public string CharacteristicID
+        {
+            get
+            {
+                return this.characteristicIDField;
+            }
+            set
+            {
+                this.characteristicIDField = value;
             }
         }
     }
@@ -1165,6 +1190,48 @@ namespace HotelManager
         }
     }
     
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="getMoneyValue", WrapperNamespace="HotelManager", IsWrapped=true)]
+    public partial class getMoneyValueRequest
+    {
+        
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="HotelManager", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true)]
+        public string moneyStoreID;
+        
+        public getMoneyValueRequest()
+        {
+        }
+        
+        public getMoneyValueRequest(string moneyStoreID)
+        {
+            this.moneyStoreID = moneyStoreID;
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="getMoneyValueResponse", WrapperNamespace="HotelManager", IsWrapped=true)]
+    public partial class getMoneyValueResponse
+    {
+        
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="HotelManager", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true)]
+        public System.Nullable<float> @return;
+        
+        public getMoneyValueResponse()
+        {
+        }
+        
+        public getMoneyValueResponse(System.Nullable<float> @return)
+        {
+            this.@return = @return;
+        }
+    }
+    
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
     public interface HotelManagerPortTypeChannel : HotelManager.HotelManagerPortType, System.ServiceModel.IClientChannel
     {
@@ -1361,6 +1428,33 @@ namespace HotelManager
             HotelManager.getStoresListRequest inValue = new HotelManager.getStoresListRequest();
             inValue.storeID = storeID;
             return ((HotelManager.HotelManagerPortType)(this)).getStoresListAsync(inValue);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        HotelManager.getMoneyValueResponse HotelManager.HotelManagerPortType.getMoneyValue(HotelManager.getMoneyValueRequest request)
+        {
+            return base.Channel.getMoneyValue(request);
+        }
+        
+        public System.Nullable<float> getMoneyValue(string moneyStoreID)
+        {
+            HotelManager.getMoneyValueRequest inValue = new HotelManager.getMoneyValueRequest();
+            inValue.moneyStoreID = moneyStoreID;
+            HotelManager.getMoneyValueResponse retVal = ((HotelManager.HotelManagerPortType)(this)).getMoneyValue(inValue);
+            return retVal.@return;
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        System.Threading.Tasks.Task<HotelManager.getMoneyValueResponse> HotelManager.HotelManagerPortType.getMoneyValueAsync(HotelManager.getMoneyValueRequest request)
+        {
+            return base.Channel.getMoneyValueAsync(request);
+        }
+        
+        public System.Threading.Tasks.Task<HotelManager.getMoneyValueResponse> getMoneyValueAsync(string moneyStoreID)
+        {
+            HotelManager.getMoneyValueRequest inValue = new HotelManager.getMoneyValueRequest();
+            inValue.moneyStoreID = moneyStoreID;
+            return ((HotelManager.HotelManagerPortType)(this)).getMoneyValueAsync(inValue);
         }
         
         public virtual System.Threading.Tasks.Task OpenAsync()
