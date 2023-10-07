@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+https://go.microsoft.com/fwlink/?LinkID=208121.
+-->
+<Project>
+  <PropertyGroup>
+    <TimeStampOfAssociatedLegacyPublishXmlFile />
+    <EncryptedPassword>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAAvptZCHDrRUuuCPcBk2eOvgAAAAACAAAAAAAQZgAAAAEAACAAAADHUsa5JEgDVldvlRFhQEI2gkQNCAp9frsOyMI6Bib2mAAAAAAOgAAAAAIAACAAAACUeU3oElW3t4uQEqFPbquRRW5LfxitX42vQbHstzUHVyAAAAD4ORtN0ua4y2WK6zADbZqni1lm7NKVapwd8s8LXdNYZUAAAAArWzadhTbA1qEV1H5GFey7O8oeuyfq3g6gTS5CxiFkXUTs3YIOWNkrrJajL5cpwfuRNddasO5ECZFZyUPSQl9V</EncryptedPassword>
+    <History>True|2023-02-24T15:32:54.7429703Z;True|2023-02-24T18:14:36.4080308+03:00;True|2023-02-24T18:11:00.3819728+03:00;True|2023-02-24T18:02:37.0437051+03:00;True|2023-02-24T18:01:47.5126534+03:00;True|2023-02-24T18:00:02.0700845+03:00;True|2023-02-24T17:58:46.2030459+03:00;True|2023-02-24T16:58:22.4021867+03:00;True|2023-02-24T16:38:54.8153607+03:00;</History>
+    <LastFailureDetails />
+  </PropertyGroup>
+  <ItemGroup>
+    <DestinationConnectionStrings Include="SigmaMySQL">
+      <Value>server=localhost%3buser=iberezhnoy%3bdatabase=sigma%3bpassword=Bi34#802</Value>
+    </DestinationConnectionStrings>
+  </ItemGroup>
+</Project>

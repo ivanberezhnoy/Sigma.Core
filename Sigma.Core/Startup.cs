@@ -1,7 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Sigma.Core.DatabaseEntity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Sigma.Core.Controllers;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace Sigma.Core
 {
@@ -16,12 +17,20 @@ namespace Sigma.Core
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
 
-            services.AddDbContext<DatabaseContext>(options => options.UseMySQL(Configuration.GetConnectionString("SigmaMySQL")));
+            services.AddHttpContextAccessor();
 
+            services.AddSingleton<SOAP1CCleintProviderController>();
+            services.AddSingleton<ProductController>();
+            services.AddSingleton<OrganizationController>();
+            services.AddSingleton<MoneyStoreController>();
+            services.AddSingleton<StoreController>();
+
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options => options.LoginPath = "/login");
         }
     }
 }

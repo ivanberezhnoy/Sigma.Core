@@ -1,4 +1,4 @@
-Sigma.Core/bin/
-Sigma.Core/obj/
-Sigma.Web/
-./vs/
+**/Sigma.Core/bin/
+**Sigma.Core/obj/
+**/Sigma.Web/
+**/.vs/
