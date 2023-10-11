@@ -61,14 +61,14 @@ namespace HotelManager
         [System.ServiceModel.OperationContractAttribute(Action="HotelManager#HotelManager:getOrganizationsList", ReplyAction="*")]
         System.Threading.Tasks.Task<HotelManager.getOrganizationsListResponse> getOrganizationsListAsync(HotelManager.getOrganizationsListRequest request);
         
-        [System.ServiceModel.OperationContractAttribute(Action="HotelManager#HotelManager:getSales", ReplyAction="*")]
+        // CODEGEN: Параметр "documentID" требует дополнительной информации о схеме, которую невозможно получить в режиме параметров. Указан атрибут "Microsoft.Xml.Serialization.XmlElementAttribute".
+        [System.ServiceModel.OperationContractAttribute(Action="HotelManager#HotelManager:getDocuments", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
         [return: System.ServiceModel.MessageParameterAttribute(Name="return")]
-        HotelManager.SalesList getSales();
+        HotelManager.getDocumentsResponse getDocuments(HotelManager.getDocumentsRequest request);
         
-        [System.ServiceModel.OperationContractAttribute(Action="HotelManager#HotelManager:getSales", ReplyAction="*")]
-        [return: System.ServiceModel.MessageParameterAttribute(Name="return")]
-        System.Threading.Tasks.Task<HotelManager.SalesList> getSalesAsync();
+        [System.ServiceModel.OperationContractAttribute(Action="HotelManager#HotelManager:getDocuments", ReplyAction="*")]
+        System.Threading.Tasks.Task<HotelManager.getDocumentsResponse> getDocumentsAsync(HotelManager.getDocumentsRequest request);
         
         // CODEGEN: Параметр "storeID" требует дополнительной информации о схеме, которую невозможно получить в режиме параметров. Указан атрибут "Microsoft.Xml.Serialization.XmlElementAttribute".
         [System.ServiceModel.OperationContractAttribute(Action="HotelManager#HotelManager:getStoresList", ReplyAction="*")]
@@ -87,6 +87,33 @@ namespace HotelManager
         
         [System.ServiceModel.OperationContractAttribute(Action="HotelManager#HotelManager:getMoneyValue", ReplyAction="*")]
         System.Threading.Tasks.Task<HotelManager.getMoneyValueResponse> getMoneyValueAsync(HotelManager.getMoneyValueRequest request);
+        
+        // CODEGEN: Параметр "clientID" требует дополнительной информации о схеме, которую невозможно получить в режиме параметров. Указан атрибут "Microsoft.Xml.Serialization.XmlElementAttribute".
+        [System.ServiceModel.OperationContractAttribute(Action="HotelManager#HotelManager:getClients", ReplyAction="*")]
+        [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
+        [return: System.ServiceModel.MessageParameterAttribute(Name="return")]
+        HotelManager.getClientsResponse getClients(HotelManager.getClientsRequest request);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="HotelManager#HotelManager:getClients", ReplyAction="*")]
+        System.Threading.Tasks.Task<HotelManager.getClientsResponse> getClientsAsync(HotelManager.getClientsRequest request);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="HotelManager#HotelManager:getUsers", ReplyAction="*")]
+        [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
+        [return: System.ServiceModel.MessageParameterAttribute(Name="return")]
+        HotelManager.UsersList getUsers();
+        
+        [System.ServiceModel.OperationContractAttribute(Action="HotelManager#HotelManager:getUsers", ReplyAction="*")]
+        [return: System.ServiceModel.MessageParameterAttribute(Name="return")]
+        System.Threading.Tasks.Task<HotelManager.UsersList> getUsersAsync();
+        
+        // CODEGEN: Параметр "agreementId" требует дополнительной информации о схеме, которую невозможно получить в режиме параметров. Указан атрибут "Microsoft.Xml.Serialization.XmlElementAttribute".
+        [System.ServiceModel.OperationContractAttribute(Action="HotelManager#HotelManager:getAgrementsList", ReplyAction="*")]
+        [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
+        [return: System.ServiceModel.MessageParameterAttribute(Name="return")]
+        HotelManager.getAgrementsListResponse getAgrementsList(HotelManager.getAgrementsListRequest request);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="HotelManager#HotelManager:getAgrementsList", ReplyAction="*")]
+        System.Threading.Tasks.Task<HotelManager.getAgrementsListResponse> getAgrementsListAsync(HotelManager.getAgrementsListRequest request);
     }
     
     /// <remarks/>
@@ -309,6 +336,326 @@ namespace HotelManager
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.hotel-manager.org")]
+    public partial class Agreement
+    {
+        
+        private string idField;
+        
+        private string nameField;
+        
+        private DocumentType typeField;
+        
+        private string clientIdField;
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=0)]
+        public string Id
+        {
+            get
+            {
+                return this.idField;
+            }
+            set
+            {
+                this.idField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=1)]
+        public string Name
+        {
+            get
+            {
+                return this.nameField;
+            }
+            set
+            {
+                this.nameField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=2)]
+        public DocumentType Type
+        {
+            get
+            {
+                return this.typeField;
+            }
+            set
+            {
+                this.typeField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=3)]
+        public string ClientId
+        {
+            get
+            {
+                return this.clientIdField;
+            }
+            set
+            {
+                this.clientIdField = value;
+            }
+        }
+    }
+    
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
+    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.hotel-manager.org")]
+    public enum DocumentType
+    {
+        
+        /// <remarks/>
+        Sell,
+        
+        /// <remarks/>
+        Buy,
+        
+        /// <remarks/>
+        ReturnFromClient,
+        
+        /// <remarks/>
+        ReturnToClient,
+        
+        /// <remarks/>
+        MoneyGet,
+        
+        /// <remarks/>
+        MoneyPut,
+        
+        /// <remarks/>
+        MoneyReturnToClient,
+        
+        /// <remarks/>
+        MeneyReturnFromClient,
+    }
+    
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.hotel-manager.org")]
+    public partial class AgreementsList
+    {
+        
+        private Agreement[] dataField;
+        
+        private string errorField;
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute("data", Order=0)]
+        public Agreement[] data
+        {
+            get
+            {
+                return this.dataField;
+            }
+            set
+            {
+                this.dataField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=1)]
+        public string error
+        {
+            get
+            {
+                return this.errorField;
+            }
+            set
+            {
+                this.errorField = value;
+            }
+        }
+    }
+    
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.hotel-manager.org")]
+    public partial class User
+    {
+        
+        private string idField;
+        
+        private string nameField;
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=0)]
+        public string Id
+        {
+            get
+            {
+                return this.idField;
+            }
+            set
+            {
+                this.idField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=1)]
+        public string Name
+        {
+            get
+            {
+                return this.nameField;
+            }
+            set
+            {
+                this.nameField = value;
+            }
+        }
+    }
+    
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.hotel-manager.org")]
+    public partial class UsersList
+    {
+        
+        private User[] dataField;
+        
+        private string errorField;
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute("data", Order=0)]
+        public User[] data
+        {
+            get
+            {
+                return this.dataField;
+            }
+            set
+            {
+                this.dataField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=1)]
+        public string error
+        {
+            get
+            {
+                return this.errorField;
+            }
+            set
+            {
+                this.errorField = value;
+            }
+        }
+    }
+    
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.hotel-manager.org")]
+    public partial class Client
+    {
+        
+        private string idField;
+        
+        private string nameField;
+        
+        private string[] agreementsIdField;
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=0)]
+        public string Id
+        {
+            get
+            {
+                return this.idField;
+            }
+            set
+            {
+                this.idField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=1)]
+        public string Name
+        {
+            get
+            {
+                return this.nameField;
+            }
+            set
+            {
+                this.nameField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlArrayAttribute(Order=2)]
+        [System.Xml.Serialization.XmlArrayItemAttribute("data", IsNullable=false)]
+        public string[] AgreementsId
+        {
+            get
+            {
+                return this.agreementsIdField;
+            }
+            set
+            {
+                this.agreementsIdField = value;
+            }
+        }
+    }
+    
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.hotel-manager.org")]
+    public partial class ClientsList
+    {
+        
+        private Client[] dataField;
+        
+        private string errorField;
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute("data", Order=0)]
+        public Client[] data
+        {
+            get
+            {
+                return this.dataField;
+            }
+            set
+            {
+                this.dataField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=1)]
+        public string error
+        {
+            get
+            {
+                return this.errorField;
+            }
+            set
+            {
+                this.errorField = value;
+            }
+        }
+    }
+    
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.hotel-manager.org")]
     public partial class Store
     {
         
@@ -389,7 +736,7 @@ namespace HotelManager
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.hotel-manager.org")]
-    public partial class ProductSale
+    public partial class ProductItem
     {
         
         private string productIdField;
@@ -477,7 +824,7 @@ namespace HotelManager
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.hotel-manager.org")]
-    public partial class Sale
+    public partial class Document
     {
         
         private string idField;
@@ -490,11 +837,25 @@ namespace HotelManager
         
         private string userIdField;
         
-        private ProductSale[] productSalesField;
-        
         private System.Nullable<System.DateTime> dateField;
         
         private string commentField;
+        
+        private bool isActiveField;
+        
+        private string parentDocumentIdField;
+        
+        private string[] childDocumentsIdField;
+        
+        private DocumentType documentTypeField;
+        
+        private string agreementIdField;
+        
+        private ProductItem[] productItemsField;
+        
+        private string moneyStoreIdField;
+        
+        private float sumField;
         
         /// <remarks/>
         [System.Xml.Serialization.XmlElementAttribute(Order=0)]
@@ -553,7 +914,7 @@ namespace HotelManager
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute(Order=4)]
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=4)]
         public string UserId
         {
             get
@@ -567,21 +928,7 @@ namespace HotelManager
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute("ProductSales", Order=5)]
-        public ProductSale[] ProductSales
-        {
-            get
-            {
-                return this.productSalesField;
-            }
-            set
-            {
-                this.productSalesField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=6)]
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=5)]
         public System.Nullable<System.DateTime> Date
         {
             get
@@ -595,7 +942,7 @@ namespace HotelManager
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=7)]
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=6)]
         public string Comment
         {
             get
@@ -607,22 +954,135 @@ namespace HotelManager
                 this.commentField = value;
             }
         }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=7)]
+        public bool IsActive
+        {
+            get
+            {
+                return this.isActiveField;
+            }
+            set
+            {
+                this.isActiveField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=8)]
+        public string ParentDocumentId
+        {
+            get
+            {
+                return this.parentDocumentIdField;
+            }
+            set
+            {
+                this.parentDocumentIdField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlArrayAttribute(Order=9)]
+        [System.Xml.Serialization.XmlArrayItemAttribute("data", IsNullable=false)]
+        public string[] ChildDocumentsId
+        {
+            get
+            {
+                return this.childDocumentsIdField;
+            }
+            set
+            {
+                this.childDocumentsIdField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=10)]
+        public DocumentType DocumentType
+        {
+            get
+            {
+                return this.documentTypeField;
+            }
+            set
+            {
+                this.documentTypeField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=11)]
+        public string AgreementId
+        {
+            get
+            {
+                return this.agreementIdField;
+            }
+            set
+            {
+                this.agreementIdField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute("ProductItems", Order=12)]
+        public ProductItem[] ProductItems
+        {
+            get
+            {
+                return this.productItemsField;
+            }
+            set
+            {
+                this.productItemsField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=13)]
+        public string MoneyStoreId
+        {
+            get
+            {
+                return this.moneyStoreIdField;
+            }
+            set
+            {
+                this.moneyStoreIdField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=14)]
+        public float Sum
+        {
+            get
+            {
+                return this.sumField;
+            }
+            set
+            {
+                this.sumField = value;
+            }
+        }
     }
     
     /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.hotel-manager.org")]
-    public partial class SalesList
+    public partial class DocumentsList
     {
         
-        private Sale[] dataField;
+        private Document[] dataField;
         
         private string errorField;
         
         /// <remarks/>
         [System.Xml.Serialization.XmlElementAttribute("data", Order=0)]
-        public Sale[] data
+        public Document[] data
         {
             get
             {
@@ -1152,6 +1612,47 @@ namespace HotelManager
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
     [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="getDocuments", WrapperNamespace="HotelManager", IsWrapped=true)]
+    public partial class getDocumentsRequest
+    {
+        
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="HotelManager", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true)]
+        public string documentID;
+        
+        public getDocumentsRequest()
+        {
+        }
+        
+        public getDocumentsRequest(string documentID)
+        {
+            this.documentID = documentID;
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="getDocumentsResponse", WrapperNamespace="HotelManager", IsWrapped=true)]
+    public partial class getDocumentsResponse
+    {
+        
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="HotelManager", Order=0)]
+        public HotelManager.DocumentsList @return;
+        
+        public getDocumentsResponse()
+        {
+        }
+        
+        public getDocumentsResponse(HotelManager.DocumentsList @return)
+        {
+            this.@return = @return;
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
     [System.ServiceModel.MessageContractAttribute(WrapperName="getStoresList", WrapperNamespace="HotelManager", IsWrapped=true)]
     public partial class getStoresListRequest
     {
@@ -1227,6 +1728,88 @@ namespace HotelManager
         }
         
         public getMoneyValueResponse(System.Nullable<float> @return)
+        {
+            this.@return = @return;
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="getClients", WrapperNamespace="HotelManager", IsWrapped=true)]
+    public partial class getClientsRequest
+    {
+        
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="HotelManager", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true)]
+        public string clientID;
+        
+        public getClientsRequest()
+        {
+        }
+        
+        public getClientsRequest(string clientID)
+        {
+            this.clientID = clientID;
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="getClientsResponse", WrapperNamespace="HotelManager", IsWrapped=true)]
+    public partial class getClientsResponse
+    {
+        
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="HotelManager", Order=0)]
+        public HotelManager.ClientsList @return;
+        
+        public getClientsResponse()
+        {
+        }
+        
+        public getClientsResponse(HotelManager.ClientsList @return)
+        {
+            this.@return = @return;
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="getAgrementsList", WrapperNamespace="HotelManager", IsWrapped=true)]
+    public partial class getAgrementsListRequest
+    {
+        
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="HotelManager", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true)]
+        public string agreementId;
+        
+        public getAgrementsListRequest()
+        {
+        }
+        
+        public getAgrementsListRequest(string agreementId)
+        {
+            this.agreementId = agreementId;
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="getAgrementsListResponse", WrapperNamespace="HotelManager", IsWrapped=true)]
+    public partial class getAgrementsListResponse
+    {
+        
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="HotelManager", Order=0)]
+        public HotelManager.AgreementsList @return;
+        
+        public getAgrementsListResponse()
+        {
+        }
+        
+        public getAgrementsListResponse(HotelManager.AgreementsList @return)
         {
             this.@return = @return;
         }
@@ -1393,14 +1976,31 @@ namespace HotelManager
             return ((HotelManager.HotelManagerPortType)(this)).getOrganizationsListAsync(inValue);
         }
         
-        public HotelManager.SalesList getSales()
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        HotelManager.getDocumentsResponse HotelManager.HotelManagerPortType.getDocuments(HotelManager.getDocumentsRequest request)
         {
-            return base.Channel.getSales();
+            return base.Channel.getDocuments(request);
         }
         
-        public System.Threading.Tasks.Task<HotelManager.SalesList> getSalesAsync()
+        public HotelManager.DocumentsList getDocuments(string documentID)
         {
-            return base.Channel.getSalesAsync();
+            HotelManager.getDocumentsRequest inValue = new HotelManager.getDocumentsRequest();
+            inValue.documentID = documentID;
+            HotelManager.getDocumentsResponse retVal = ((HotelManager.HotelManagerPortType)(this)).getDocuments(inValue);
+            return retVal.@return;
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        System.Threading.Tasks.Task<HotelManager.getDocumentsResponse> HotelManager.HotelManagerPortType.getDocumentsAsync(HotelManager.getDocumentsRequest request)
+        {
+            return base.Channel.getDocumentsAsync(request);
+        }
+        
+        public System.Threading.Tasks.Task<HotelManager.getDocumentsResponse> getDocumentsAsync(string documentID)
+        {
+            HotelManager.getDocumentsRequest inValue = new HotelManager.getDocumentsRequest();
+            inValue.documentID = documentID;
+            return ((HotelManager.HotelManagerPortType)(this)).getDocumentsAsync(inValue);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
@@ -1455,6 +2055,70 @@ namespace HotelManager
             HotelManager.getMoneyValueRequest inValue = new HotelManager.getMoneyValueRequest();
             inValue.moneyStoreID = moneyStoreID;
             return ((HotelManager.HotelManagerPortType)(this)).getMoneyValueAsync(inValue);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        HotelManager.getClientsResponse HotelManager.HotelManagerPortType.getClients(HotelManager.getClientsRequest request)
+        {
+            return base.Channel.getClients(request);
+        }
+        
+        public HotelManager.ClientsList getClients(string clientID)
+        {
+            HotelManager.getClientsRequest inValue = new HotelManager.getClientsRequest();
+            inValue.clientID = clientID;
+            HotelManager.getClientsResponse retVal = ((HotelManager.HotelManagerPortType)(this)).getClients(inValue);
+            return retVal.@return;
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        System.Threading.Tasks.Task<HotelManager.getClientsResponse> HotelManager.HotelManagerPortType.getClientsAsync(HotelManager.getClientsRequest request)
+        {
+            return base.Channel.getClientsAsync(request);
+        }
+        
+        public System.Threading.Tasks.Task<HotelManager.getClientsResponse> getClientsAsync(string clientID)
+        {
+            HotelManager.getClientsRequest inValue = new HotelManager.getClientsRequest();
+            inValue.clientID = clientID;
+            return ((HotelManager.HotelManagerPortType)(this)).getClientsAsync(inValue);
+        }
+        
+        public HotelManager.UsersList getUsers()
+        {
+            return base.Channel.getUsers();
+        }
+        
+        public System.Threading.Tasks.Task<HotelManager.UsersList> getUsersAsync()
+        {
+            return base.Channel.getUsersAsync();
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        HotelManager.getAgrementsListResponse HotelManager.HotelManagerPortType.getAgrementsList(HotelManager.getAgrementsListRequest request)
+        {
+            return base.Channel.getAgrementsList(request);
+        }
+        
+        public HotelManager.AgreementsList getAgrementsList(string agreementId)
+        {
+            HotelManager.getAgrementsListRequest inValue = new HotelManager.getAgrementsListRequest();
+            inValue.agreementId = agreementId;
+            HotelManager.getAgrementsListResponse retVal = ((HotelManager.HotelManagerPortType)(this)).getAgrementsList(inValue);
+            return retVal.@return;
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        System.Threading.Tasks.Task<HotelManager.getAgrementsListResponse> HotelManager.HotelManagerPortType.getAgrementsListAsync(HotelManager.getAgrementsListRequest request)
+        {
+            return base.Channel.getAgrementsListAsync(request);
+        }
+        
+        public System.Threading.Tasks.Task<HotelManager.getAgrementsListResponse> getAgrementsListAsync(string agreementId)
+        {
+            HotelManager.getAgrementsListRequest inValue = new HotelManager.getAgrementsListRequest();
+            inValue.agreementId = agreementId;
+            return ((HotelManager.HotelManagerPortType)(this)).getAgrementsListAsync(inValue);
         }
         
         public virtual System.Threading.Tasks.Task OpenAsync()

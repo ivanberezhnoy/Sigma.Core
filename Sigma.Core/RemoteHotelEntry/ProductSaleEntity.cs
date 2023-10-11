@@ -4,7 +4,7 @@ namespace Sigma.Core.RemoteHotelEntry
 {
     public class ProductSaleEntity
     {
-        public ProductSaleEntity(uint index, ProductEntry product, float quantity, float price, UnitEntity unit, Characteristic? characteristic)
+        public ProductSaleEntity(uint index, ProductEntity product, float quantity, float price, UnitEntity unit, CharacteristicEntity? characteristic)
         {
             Index = index;
             Product = product;
@@ -15,7 +15,7 @@ namespace Sigma.Core.RemoteHotelEntry
         }
 
         public uint Index;
-        public ProductEntry Product { get; set; }
+        public ProductEntity Product { get; set; }
 
         public float Quantity { get; set; }
 
@@ -23,6 +23,6 @@ namespace Sigma.Core.RemoteHotelEntry
 
         public UnitEntity Unit { get; set; }
 
-        public Characteristic? Characteristic { get; set; }
+        public CharacteristicEntity? Characteristic { get; set; }
     }
 }

@@ -4,7 +4,7 @@ using Id = System.String;
 
 namespace Sigma.Core.RemoteHotelEntry
 {
-    public class CharacteristicEntry
+    public class CharacteristicEntity
     {
         [Key]
         public Id Id { get; set; }
@@ -22,7 +22,7 @@ namespace Sigma.Core.RemoteHotelEntry
             Name = characteristic.Name;
         }
 
-        public CharacteristicEntry(Characteristic characteristic)
+        public CharacteristicEntity(Characteristic characteristic)
         {
             Id = characteristic.Id;
             Name = characteristic.Name;

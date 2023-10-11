@@ -5,14 +5,15 @@
     using System.ServiceModel.Security;
     public class UserEntity
     {
-        public UserEntity(CredentionalInfo credentional)
+        public UserEntity(CredentionalInfo credentional, string userID)
         {
             Credentional = credentional;
+            UserId = userID;
         }
 
         public CredentionalInfo Credentional { get; set; }
 
-        public string? UserId { get; set; }
+        public string UserId { get; set; }
 
         public OrganizationEntity? DefaultOrganization { get; set; } = null;
         public StoreEntity? DefaultStore { get; set; } = null;

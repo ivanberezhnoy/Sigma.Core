@@ -102,7 +102,9 @@ namespace Sigma.Core.Controllers
             return _moneyStores;
         }
 
+        
         [ApiExplorerSettings(IgnoreApi = true)]
+        [NonAction]
         public MoneyStoreEntity? GetMoneyStore(HotelManagerPortTypeClient session, string? moneyStoreID)
         {
             MoneyStoreEntity? result = null;

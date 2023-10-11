@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using HotelManager;
 using System;
 using Sigma.Core.Controllers;
+using System.Web.Services.Description;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,14 +47,17 @@ var helloResult = await client.getHelloAsync();*/
 app.UseAuthentication();
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
 
-app.Services.GetService<SOAP1CCleintProviderController>();
-app.Services.GetService<ProductController>();
-app.Services.GetService<OrganizationController>();
+app.Services.GetService<ClientController>();
+app.Services.GetService<DocumentController>();
+app.Services.GetService<LoginController>();
 app.Services.GetService<MoneyStoreController>();
+app.Services.GetService<OrganizationController>();
+app.Services.GetService<ProductController>();
+app.Services.GetService<SOAP1CCleintProviderController>();
 app.Services.GetService<StoreController>();
+
 
 /*var dbContext = app.Services.GetService<DatabaseContext>();
 if (dbContext != null)

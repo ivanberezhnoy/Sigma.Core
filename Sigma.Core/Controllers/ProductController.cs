@@ -6,14 +6,15 @@ using MySqlX.XDevAPI;
 using Sigma.Core.RemoteHotelEntry;
 using Sigma.Core.Utils;
 using System.Security.Claims;
+using static Sigma.Core.Controllers.OrganizationController;
 
 namespace Sigma.Core.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class ProductController : ControllerBase
+    public class ProductController : Controller
     {
-        public class ProductsDicrionary : Dictionary<string, ProductEntry> { };
+        public class ProductsDicrionary : Dictionary<string, ProductEntity> { };
         private ProductsDicrionary? _products;
 
         private ILogger<ProductController> _logger;
@@ -39,9 +40,27 @@ namespace Sigma.Core.Controllers
             return null;
         }
 
-        private ProductEntry? fillProducts(HotelManagerPortTypeClient session, string? productID = null, bool fullReload = false)
+        [ApiExplorerSettings(IgnoreApi = true)]
+        [NonAction]
+        public void ReloadProduct(HotelManagerPortTypeClient session, ProductEntity product)
         {
-            ProductEntry? firstProduct = null;
+            if (_products != null)
+            {
+                if (!_products.ContainsKey(product.Id))
+                {
+                    _logger.LogError("ReloadProduct. Products container does not contain product with ID: {ProductID}", product.Id);
+                }
+                fillProducts(session, product.Id);
+            }
+            else
+            {
+                _logger.LogCritical("Unable to reload product. Products container is empty");
+            }
+        }
+
+        private ProductEntity? fillProducts(HotelManagerPortTypeClient session, string? productID = null, bool fullReload = false)
+        {
+            ProductEntity? firstProduct = null;
 
             if (_products != null)
             {
@@ -51,7 +70,7 @@ namespace Sigma.Core.Controllers
                 {
                     foreach (Product product in products.data)
                     {
-                        ProductEntry? productEntity = null;
+                        ProductEntity? productEntity = null;
 
                         if (!fullReload && _products.TryGetValue(product.Id, out productEntity))
                         {
@@ -60,7 +79,7 @@ namespace Sigma.Core.Controllers
 
                         if (productEntity == null)
                         {
-                            productEntity = new ProductEntry(product);
+                            productEntity = new ProductEntity(product);
                             _products[product.Id] = productEntity;
                         }
 
@@ -74,7 +93,6 @@ namespace Sigma.Core.Controllers
 
             return firstProduct;
         }
-
         private ProductsDicrionary getProducts(HotelManagerPortTypeClient session)
         {
 
@@ -86,6 +104,29 @@ namespace Sigma.Core.Controllers
             }
 
             return _products;
+        }
+
+        [ApiExplorerSettings(IgnoreApi = true)]
+        [NonAction]
+        public ProductEntity? GetProduct(HotelManagerPortTypeClient session, string? productID)
+        {
+            ProductEntity? result = null;
+
+            if (productID == null || productID.Length == 0)
+            {
+                return result;
+            }
+
+            ProductsDicrionary products = getProducts(session);
+
+            if (!products.TryGetValue(productID, out result))
+            {
+                _logger.LogInformation("Loading product with ID {OrganizationID}", productID);
+
+                result = fillProducts(session, productID);
+            }
+
+            return result;
         }
     }
 }

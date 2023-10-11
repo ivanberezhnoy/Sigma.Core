@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Sigma.Core.RemoteHotelEntry;
+using System.Reflection.Metadata;
 
 namespace Sigma.Core.Controllers
 {
@@ -29,11 +30,11 @@ namespace Sigma.Core.Controllers
 
             if (_organizations != null)
             {
-                OrganizationsList organizationsList = session.getOrganizationsList(null);
+                OrganizationsList organizationsList = session.getOrganizationsList(organizationID);
 
                 if (organizationsList.error != null && organizationsList.error.Length > 0)
                 {
-                    _logger.LogError("Failed to load organizations list. Error : {Error}, organizations: {Organizations}", organizationsList.error, organizationsList);
+                    _logger.LogError("Failed to load organizations list. Error : {Error}, organizations: {Organizations}, organizationID: {OrganizationID}", organizationsList.error, organizationsList, organizationID != null ? organizationID : "null");
                 }
 
                 foreach (var organization in organizationsList.data)
@@ -63,6 +64,7 @@ namespace Sigma.Core.Controllers
         }
 
         [ApiExplorerSettings(IgnoreApi = true)]
+        [NonAction]
         public OrganizationEntity? GetOrganization(HotelManagerPortTypeClient session, string? organizationID)
         {
             OrganizationEntity? result = null;

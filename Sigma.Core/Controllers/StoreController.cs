@@ -42,6 +42,11 @@ namespace Sigma.Core.Controllers
                 {
                     StoreEntity newStore = new StoreEntity(store);
                     _stores[newStore.Id] = newStore;
+
+                    if (result == null)
+                    {
+                        result = newStore;
+                    }
                 }
             }
 
@@ -59,6 +64,7 @@ namespace Sigma.Core.Controllers
         }
 
         [ApiExplorerSettings(IgnoreApi = true)]
+        [NonAction]
         public StoreEntity? GetStore(HotelManagerPortTypeClient session, string? storeID)
         {
             StoreEntity? result = null;

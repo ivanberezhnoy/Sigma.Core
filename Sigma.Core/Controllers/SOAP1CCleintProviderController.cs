@@ -11,7 +11,20 @@ using Microsoft.AspNetCore.Mvc;
 namespace Sigma.Core.Controllers
 {
     using UserName = ConnectionID;
-    using UserSessions = Tuple<UserEntity, HotelManagerPortTypeClient, HashSet<ConnectionID>>;
+    //using UserSessions = Tuple<UserEntity, HotelManagerPortTypeClient, HashSet<ConnectionID>>;
+
+    public class UserSessions
+    {
+        public UserSessions(UserEntity user, HotelManagerPortTypeClient? client, HashSet<ConnectionID> connections)
+        {
+            User = user;
+            Client = client;
+            Connections = connections;
+        }
+        public UserEntity User { get; set; }
+        public HotelManagerPortTypeClient? Client;
+        public HashSet<ConnectionID> Connections { get; set; }
+    }
 
     public class UserClient
     {
@@ -48,6 +61,44 @@ namespace Sigma.Core.Controllers
 
 
         [ApiExplorerSettings(IgnoreApi = true)]
+        [NonAction]
+        public UserEntity? GetUserByID(HotelManagerPortTypeClient client, string userID)
+        {
+            UserEntity? result = null;
+            if (userID != null && userID.Length > 0)
+            {
+                HashSet<string> existingUserIds = new HashSet<UserName>();
+                foreach(var userSession in _connectedUsersSessions.Values)
+                {
+                    existingUserIds.Add(userSession.User.UserId);
+                    
+                    if (userSession.User.UserId == userID)
+                    {
+                        return userSession.User;
+                    }
+                }
+
+                UsersList users = client.getUsers();
+
+                foreach(var user in users.data)
+                {
+                    if (!existingUserIds.Contains(user.Id))
+                    {
+                        result = new UserEntity(new CredentionalInfo(user.Name, null), user.Id);
+                        _connectedUsersSessions[result.Credentional.UserName] = new UserSessions(result, null, new HashSet<UserName>());
+                    }
+                }
+            }
+            else 
+            {
+                _logger.LogWarning("Unable find user with empty UserID");
+            }
+
+            return result;
+        }
+
+        [ApiExplorerSettings(IgnoreApi = true)]
+        [NonAction]
         public bool ConnectClient(CredentionalInfo userCredential, ConnectionID connectionID)
         {
             _logger.LogInformation("Try to connect user: {UserName}", userCredential.UserName);
@@ -63,9 +114,9 @@ namespace Sigma.Core.Controllers
             _connectedUsersSessions.TryGetValue(userCredential.UserName, out connectedUserInfo);
 
             UserEntity? user;
-            if (connectedUserInfo == null || connectedUserInfo.Item1.Credentional.Password != userCredential.Password)
+            if (connectedUserInfo == null || connectedUserInfo.Client == null || connectedUserInfo.User.Credentional.Password != userCredential.Password)
             {
-                if (connectedUserInfo != null && connectedUserInfo.Item1.Credentional.Password != userCredential.Password)
+                if (connectedUserInfo != null && connectedUserInfo.User.Credentional.Password != userCredential.Password)
                 {
                     _logger.LogWarning("User: {User} try to connect with new password", userCredential.UserName);
                 }
@@ -123,19 +174,19 @@ namespace Sigma.Core.Controllers
                 if (organizationController != null && storeController != null && moneyStoreController != null)
                 {
 
-                    user = new UserEntity(userCredential);
-                    user.UserId = userSettings.UserID;
+                    user = new UserEntity(userCredential, userSettings.UserID);
+
                     user.DefaultOrganization = organizationController.GetOrganization(client, userSettings.DefaultOrganizationId);
                     user.DefaultMoneyStore = moneyStoreController.GetMoneyStore(client, userSettings.DefaultMoneyStoreId);
                     user.DefaultStore = storeController.GetStore(client, userSettings.DefaultStoreId);
 
-                    if (connectedUserInfo != null)
+                    if (connectedUserInfo != null && connectedUserInfo.Client != null)
                     {
                         _logger.LogWarning("User: {User} password was changed", userCredential.UserName);
 
-                        connectedUserInfo.Item2.CloseAsync();
+                        connectedUserInfo.Client.CloseAsync();
 
-                        foreach (ConnectionID oldSession in connectedUserInfo.Item3)
+                        foreach (ConnectionID oldSession in connectedUserInfo.Connections)
                         {
                             _usersConnections.Remove(oldSession);
                         }
@@ -151,18 +202,23 @@ namespace Sigma.Core.Controllers
             }
             else
             {
-                user = connectedUserInfo.Item1;
+                user = connectedUserInfo.User;
             }
 
             _logger.LogInformation("New user {UserName} session establiched {SessionID}", userCredential.UserName, connectionID);
 
-            connectedUserInfo.Item3.Add(connectionID);
-            _usersConnections[connectionID] = new UserClient(user, connectedUserInfo.Item2);
+            connectedUserInfo.Connections.Add(connectionID);
+
+            if (connectedUserInfo.Client != null)
+            {
+                _usersConnections[connectionID] = new UserClient(user, connectedUserInfo.Client);
+            }
 
             return true;
         }
 
         [ApiExplorerSettings(IgnoreApi = true)]
+        [NonAction]
         public UserClient? GetClentForConnectionID(ConnectionID? connectionID, bool logWarning = true)
         {
             UserClient? result = null;

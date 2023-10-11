@@ -8,14 +8,14 @@ using System.Reflection.PortableExecutable;
 
 namespace Sigma.Core.RemoteHotelEntry
 {
-    public class CharacteristicDictionary : Dictionary<string, CharacteristicEntry>
+    public class CharacteristicDictionary : Dictionary<string, CharacteristicEntity>
     { }
 
     public class UntitsDictionary : Dictionary<string, UnitEntity>
     { }
 
 
-    public class ProductEntry
+    public class ProductEntity
     {
         [Key]
         public Id Id { get; set; }
@@ -51,10 +51,10 @@ namespace Sigma.Core.RemoteHotelEntry
             {
                 foreach(var characteristic in product.Characteristics)
                 {
-                    CharacteristicEntry? newCharacteristic = null;
+                    CharacteristicEntity? newCharacteristic = null;
                     if (!Characteristics.TryGetValue(characteristic.Id, out newCharacteristic))
                     {
-                        newCharacteristic = new CharacteristicEntry(characteristic);
+                        newCharacteristic = new CharacteristicEntity(characteristic);
                     }
 
                     newCharacteristic.Reload(characteristic);
@@ -94,7 +94,29 @@ namespace Sigma.Core.RemoteHotelEntry
             Units = newUnits;
         }
 
-        public ProductEntry(Product product)
+        public UnitEntity? GetUnitWithID(string unitID)
+        {
+            UnitEntity? result = null;
+
+            if (!Units.TryGetValue(unitID, out result))
+            {
+            }
+
+            return result;
+        }
+
+        public CharacteristicEntity? GetCharacteristicWithID(string characteristicID)
+        {
+            CharacteristicEntity? result = null;
+
+            if (!Characteristics.TryGetValue(characteristicID, out result))
+            {
+            }
+
+            return result;
+        }
+
+        public ProductEntity(Product product)
         {
             Id = product.Id;
             Name = product.Name;

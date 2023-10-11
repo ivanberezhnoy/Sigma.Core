@@ -1,6 +1,9 @@
-﻿namespace Sigma.Core.RemoteHotelEntry
+﻿using HotelManager;
+using System.Diagnostics;
+
+namespace Sigma.Core.RemoteHotelEntry
 {
-    public enum DocumentType
+    public enum DocumentEntityType
     {
         Sell,
         Buy,
@@ -12,7 +15,24 @@
 
     public class DocumentEntity
     {
-        public void Fill(OrganizationEntity organization, ClientEntity client, DateTime date, string? comment, UserEntity user, bool isActive)
+        public static DocumentEntityType ConvertDocumentType(DocumentType type)
+        {
+            switch(type)
+            {
+                case HotelManager.DocumentType.Sell:
+                        return DocumentEntityType.Sell;
+                case HotelManager.DocumentType.Buy:
+                    return DocumentEntityType.Sell;
+                case HotelManager.DocumentType.ReturnToClient:
+                    return DocumentEntityType.ReturnToClient;
+                case HotelManager.DocumentType.ReturnFromClient:
+                    return DocumentEntityType.ReturnFromClient;
+                default:
+                    return DocumentEntityType.Sell;
+            }
+
+        }
+        public void Fill(OrganizationEntity organization, ClientEntity client, DateTime? date, string? comment, UserEntity? user, bool isActive, AgreementEntity agreement)
         {
             Organization = organization;
             Client = client;
@@ -20,6 +40,7 @@
             Comment = comment;
             User = user;
             IsActive = isActive;
+            Agreement = agreement;
         }
 
         public void SetParentDocument(DocumentEntity? parentDocument)
@@ -57,7 +78,7 @@
             }
         }
 
-        public DocumentEntity(string id, OrganizationEntity organization, ClientEntity client, DateTime date, string? comment, UserEntity user, DocumentType documentType, bool isActive)
+        public DocumentEntity(string id, OrganizationEntity organization, ClientEntity client, DateTime? date, string? comment, UserEntity? user, DocumentEntityType documentType, bool isActive, AgreementEntity agreement)
         {
             Id = id;
             ChildDocuments = new DocumentsSet();
@@ -69,26 +90,29 @@
             Comment = comment;
             User = user;
             IsActive = isActive;
+            Agreement = agreement;
 
-            Fill(organization, client, date, comment, user, isActive);
+            //Fill(organization, client, date, comment, user, isActive);
         }
 
         public string Id { get; set; }
         public OrganizationEntity Organization { get; set; }
         public ClientEntity Client { get; set; }
 
-        public DateTime Date { get; set; }
+        public DateTime? Date { get; set; }
 
         public string? Comment { get; set; }
 
-        public UserEntity User { get; set; }
+        public UserEntity? User { get; set; }
 
-        public DocumentType DocumentType { get; set; }
+        public DocumentEntityType DocumentType { get; set; }
 
         public bool IsActive { get; set; }
 
         public DocumentsSet ChildDocuments { get; set; }
 
         public DocumentEntity? ParentDocument { get; set; }
+
+        public AgreementEntity Agreement { get; set; }
     }
 }
