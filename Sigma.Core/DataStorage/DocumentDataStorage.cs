@@ -1,32 +1,23 @@
 ﻿using HotelManager;
 using Microsoft.AspNetCore.Mvc;
+using Sigma.Core.Controllers;
 using Sigma.Core.RemoteHotelEntry;
-using static Sigma.Core.Controllers.OrganizationController;
-using static Sigma.Core.Controllers.ProductController;
 
-namespace Sigma.Core.Controllers
+namespace Sigma.Core.DataStorage
 {
 
-    public class DocumentsDictionary : Dictionary<string, DocumentEntity> {}
+    public class DocumentsDictionary : Dictionary<string, DocumentEntity> { }
 
-    [ApiController]
-    [Route("[controller]")]
-    public class DocumentController: Controller
+    public class DocumentDataStorage : BaseDataStorage
     {
         private DocumentsDictionary? _documents;
 
-        private ILogger<DocumentController> _logger;
-        private SOAP1CCleintProviderController _clientProvider;
-        IHttpContextAccessor _httpContextAccessor;
-
-        public DocumentController(ILogger<DocumentController> logger, SOAP1CCleintProviderController clientProvider, IHttpContextAccessor httpContextAccessor)
+        public DocumentDataStorage(ILogger<DocumentDataStorage> logger, StorageProvider storageProvider) : base(logger, storageProvider)
         {
-            _logger = logger;
-            _clientProvider = clientProvider;
-            _httpContextAccessor = httpContextAccessor;
+            storageProvider.Documents = this;
         }
 
-        [HttpGet(Name = "GetDocuemnts")]
+        /*[HttpGet(Name = "GetDocuemnts")]
         public DocumentsDictionary? Get()
         {
             var session = _clientProvider.GetClentForConnectionID(HttpContext.Connection.Id);
@@ -36,31 +27,18 @@ namespace Sigma.Core.Controllers
                 return getDocuments(session.Client);
             }
             return null;
-        }
+        }*/
 
         private DocumentEntity? fillDocuments(HotelManagerPortTypeClient session, string? documentID = null)
         {
             DocumentEntity? result = null;
 
-
-            if (_httpContextAccessor.HttpContext == null)
-            {
-                _logger.LogError("Unable to find HTTP Context");
-
-                return result;
-            }
-
-            OrganizationController? organizationController = _httpContextAccessor.HttpContext.RequestServices.GetService<OrganizationController>();
-            MoneyStoreController? moneyStoreController = _httpContextAccessor.HttpContext.RequestServices.GetService<MoneyStoreController>();
-            StoreController? storeController = _httpContextAccessor.HttpContext.RequestServices.GetService<StoreController>();
-            ClientController? clientController = _httpContextAccessor.HttpContext.RequestServices.GetService<ClientController>();
-            ProductController? productController = _httpContextAccessor.HttpContext.RequestServices.GetService<ProductController>();
-
-            if (organizationController == null || moneyStoreController == null || storeController == null || clientController == null || productController == null)
-            {
-                _logger.LogCritical("Unable to filend controller");
-                return result;
-            }
+            OrganizationDataStorage organizationDataStorage = _storageProvider.Organizations;
+            MoneyStoreDataStorage moneyStoreDataStorage = _storageProvider.MoneyStores;
+            StoreDataStorage storeDataStorage = _storageProvider.Stores;
+            ClientDataStorage clientDataStorage = _storageProvider.Clients;
+            ProductDataStorage productDataStorage = _storageProvider.Products;
+            SessionDataStorage sessionDataStorage = _storageProvider.Sessions;
 
             if (_documents != null)
             {
@@ -69,7 +47,7 @@ namespace Sigma.Core.Controllers
 
                 if (documentsList.error != null && documentsList.error.Length > 0)
                 {
-                    _logger.LogError("Failed to load documents list. Error : {Error}, organizations: {Organizations} documentID: {DocumentID}", documentsList.error, documentsList, documentID != null ? documentID : "null") ;
+                    _logger.LogError("Failed to load documents list. Error : {Error}, organizations: {Organizations} documentID: {DocumentID}", documentsList.error, documentsList, documentID != null ? documentID : "null");
                 }
 
                 foreach (var document in documentsList.data)
@@ -77,10 +55,10 @@ namespace Sigma.Core.Controllers
                     DocumentEntity? existingDocument = null;
                     _documents.TryGetValue(document.Id, out existingDocument);
 
-                    OrganizationEntity? organization = organizationController.GetOrganization(session, document.OrganizationId);
-                    ClientEntity? client = clientController.GetClient(session, document.ClientId);
+                    OrganizationEntity? organization = organizationDataStorage.GetOrganization(session, document.OrganizationId);
+                    ClientEntity? client = clientDataStorage.GetClient(session, document.ClientId);
                     DocumentEntityType documentType = DocumentEntity.ConvertDocumentType(document.DocumentType);
-                    AgreementEntity? agreement = clientController.GetAgreement(session, document.ClientId, document.AgreementId);
+                    AgreementEntity? agreement = clientDataStorage.GetAgreement(session, document.ClientId, document.AgreementId);
 
                     if (client == null)
                     {
@@ -99,7 +77,7 @@ namespace Sigma.Core.Controllers
                     }
 
 
-                    UserEntity? user = _clientProvider.GetUserByID(session, document.UserId);
+                    UserEntity? user = sessionDataStorage.GetUserByID(session, document.UserId);
 
                     if (user == null)
                     {
@@ -109,7 +87,7 @@ namespace Sigma.Core.Controllers
 
                     if (ProductDocumentEntity.IsProductDocument(document.DocumentType))
                     {
-                        StoreEntity? store = storeController.GetStore(session, document.StoreId);
+                        StoreEntity? store = storeDataStorage.GetStore(session, document.StoreId);
 
                         if (store == null)
                         {
@@ -125,7 +103,7 @@ namespace Sigma.Core.Controllers
                         {
                             foreach (ProductItem productItem in document.ProductItems)
                             {
-                                ProductEntity? productEntity = productController.GetProduct(session, productItem.ProductId);
+                                ProductEntity? productEntity = productDataStorage.GetProduct(session, productItem.ProductId);
 
                                 if (productEntity == null)
                                 {
@@ -148,9 +126,9 @@ namespace Sigma.Core.Controllers
                                     }
                                 }
 
-                                if (unit == null || (characteristic == null && productItem.CharacteristicID != null))
+                                if (unit == null || characteristic == null && productItem.CharacteristicID != null)
                                 {
-                                    productController.ReloadProduct(session, productEntity);
+                                    productDataStorage.ReloadProduct(session, productEntity);
                                     unit = productEntity.GetUnitWithID(productItem.UnitID);
                                     if (unit == null)
                                     {
@@ -186,7 +164,7 @@ namespace Sigma.Core.Controllers
                     }
                     else if (ProductDocumentEntity.IsMoneyDocument(document.DocumentType))
                     {
-                        MoneyStoreEntity? moneyStore = moneyStoreController.GetMoneyStore(session, document.MoneyStoreId);
+                        MoneyStoreEntity? moneyStore = moneyStoreDataStorage.GetMoneyStore(session, document.MoneyStoreId);
 
                         if (moneyStore == null)
                         {
@@ -196,7 +174,7 @@ namespace Sigma.Core.Controllers
 
                         if (existingDocument == null)
                         {
-                            existingDocument = new MoneyStoreDocumentEntity(document.Id, organization, client, document.Date, document.Comment, user, documentType, 
+                            existingDocument = new MoneyStoreDocumentEntity(document.Id, organization, client, document.Date, document.Comment, user, documentType,
                                 document.IsActive, agreement, moneyStore, document.Sum);
                         }
                         else
@@ -216,7 +194,7 @@ namespace Sigma.Core.Controllers
                     }
                     else
                     {
-                        _logger.LogError("Unknown document type for document with ID: {DocumentID}", existingDocument.Id);
+                        _logger.LogError("Unknown document type for document with ID: {DocumentID}", document.Id);
                     }
                 }
 
@@ -226,7 +204,7 @@ namespace Sigma.Core.Controllers
                     if (newDocumentsList.TryGetValue(document.Id, out existingDocument))
                     {
                         DocumentsSet newChildDocuments = new DocumentsSet();
-                        foreach(string childDocumentID in document.ChildDocumentsId)
+                        foreach (string childDocumentID in document.ChildDocumentsId)
                         {
                             DocumentEntity? existingChildDocument = null;
                             if (newDocumentsList.TryGetValue(childDocumentID, out existingChildDocument))

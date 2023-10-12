@@ -1,28 +1,19 @@
 ﻿using HotelManager;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Sigma.Core.Controllers;
 using Sigma.Core.RemoteHotelEntry;
-using static Sigma.Core.Controllers.OrganizationController;
-using static Sigma.Core.Controllers.ProductController;
 
-namespace Sigma.Core.Controllers
+namespace Sigma.Core.DataStorage
 {
-    [ApiController]
-    [Route("[controller]")]
-    public class StoreController : Controller
+    public class StoreDataStorage : BaseDataStorage
     {
         public class StoresDicrionary : Dictionary<string, StoreEntity> { };
         public StoresDicrionary? _stores;
 
-        private ILogger<StoreController> _logger;
-        private SOAP1CCleintProviderController _clientProvider;
-        private IHttpContextAccessor _httpContextAccessor;
-
-        public StoreController(ILogger<StoreController> logger, SOAP1CCleintProviderController clientProvider, IHttpContextAccessor httpContextAccessor)
+        public StoreDataStorage(ILogger<StoreDataStorage> logger, StorageProvider storageProvider) : base(logger, storageProvider)
         {
-            _logger = logger;
-            _clientProvider = clientProvider;
-            _httpContextAccessor = httpContextAccessor;
+            _storageProvider.Stores = this;
         }
 
         private StoreEntity? fillStores(HotelManagerPortTypeClient session, string? storeID = null)
@@ -63,8 +54,6 @@ namespace Sigma.Core.Controllers
             return _stores;
         }
 
-        [ApiExplorerSettings(IgnoreApi = true)]
-        [NonAction]
         public StoreEntity? GetStore(HotelManagerPortTypeClient session, string? storeID)
         {
             StoreEntity? result = null;

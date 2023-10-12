@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Sigma.Core.Utils;
+using Sigma.Core.DataStorage;
 
 namespace Sigma.Core.Controllers
 {
@@ -10,8 +11,8 @@ namespace Sigma.Core.Controllers
     public class LoginController: Controller
     { 
 
-        private SOAP1CCleintProviderController _clientProvier;
-        public LoginController(SOAP1CCleintProviderController clientProvier)
+        private SessionDataStorage _clientProvier;
+        public LoginController(SessionDataStorage clientProvier)
         {
             _clientProvier = clientProvier;
         }
@@ -19,6 +20,10 @@ namespace Sigma.Core.Controllers
         [HttpPost(Name = "Login")]
         public IResult Post(CredentionalInfo userCredentional)
         {
+            if (userCredentional == null || userCredentional.UserName == null || userCredentional.Password == null)
+            {
+                return Results.Unauthorized();
+            }
             if (userCredentional.UserName.Length != 0 && userCredentional.Password.Length != 0)
             {
                 bool connectionResult = _clientProvier.ConnectClient(userCredentional, HttpContext.Connection.Id);

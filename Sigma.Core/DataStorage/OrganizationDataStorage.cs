@@ -4,24 +4,16 @@ using Microsoft.AspNetCore.Mvc;
 using Sigma.Core.RemoteHotelEntry;
 using System.Reflection.Metadata;
 
-namespace Sigma.Core.Controllers
+namespace Sigma.Core.DataStorage
 {
-    [ApiController]
-    [Route("[controller]")]
-    public class OrganizationController : Controller
+    public class OrganizationDataStorage : BaseDataStorage
     {
         public class OrganizationsDicrionary : Dictionary<string, OrganizationEntity> { };
         public OrganizationsDicrionary? _organizations;
 
-        private ILogger<OrganizationController> _logger;
-        private SOAP1CCleintProviderController _clientProvider;
-        IHttpContextAccessor _httpContextAccessor;
-
-        public OrganizationController(ILogger<OrganizationController> logger, SOAP1CCleintProviderController clientProvider, IHttpContextAccessor httpContextAccessor)
+        public OrganizationDataStorage(ILogger<OrganizationDataStorage> logger, StorageProvider storageProvider) : base(logger, storageProvider)
         {
-            _logger = logger;
-            _clientProvider = clientProvider;
-            _httpContextAccessor = httpContextAccessor;
+            _storageProvider.Organizations = this;
         }
 
         private OrganizationEntity? fillOrganizations(HotelManagerPortTypeClient session, string? organizationID = null)
@@ -63,13 +55,11 @@ namespace Sigma.Core.Controllers
             return _organizations;
         }
 
-        [ApiExplorerSettings(IgnoreApi = true)]
-        [NonAction]
         public OrganizationEntity? GetOrganization(HotelManagerPortTypeClient session, string? organizationID)
         {
             OrganizationEntity? result = null;
 
-            if (organizationID  == null || organizationID.Length == 0)
+            if (organizationID == null || organizationID.Length == 0)
             {
                 return result;
             }

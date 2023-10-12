@@ -2,31 +2,20 @@
 using Microsoft.AspNetCore.Mvc;
 using MySqlX.XDevAPI;
 using Sigma.Core.RemoteHotelEntry;
-using static Sigma.Core.Controllers.OrganizationController;
-using static Sigma.Core.Controllers.ProductController;
-using static Sigma.Core.Controllers.StoreController;
 
-namespace Sigma.Core.Controllers
+namespace Sigma.Core.DataStorage
 {
-    [ApiController]
-    [Route("[controller]")]
-    public class MoneyStoreController : Controller
+    public class MoneyStoreDataStorage : BaseDataStorage
     {
         public class MoneyStoresDicrionary : Dictionary<string, MoneyStoreEntity> { };
         public MoneyStoresDicrionary? _moneyStores;
 
-        private ILogger<MoneyStoreController> _logger;
-        private SOAP1CCleintProviderController _clientProvider;
-        private IHttpContextAccessor _httpContextAccessor;
-
-        public MoneyStoreController(ILogger<MoneyStoreController> logger, SOAP1CCleintProviderController clientProvider, IHttpContextAccessor httpContextAccessor)
+        public MoneyStoreDataStorage(ILogger<MoneyStoreDataStorage> logger, StorageProvider storageProvider) : base(logger, storageProvider)
         {
-            _logger = logger;
-            _clientProvider = clientProvider;
-            _httpContextAccessor = httpContextAccessor;
+            _storageProvider.MoneyStores = this;
         }
 
-        [HttpGet(Name = "GetMyMoneyValue")]
+        /*[HttpGet(Name = "GetMyMoneyValue")]
         public float? Get()
         {
             var session = _clientProvider.GetClentForConnectionID(HttpContext.Connection.Id);
@@ -39,7 +28,7 @@ namespace Sigma.Core.Controllers
                 }
             }
             return null;
-        }
+        }*/
 
         private MoneyStoreEntity? fillMoneyStores(HotelManagerPortTypeClient session, string? moneyStoreID = null)
         {
@@ -54,36 +43,22 @@ namespace Sigma.Core.Controllers
                     _logger.LogError("Failed to load money stores list. Error : {Error}, stores: {Organizations}", moneyStores.error, moneyStores);
                 }
 
-                if (_httpContextAccessor == null)
+                OrganizationDataStorage OrganizationDataStorage = _storageProvider.Organizations;
+
+                foreach (var moneyStore in moneyStores.data)
                 {
-                    _logger.LogError("Unable to find HTTP Context");
+                    OrganizationEntity? organization = OrganizationDataStorage.GetOrganization(session, moneyStore.OrganizationId);
 
-                    return result;
-                }
-
-                OrganizationController? organizationController = _httpContextAccessor.HttpContext.RequestServices.GetService<OrganizationController>();
-
-                if (organizationController != null)
-                {
-                    foreach (var moneyStore in moneyStores.data)
+                    if (organization != null)
                     {
-                        OrganizationEntity? organization = organizationController.GetOrganization(session, moneyStore.OrganizationId);
+                        MoneyStoreEntity newMoneyStore = new MoneyStoreEntity(moneyStore.Id, moneyStore.Name, organization);
+                        _moneyStores[newMoneyStore.Id] = newMoneyStore;
 
-                        if (organization != null)
-                        {
-                            MoneyStoreEntity newMoneyStore = new MoneyStoreEntity(moneyStore.Id, moneyStore.Name, organization);
-                            _moneyStores[newMoneyStore.Id] = newMoneyStore;
-
-                            result = newMoneyStore;
-                        }
+                        result = newMoneyStore;
                     }
                 }
-                else
-                {
-                    _logger.LogError("Unable to find OrganizationController");
-                }
             }
-            else 
+            else
             {
                 _logger.LogError("Error moneyStores is NULL");
             }
@@ -102,9 +77,7 @@ namespace Sigma.Core.Controllers
             return _moneyStores;
         }
 
-        
-        [ApiExplorerSettings(IgnoreApi = true)]
-        [NonAction]
+
         public MoneyStoreEntity? GetMoneyStore(HotelManagerPortTypeClient session, string? moneyStoreID)
         {
             MoneyStoreEntity? result = null;

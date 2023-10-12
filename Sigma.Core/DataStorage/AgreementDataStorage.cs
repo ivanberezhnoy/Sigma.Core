@@ -1,26 +1,17 @@
 ﻿using HotelManager;
 using Microsoft.AspNetCore.Mvc;
 using Sigma.Core.RemoteHotelEntry;
-using static Sigma.Core.Controllers.StoreController;
 
-namespace Sigma.Core.Controllers
+namespace Sigma.Core.DataStorage
 {
-    [ApiController]
-    [Route("[controller]")]
-    public class AgreementController : Controller
+    public class AgreementDataStorage : BaseDataStorage
     {
         public class AgreementsDicrionary : Dictionary<string, AgreementEntity> { };
         public AgreementsDicrionary? _agreements;
 
-        private ILogger<AgreementController> _logger;
-        private SOAP1CCleintProviderController _clientProvider;
-        private IHttpContextAccessor _httpContextAccessor;
-
-        public AgreementController(ILogger<AgreementController> logger, SOAP1CCleintProviderController clientProvider, IHttpContextAccessor httpContextAccessor)
+        public AgreementDataStorage(ILogger<AgreementDataStorage> logger, StorageProvider storageProvider) : base(logger, storageProvider)
         {
-            _logger = logger;
-            _clientProvider = clientProvider;
-            _httpContextAccessor = httpContextAccessor;
+            _storageProvider.Agreements = this;
         }
 
         private AgreementEntity? fillAgreements(HotelManagerPortTypeClient session, string? agreementID = null)
@@ -62,8 +53,6 @@ namespace Sigma.Core.Controllers
             return _agreements;
         }
 
-        [ApiExplorerSettings(IgnoreApi = true)]
-        [NonAction]
         public AgreementEntity? GetAgreement(HotelManagerPortTypeClient session, string? agreementID)
         {
             AgreementEntity? result = null;

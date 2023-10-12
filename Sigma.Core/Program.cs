@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 using HotelManager;
 using System;
 using Sigma.Core.Controllers;
-using System.Web.Services.Description;
+using Sigma.Core.DataStorage;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -49,14 +49,18 @@ app.UseAuthentication();
 app.UseHttpsRedirection();
 app.UseAuthorization();
 
-app.Services.GetService<ClientController>();
-app.Services.GetService<DocumentController>();
+app.Services.GetService<StorageProvider>();
+
+app.Services.GetService<AgreementDataStorage>();
+app.Services.GetService<ClientDataStorage>();
+app.Services.GetService<DocumentDataStorage>();
 app.Services.GetService<LoginController>();
-app.Services.GetService<MoneyStoreController>();
-app.Services.GetService<OrganizationController>();
-app.Services.GetService<ProductController>();
-app.Services.GetService<SOAP1CCleintProviderController>();
-app.Services.GetService<StoreController>();
+app.Services.GetService<MoneyStoreDataStorage>();
+app.Services.GetService<OrganizationDataStorage>();
+app.Services.GetService<ProductDataStorage>();
+app.Services.GetService<SessionDataStorage>();
+app.Services.GetService<StoreDataStorage>();
+
 
 
 /*var dbContext = app.Services.GetService<DatabaseContext>();

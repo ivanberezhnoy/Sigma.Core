@@ -2,16 +2,13 @@
 using System.Collections.Generic;
 using Sigma.Core.RemoteHotelEntry;
 using Sigma.Core.Utils;
-using MySqlX.XDevAPI;
-using Org.BouncyCastle.Utilities.Collections;
 
 using ConnectionID = System.String;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Sigma.Core.Controllers
+namespace Sigma.Core.DataStorage
 {
     using UserName = ConnectionID;
-    //using UserSessions = Tuple<UserEntity, HotelManagerPortTypeClient, HashSet<ConnectionID>>;
 
     public class UserSessions
     {
@@ -30,7 +27,7 @@ namespace Sigma.Core.Controllers
     {
         public UserEntity User { get; set; }
 
-        public HotelManagerPortTypeClient Client {get;set;}
+        public HotelManagerPortTypeClient Client { get; set; }
 
         public UserClient(UserEntity user, HotelManagerPortTypeClient client)
         {
@@ -39,39 +36,29 @@ namespace Sigma.Core.Controllers
         }
     }
 
-    [ApiController]
-    [Route("[controller]")]
-    public class SOAP1CCleintProviderController: Controller
+    public class SessionDataStorage : BaseDataStorage
     {
-        public SOAP1CCleintProviderController(ILogger<SOAP1CCleintProviderController> logger, IHttpContextAccessor httpContextAccessor)
+        public SessionDataStorage(ILogger<SessionDataStorage> logger, StorageProvider storageProvider) : base(logger, storageProvider)
         {
             _connectedUsersSessions = new Dictionary<UserName, UserSessions>();
             _usersConnections = new Dictionary<ConnectionID, UserClient>();
 
-            _httpContextAccessor = httpContextAccessor;
-
-            _logger = logger;
+            _storageProvider.Sessions = this;
         }
 
         private Dictionary<UserName, UserSessions> _connectedUsersSessions;
         private Dictionary<ConnectionID, UserClient> _usersConnections;
-        private IHttpContextAccessor _httpContextAccessor;
 
-        private ILogger<SOAP1CCleintProviderController> _logger;
-
-
-        [ApiExplorerSettings(IgnoreApi = true)]
-        [NonAction]
         public UserEntity? GetUserByID(HotelManagerPortTypeClient client, string userID)
         {
             UserEntity? result = null;
             if (userID != null && userID.Length > 0)
             {
                 HashSet<string> existingUserIds = new HashSet<UserName>();
-                foreach(var userSession in _connectedUsersSessions.Values)
+                foreach (var userSession in _connectedUsersSessions.Values)
                 {
                     existingUserIds.Add(userSession.User.UserId);
-                    
+
                     if (userSession.User.UserId == userID)
                     {
                         return userSession.User;
@@ -80,7 +67,7 @@ namespace Sigma.Core.Controllers
 
                 UsersList users = client.getUsers();
 
-                foreach(var user in users.data)
+                foreach (var user in users.data)
                 {
                     if (!existingUserIds.Contains(user.Id))
                     {
@@ -89,7 +76,7 @@ namespace Sigma.Core.Controllers
                     }
                 }
             }
-            else 
+            else
             {
                 _logger.LogWarning("Unable find user with empty UserID");
             }
@@ -97,8 +84,6 @@ namespace Sigma.Core.Controllers
             return result;
         }
 
-        [ApiExplorerSettings(IgnoreApi = true)]
-        [NonAction]
         public bool ConnectClient(CredentionalInfo userCredential, ConnectionID connectionID)
         {
             _logger.LogInformation("Try to connect user: {UserName}", userCredential.UserName);
@@ -160,45 +145,30 @@ namespace Sigma.Core.Controllers
                     _logger.LogError("Error on connect user: {UserName}. Error: {Error}", userCredential.UserName, userSettings.error);
                 }
 
-                if (_httpContextAccessor.HttpContext == null)
+                OrganizationDataStorage OrganizationDataStorage = _storageProvider.Organizations;
+                MoneyStoreDataStorage moneyStoreDataStorage = _storageProvider.MoneyStores;
+                StoreDataStorage StoreDataStorage = _storageProvider.Stores;
+
+                user = new UserEntity(userCredential, userSettings.UserID);
+
+                user.DefaultOrganization = OrganizationDataStorage.GetOrganization(client, userSettings.DefaultOrganizationId);
+                user.DefaultMoneyStore = moneyStoreDataStorage.GetMoneyStore(client, userSettings.DefaultMoneyStoreId);
+                user.DefaultStore = StoreDataStorage.GetStore(client, userSettings.DefaultStoreId);
+
+                if (connectedUserInfo != null && connectedUserInfo.Client != null)
                 {
-                    _logger.LogError("Unable to find HTTP Context");
+                    _logger.LogWarning("User: {User} password was changed", userCredential.UserName);
 
-                    return false;
-                }
+                    connectedUserInfo.Client.CloseAsync();
 
-                OrganizationController? organizationController = _httpContextAccessor.HttpContext.RequestServices.GetService<OrganizationController>();
-                MoneyStoreController? moneyStoreController = _httpContextAccessor.HttpContext.RequestServices.GetService<MoneyStoreController>();
-                StoreController? storeController = _httpContextAccessor.HttpContext.RequestServices.GetService<StoreController>();
-
-                if (organizationController != null && storeController != null && moneyStoreController != null)
-                {
-
-                    user = new UserEntity(userCredential, userSettings.UserID);
-
-                    user.DefaultOrganization = organizationController.GetOrganization(client, userSettings.DefaultOrganizationId);
-                    user.DefaultMoneyStore = moneyStoreController.GetMoneyStore(client, userSettings.DefaultMoneyStoreId);
-                    user.DefaultStore = storeController.GetStore(client, userSettings.DefaultStoreId);
-
-                    if (connectedUserInfo != null && connectedUserInfo.Client != null)
+                    foreach (ConnectionID oldSession in connectedUserInfo.Connections)
                     {
-                        _logger.LogWarning("User: {User} password was changed", userCredential.UserName);
-
-                        connectedUserInfo.Client.CloseAsync();
-
-                        foreach (ConnectionID oldSession in connectedUserInfo.Connections)
-                        {
-                            _usersConnections.Remove(oldSession);
-                        }
+                        _usersConnections.Remove(oldSession);
                     }
-                    connectedUserInfo = new UserSessions(user, client, new HashSet<ConnectionID>());
-                    _connectedUsersSessions[user.Credentional.UserName] = connectedUserInfo;
                 }
-                else 
-                {
-                    _logger.LogCritical("Unable to get controllers");
-                    return false;
-                }
+                connectedUserInfo = new UserSessions(user, client, new HashSet<ConnectionID>());
+                _connectedUsersSessions[user.Credentional.UserName] = connectedUserInfo;
+
             }
             else
             {
@@ -217,8 +187,6 @@ namespace Sigma.Core.Controllers
             return true;
         }
 
-        [ApiExplorerSettings(IgnoreApi = true)]
-        [NonAction]
         public UserClient? GetClentForConnectionID(ConnectionID? connectionID, bool logWarning = true)
         {
             UserClient? result = null;

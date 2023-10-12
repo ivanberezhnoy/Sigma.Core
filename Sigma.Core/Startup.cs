@@ -1,9 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Sigma.Core.Controllers;
+﻿using Sigma.Core.Controllers;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Org.BouncyCastle.Crypto.Tls;
+using Sigma.Core.DataStorage;
 
 namespace Sigma.Core
 {
@@ -25,15 +22,18 @@ namespace Sigma.Core
 
             services.AddHttpContextAccessor();
 
-            services.AddSingleton<AgreementController>();
-            services.AddSingleton<ClientController>();
-            services.AddSingleton<DocumentController>();
-            services.AddSingleton<LoginController>();
-            services.AddSingleton<MoneyStoreController>();
-            services.AddSingleton<OrganizationController>();
-            services.AddSingleton<ProductController>();
-            services.AddSingleton<SOAP1CCleintProviderController>();
-            services.AddSingleton<StoreController>();
+            services.AddSingleton<AgreementDataStorage>();
+            services.AddSingleton<ClientDataStorage>();
+            services.AddSingleton<DocumentDataStorage>();
+            services.AddSingleton<MoneyStoreDataStorage>();
+            services.AddSingleton<OrganizationDataStorage>();
+            services.AddSingleton<ProductDataStorage>();
+            services.AddSingleton<SessionDataStorage>();
+            services.AddSingleton<StorageProvider>();
+            services.AddSingleton<StoreDataStorage>();
+
+            services.AddTransient<LoginController>();
+            services.AddTransient<ProductController>();
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options => options.LoginPath = "/login");
         }
