@@ -11,7 +11,7 @@ namespace Sigma.Core.RemoteHotelEntry
     public class CharacteristicDictionary : Dictionary<string, CharacteristicEntity>
     { }
 
-    public class UntitsDictionary : Dictionary<string, UnitEntity>
+    public class UnitsDictionary : Dictionary<string, UnitEntity>
     { }
 
 
@@ -31,7 +31,7 @@ namespace Sigma.Core.RemoteHotelEntry
 
         public float? Price { get; set; }
 
-        public UntitsDictionary Units { get; set; }
+        public UnitsDictionary Units { get; set; }
 
         public UnitEntity? DefaultUnit { get; set; }
 
@@ -65,7 +65,7 @@ namespace Sigma.Core.RemoteHotelEntry
 
             Characteristics = newCharacteristics;
 
-            UntitsDictionary newUnits = new UntitsDictionary();
+            UnitsDictionary newUnits = new UnitsDictionary();
             bool isFirstUnit = true;
 
             if (product.Units != null)
@@ -121,7 +121,7 @@ namespace Sigma.Core.RemoteHotelEntry
             Id = product.Id;
             Name = product.Name;
 
-            Units = new UntitsDictionary();
+            Units = new UnitsDictionary();
 
             Characteristics = new CharacteristicDictionary();
 

@@ -5,26 +5,26 @@ namespace Sigma.Core.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class ProductController: Controller
+    public class DocumentsController : Controller
     {
-        private ILogger<ProductController> _logger;
+        private ILogger<DocumentsController> _logger;
         private StorageProvider _storageProvider;
 
-        public ProductController(ILogger<ProductController> logger, StorageProvider storageProvider)
+        public DocumentsController(ILogger<DocumentsController> logger, StorageProvider storageProvider)
         {
             _logger = logger;
             _storageProvider = storageProvider;
         }
 
-        [HttpGet(Name = "GetProducts")]
-        public ProductsDicrionary? Get()
+        [HttpGet(Name = "GetDocuments")]
+        public DocumentsDictionary Get()
         {
             var session = _storageProvider.Sessions.GetClentForConnectionID(HttpContext.Connection.Id);
 
             if (session != null)
             {
-                _logger.LogInformation("GetProducts for connection {ConnectionID}", HttpContext.Connection.Id);
-                return _storageProvider.Products.GetProducts(session.Client);
+                _logger.LogInformation("GetDocuments for connection {ConnectionID}", HttpContext.Connection.Id);
+                return _storageProvider.Documents.GetDocuments(session.Client);
             }
 
             _logger.LogWarning("Unable to find user with connection ID {ConnectionID}", HttpContext.Connection.Id);

@@ -227,15 +227,17 @@ namespace Sigma.Core.DataStorage
             return result;
         }
 
-        private DocumentsDictionary getDocuments(HotelManagerPortTypeClient session)
+        public DocumentsDictionary GetDocuments(HotelManagerPortTypeClient session)
         {
             if (_documents == null)
             {
                 _documents = new DocumentsDictionary();
 
-                _logger.LogInformation("Reloading organizations list");
+                _logger.LogInformation("Reloading documents list started");
 
                 fillDocuments(session);
+
+                _logger.LogInformation("Reloading documents list finished");
             }
 
             return _documents;

@@ -7,6 +7,8 @@ using Sigma.Core.DataStorage;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors();
+
 builder.WebHost.ConfigureKestrel((context, options) =>
 {
     options.AllowSynchronousIO = true;
@@ -17,6 +19,10 @@ Sigma.Core.Startup startup = new Sigma.Core.Startup(builder.Configuration);
 startup.ConfigureServices(builder.Services);
 
 var app = builder.Build();
+
+app.UseCors(builder => builder.AllowAnyOrigin()
+                             .AllowAnyMethod()
+                             .AllowAnyHeader());
 
 app.UseDeveloperExceptionPage();
 
@@ -39,6 +45,13 @@ var helloResult = await client.getHelloAsync();*/
 
 // Configure the HTTP request pipeline.
 //if (app.Environment.IsDevelopment())
+
+app.Use(async (context, next) =>
+{
+    // действия перед передачи запроса в следующий middleware
+    await next.Invoke();
+    // действия после обработки запроса следующим middleware
+});
 {
     app.UseSwagger();
     app.UseSwaggerUI();

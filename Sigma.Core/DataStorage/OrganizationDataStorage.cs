@@ -41,7 +41,7 @@ namespace Sigma.Core.DataStorage
             return result;
         }
 
-        private OrganizationsDicrionary getOrganizations(HotelManagerPortTypeClient session)
+        public OrganizationsDicrionary GetOrganizations(HotelManagerPortTypeClient session)
         {
             if (_organizations == null)
             {
@@ -64,7 +64,7 @@ namespace Sigma.Core.DataStorage
                 return result;
             }
 
-            OrganizationsDicrionary organizations = getOrganizations(session);
+            OrganizationsDicrionary organizations = GetOrganizations(session);
 
             if (!organizations.TryGetValue(organizationID, out result))
             {

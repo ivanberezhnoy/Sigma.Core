@@ -92,7 +92,7 @@ namespace Sigma.Core.DataStorage
             return result;
         }
 
-        private ClientDicrionary getClients(HotelManagerPortTypeClient session)
+        public ClientDicrionary GetClients(HotelManagerPortTypeClient session)
         {
             if (_clients == null)
             {
@@ -115,7 +115,7 @@ namespace Sigma.Core.DataStorage
                 return result;
             }
 
-            ClientDicrionary clients = getClients(session);
+            ClientDicrionary clients = GetClients(session);
 
             if (!clients.TryGetValue(clientID, out result))
             {

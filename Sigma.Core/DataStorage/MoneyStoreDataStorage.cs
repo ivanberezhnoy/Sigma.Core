@@ -66,7 +66,7 @@ namespace Sigma.Core.DataStorage
             return result;
         }
 
-        private MoneyStoresDicrionary getMoneyStores(HotelManagerPortTypeClient session)
+        public MoneyStoresDicrionary GetMoneyStores(HotelManagerPortTypeClient session)
         {
             if (_moneyStores == null)
             {
@@ -87,7 +87,7 @@ namespace Sigma.Core.DataStorage
                 return result;
             }
 
-            MoneyStoresDicrionary monetStores = getMoneyStores(session);
+            MoneyStoresDicrionary monetStores = GetMoneyStores(session);
 
             if (!monetStores.TryGetValue(moneyStoreID, out result))
             {

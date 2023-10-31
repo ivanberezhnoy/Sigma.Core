@@ -32,8 +32,14 @@ namespace Sigma.Core
             services.AddSingleton<StorageProvider>();
             services.AddSingleton<StoreDataStorage>();
 
+            services.AddTransient<ClientController>();
+            services.AddTransient<DocumentsController>();
             services.AddTransient<LoginController>();
+            services.AddTransient<MoneyStoreController>();
+            services.AddTransient<OrganizationController>();
             services.AddTransient<ProductController>();
+            services.AddTransient<StoreController>();
+            services.AddTransient<UserController>();
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options => options.LoginPath = "/login");
         }

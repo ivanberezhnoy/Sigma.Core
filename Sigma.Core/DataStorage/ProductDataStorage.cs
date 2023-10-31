@@ -76,9 +76,12 @@ namespace Sigma.Core.DataStorage
 
             if (_products == null)
             {
+                _logger.LogInformation("Reloading all products list started");
                 _products = new ProductsDicrionary();
 
                 fillProducts(session);
+
+                _logger.LogInformation("Reloading all products list finished");
             }
 
             return _products;

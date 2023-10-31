@@ -43,7 +43,7 @@ namespace Sigma.Core.DataStorage
 
             return result;
         }
-        private StoresDicrionary getStores(HotelManagerPortTypeClient session)
+        public StoresDicrionary GetStores(HotelManagerPortTypeClient session)
         {
             if (_stores == null)
             {
@@ -63,7 +63,7 @@ namespace Sigma.Core.DataStorage
                 return result;
             }
 
-            StoresDicrionary stores = getStores(session);
+            StoresDicrionary stores = GetStores(session);
 
             if (!stores.TryGetValue(storeID, out result))
             {
