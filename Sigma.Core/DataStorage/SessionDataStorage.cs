@@ -21,6 +21,7 @@ namespace Sigma.Core.DataStorage
         public UserEntity User { get; set; }
         public HotelManagerPortTypeClient? Client;
         public HashSet<ConnectionID> Connections { get; set; }
+
     }
 
     public class UserClient
@@ -48,37 +49,60 @@ namespace Sigma.Core.DataStorage
 
         private Dictionary<UserName, UserSessions> _connectedUsersSessions;
         private Dictionary<ConnectionID, UserClient> _usersConnections;
+        private Dictionary<string, UserEntity>? _usersDictionary;
 
-        public UserEntity? GetUserByID(HotelManagerPortTypeClient client, string userID)
+        public Dictionary<string, UserEntity> GetUsers(HotelManagerPortTypeClient client)
+        {
+            if (_usersDictionary == null)
+            {
+                _usersDictionary = new Dictionary<UserName, UserEntity>();
+            }
+
+            GetUserByID(client, null);
+
+            return _usersDictionary;
+        }
+        public UserEntity? GetUserByID(HotelManagerPortTypeClient client, string? userID)
         {
             UserEntity? result = null;
-            if (userID != null && userID.Length > 0)
+
+            if (_usersDictionary == null)
             {
-                HashSet<string> existingUserIds = new HashSet<UserName>();
-                foreach (var userSession in _connectedUsersSessions.Values)
-                {
-                    existingUserIds.Add(userSession.User.Id);
+                _logger.LogCritical("Users Dictionary not initialized");
+                return result;
+            }
 
-                    if (userSession.User.Id == userID)
-                    {
-                        return userSession.User;
-                    }
+            if (userID != null)
+            {
+                if (_usersDictionary.TryGetValue(userID, out result))
+                {
+                    return result;
                 }
+            }
 
-                UsersList users = client.getUsers();
+            _logger.LogInformation("Reload all users");
 
-                foreach (var user in users.data)
+            UsersList users = client.getUsers();
+
+            foreach (var user in users.data)
+            {
+                if (!_usersDictionary.ContainsKey(user.Id))
                 {
-                    if (!existingUserIds.Contains(user.Id))
+                    UserEntity newUser = new UserEntity(user.Name, null, user.Id);
+                    _connectedUsersSessions[newUser.Name] = new UserSessions(newUser, null, new HashSet<UserName>());
+
+                    _usersDictionary[newUser.Id] = newUser;
+
+                    if (userID != null && newUser.Id == userID)
                     {
-                        result = new UserEntity(new CredentionalInfo(user.Name, null), user.Id);
-                        _connectedUsersSessions[result.Name] = new UserSessions(result, null, new HashSet<UserName>());
+                        result = newUser;
                     }
                 }
             }
-            else
+
+            if (userID != null && result == null)
             {
-                _logger.LogWarning("Unable find user with empty UserID");
+                _logger.LogWarning("Unable find user with UserID: {UserID}", userID);
             }
 
             return result;
@@ -149,7 +173,16 @@ namespace Sigma.Core.DataStorage
                 MoneyStoreDataStorage moneyStoreDataStorage = _storageProvider.MoneyStores;
                 StoreDataStorage StoreDataStorage = _storageProvider.Stores;
 
-                user = new UserEntity(userCredential, userSettings.UserID);
+                if (connectedUserInfo == null)
+                {
+                    user = new UserEntity(userCredential.UserName, userCredential.Password, userSettings.UserID);
+                }
+                else
+                {
+                    user = connectedUserInfo.User;
+                    user.Name = userCredential.UserName;
+                    user.Password = userCredential.Password;
+                }
 
                 user.DefaultOrganization = OrganizationDataStorage.GetOrganization(client, userSettings.DefaultOrganizationId);
                 user.DefaultMoneyStore = moneyStoreDataStorage.GetMoneyStore(client, userSettings.DefaultMoneyStoreId);
@@ -166,6 +199,7 @@ namespace Sigma.Core.DataStorage
                         _usersConnections.Remove(oldSession);
                     }
                 }
+
                 connectedUserInfo = new UserSessions(user, client, new HashSet<ConnectionID>());
                 _connectedUsersSessions[user.Name] = connectedUserInfo;
 
@@ -182,6 +216,18 @@ namespace Sigma.Core.DataStorage
             if (connectedUserInfo.Client != null)
             {
                 _usersConnections[connectionID] = new UserClient(user, connectedUserInfo.Client);
+
+                if (_usersDictionary == null)
+                {
+                    _usersDictionary = new Dictionary<UserName, UserEntity>();
+                    _usersDictionary[user.Id] = user;
+
+                    GetUserByID(connectedUserInfo.Client, null);
+                }
+                else if (!_usersDictionary.ContainsKey(user.Id))
+                {
+                    _usersDictionary[user.Id] = user;
+                }
             }
 
             return true;

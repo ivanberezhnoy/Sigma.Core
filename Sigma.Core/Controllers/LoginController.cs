@@ -3,6 +3,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Sigma.Core.Utils;
 using Sigma.Core.DataStorage;
+using System.Net;
 
 namespace Sigma.Core.Controllers
 {
@@ -43,7 +44,7 @@ namespace Sigma.Core.Controllers
                 }
             }
 
-            
+            HttpContext.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
 
             return Results.Unauthorized();
 

@@ -5,10 +5,10 @@
     using System.ServiceModel.Security;
     public class UserEntity
     {
-        public UserEntity(CredentionalInfo credentional, string userID)
+        public UserEntity(string userName, string? userPassword, string userID)
         {
-            Name = credentional.UserName;
-            Password = credentional.Password;
+            Name = userName;
+            Password = userPassword;
             Id = userID;
         }
 
@@ -22,5 +22,11 @@
         public StoreEntity? DefaultStore { get; set; } = null;
 
         public MoneyStoreEntity? DefaultMoneyStore { get; set; } = null;
+
+        public UserEntity MakeNakedCopy()
+        {
+            UserEntity copy = new UserEntity(Name, null, Id);
+            return copy;
+        }
     }
 }

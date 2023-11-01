@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Sigma.Core.DataStorage;
 using Sigma.Core.RemoteHotelEntry;
+using System.Net;
 using static Sigma.Core.DataStorage.OrganizationDataStorage;
 using static Sigma.Core.DataStorage.StoreDataStorage;
 
@@ -20,24 +21,30 @@ namespace Sigma.Core.Controllers
         }
 
         [HttpGet(Name = "GetUser")]
-        public Dictionary<string, UserEntity> Get()
+        public Dictionary<string, UserEntity>? Get()
         {
             var session = _storageProvider.Sessions.GetClentForConnectionID(HttpContext.Connection.Id);
 
             if (session != null)
             {
-                _logger.LogInformation("GetUser for connection {ConnectionID}", HttpContext.Connection.Id);
+                _logger.LogInformation("GetUsers for connection {ConnectionID}", HttpContext.Connection.Id);
 
-                UserClient? userClient = _storageProvider.Sessions.GetClentForConnectionID(HttpContext.Connection.Id, true);
+                var users = _storageProvider.Sessions.GetUsers(session.Client);
 
-                if (userClient != null)
+                Dictionary<string, UserEntity> result = new Dictionary<string, UserEntity>();
+                foreach (var user in users.Values)
                 {
-                    return new Dictionary<string, UserEntity> { { userClient.User.Id, userClient.User } };
+                    result[user.Id] = user.Id == session.User.Id ? user : user.MakeNakedCopy();
+                    if (user.Id == session.User.Id)
+                    { }
                 }
+                
+                return result;
             }
 
             _logger.LogWarning("Unable to find user with connection ID {ConnectionID}", HttpContext.Connection.Id);
 
+            HttpContext.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
             return null;
         }
     }

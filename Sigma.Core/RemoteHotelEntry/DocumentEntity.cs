@@ -88,7 +88,7 @@ namespace Sigma.Core.RemoteHotelEntry
         {
             if (parentDocument != ParentDocument)
             {
-                ParentDocument = parentDocument;
+                //ParentDocument = parentDocument;
             }
         }
 
@@ -123,7 +123,7 @@ namespace Sigma.Core.RemoteHotelEntry
         {
             Id = id;
             ChildDocuments = new DocumentsSet();
-            DocumentType = documentType;
+            Type = documentType;
 
             Organization = organization;
             Client = client;
@@ -141,7 +141,7 @@ namespace Sigma.Core.RemoteHotelEntry
         {
             get
             { 
-                return DocumentTypeToString(DocumentType) + " " + Id + " " + Date.ToString();
+                return DocumentTypeToString(Type) + " " + Id + " " + Date.ToString();
             }
         }
         public OrganizationEntity Organization { get; set; }
@@ -153,7 +153,7 @@ namespace Sigma.Core.RemoteHotelEntry
 
         public UserEntity? User { get; set; }
 
-        public DocumentEntityType DocumentType { get; set; }
+        public DocumentEntityType Type { get; set; }
 
         public bool IsActive { get; set; }
 

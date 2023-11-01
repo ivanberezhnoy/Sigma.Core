@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Sigma.Core.DataStorage;
+using System.Net;
 
 namespace Sigma.Core.Controllers
 {
@@ -28,6 +29,8 @@ namespace Sigma.Core.Controllers
             }
 
             _logger.LogWarning("Unable to find user with connection ID {ConnectionID}", HttpContext.Connection.Id);
+
+            HttpContext.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
 
             return null;
         }

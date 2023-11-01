@@ -1,23 +1,24 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Sigma.Core.DataStorage;
+using System.Net;
 
 namespace Sigma.Core.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class DocumentsController : Controller
+    public class DocumentController : Controller
     {
-        private ILogger<DocumentsController> _logger;
+        private ILogger<DocumentController> _logger;
         private StorageProvider _storageProvider;
 
-        public DocumentsController(ILogger<DocumentsController> logger, StorageProvider storageProvider)
+        public DocumentController(ILogger<DocumentController> logger, StorageProvider storageProvider)
         {
             _logger = logger;
             _storageProvider = storageProvider;
         }
 
         [HttpGet(Name = "GetDocuments")]
-        public DocumentsDictionary Get()
+        public DocumentsDictionary? Get()
         {
             var session = _storageProvider.Sessions.GetClentForConnectionID(HttpContext.Connection.Id);
 
@@ -28,6 +29,8 @@ namespace Sigma.Core.Controllers
             }
 
             _logger.LogWarning("Unable to find user with connection ID {ConnectionID}", HttpContext.Connection.Id);
+
+            HttpContext.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
 
             return null;
         }

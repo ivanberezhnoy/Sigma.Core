@@ -33,7 +33,7 @@ namespace Sigma.Core
             services.AddSingleton<StoreDataStorage>();
 
             services.AddTransient<ClientController>();
-            services.AddTransient<DocumentsController>();
+            services.AddTransient<DocumentController>();
             services.AddTransient<LoginController>();
             services.AddTransient<MoneyStoreController>();
             services.AddTransient<OrganizationController>();
