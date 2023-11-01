@@ -57,9 +57,9 @@ namespace Sigma.Core.DataStorage
                 HashSet<string> existingUserIds = new HashSet<UserName>();
                 foreach (var userSession in _connectedUsersSessions.Values)
                 {
-                    existingUserIds.Add(userSession.User.UserId);
+                    existingUserIds.Add(userSession.User.Id);
 
-                    if (userSession.User.UserId == userID)
+                    if (userSession.User.Id == userID)
                     {
                         return userSession.User;
                     }
@@ -72,7 +72,7 @@ namespace Sigma.Core.DataStorage
                     if (!existingUserIds.Contains(user.Id))
                     {
                         result = new UserEntity(new CredentionalInfo(user.Name, null), user.Id);
-                        _connectedUsersSessions[result.Credentional.UserName] = new UserSessions(result, null, new HashSet<UserName>());
+                        _connectedUsersSessions[result.Name] = new UserSessions(result, null, new HashSet<UserName>());
                     }
                 }
             }
@@ -99,9 +99,9 @@ namespace Sigma.Core.DataStorage
             _connectedUsersSessions.TryGetValue(userCredential.UserName, out connectedUserInfo);
 
             UserEntity? user;
-            if (connectedUserInfo == null || connectedUserInfo.Client == null || connectedUserInfo.User.Credentional.Password != userCredential.Password)
+            if (connectedUserInfo == null || connectedUserInfo.Client == null || connectedUserInfo.User.Password != userCredential.Password)
             {
-                if (connectedUserInfo != null && connectedUserInfo.User.Credentional.Password != userCredential.Password)
+                if (connectedUserInfo != null && connectedUserInfo.User.Password != userCredential.Password)
                 {
                     _logger.LogWarning("User: {User} try to connect with new password", userCredential.UserName);
                 }
@@ -167,7 +167,7 @@ namespace Sigma.Core.DataStorage
                     }
                 }
                 connectedUserInfo = new UserSessions(user, client, new HashSet<ConnectionID>());
-                _connectedUsersSessions[user.Credentional.UserName] = connectedUserInfo;
+                _connectedUsersSessions[user.Name] = connectedUserInfo;
 
             }
             else

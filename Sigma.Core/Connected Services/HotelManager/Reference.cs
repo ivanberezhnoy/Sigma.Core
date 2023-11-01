@@ -432,7 +432,7 @@ namespace HotelManager
         MoneyReturnToClient,
         
         /// <remarks/>
-        MeneyReturnFromClient,
+        MoneyReturnFromClient,
     }
     
     /// <remarks/>

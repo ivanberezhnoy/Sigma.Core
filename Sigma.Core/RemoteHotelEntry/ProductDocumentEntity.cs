@@ -30,7 +30,7 @@ namespace Sigma.Core.RemoteHotelEntry
         public static bool IsMoneyDocument(DocumentType documentType)
         {
             return documentType == HotelManager.DocumentType.MoneyPut || documentType == HotelManager.DocumentType.MoneyGet || 
-                documentType == HotelManager.DocumentType.MoneyReturnToClient || documentType == HotelManager.DocumentType.MeneyReturnFromClient;
+                documentType == HotelManager.DocumentType.MoneyReturnToClient || documentType == HotelManager.DocumentType.MoneyReturnFromClient;
         }
 
         public ProductsSales Products { get; set; }

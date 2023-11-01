@@ -7,13 +7,16 @@
     {
         public UserEntity(CredentionalInfo credentional, string userID)
         {
-            Credentional = credentional;
-            UserId = userID;
+            Name = credentional.UserName;
+            Password = credentional.Password;
+            Id = userID;
         }
 
-        public CredentionalInfo Credentional { get; set; }
+        public string Id { get; set; }
 
-        public string UserId { get; set; }
+        public string Name { get; set; }
+
+        public string? Password { get; set; }
 
         public OrganizationEntity? DefaultOrganization { get; set; } = null;
         public StoreEntity? DefaultStore { get; set; } = null;

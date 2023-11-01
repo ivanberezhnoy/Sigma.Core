@@ -8,7 +8,11 @@ namespace Sigma.Core.RemoteHotelEntry
         Sell,
         Buy,
         ReturnFromClient,
-        ReturnToClient
+        ReturnToClient,
+        MoneyGet,
+        MoneyPut,
+        MoneyReturnToClient,
+        MoneyReturnFromClient
     }
 
     public class DocumentsSet : HashSet<DocumentEntity>{}
@@ -27,11 +31,48 @@ namespace Sigma.Core.RemoteHotelEntry
                     return DocumentEntityType.ReturnToClient;
                 case HotelManager.DocumentType.ReturnFromClient:
                     return DocumentEntityType.ReturnFromClient;
+
+                case HotelManager.DocumentType.MoneyGet:
+                    return DocumentEntityType.MoneyGet;
+                case HotelManager.DocumentType.MoneyPut:
+                    return DocumentEntityType.MoneyPut;
+                case HotelManager.DocumentType.MoneyReturnToClient:
+                    return DocumentEntityType.MoneyReturnToClient;
+                case HotelManager.DocumentType.MoneyReturnFromClient:
+                    return DocumentEntityType.MoneyReturnFromClient;
+
                 default:
                     return DocumentEntityType.Sell;
             }
 
         }
+
+        public static string DocumentTypeToString(DocumentEntityType documentType)
+        {
+            switch(documentType)
+            {
+                case DocumentEntityType.Sell:
+                    return "Реализация товаров и услуг";
+                case DocumentEntityType.Buy:
+                    return "Поступление товаров и услуг";
+                case DocumentEntityType.ReturnFromClient:
+                    return "Возврат товаров от покупателя";
+                case DocumentEntityType.ReturnToClient:
+                    return "Поступление товаров и услуг";
+                case DocumentEntityType.MoneyGet:
+                    return "Приходный кассовый ордер";
+                case DocumentEntityType.MoneyPut:
+                    return "Расходный кассовый ордер";
+                case DocumentEntityType.MoneyReturnToClient:
+                    return "Возврат денег покупателю";
+                case DocumentEntityType.MoneyReturnFromClient:
+                    return "Возврат денег от продавца";
+
+            }
+
+            return "Unknown";
+        }
+
         public void Fill(OrganizationEntity organization, ClientEntity client, DateTime? date, string? comment, UserEntity? user, bool isActive, AgreementEntity agreement)
         {
             Organization = organization;
@@ -96,6 +137,13 @@ namespace Sigma.Core.RemoteHotelEntry
         }
 
         public string Id { get; set; }
+        public string Name 
+        {
+            get
+            { 
+                return DocumentTypeToString(DocumentType) + " " + Id + " " + Date.ToString();
+            }
+        }
         public OrganizationEntity Organization { get; set; }
         public ClientEntity Client { get; set; }
 

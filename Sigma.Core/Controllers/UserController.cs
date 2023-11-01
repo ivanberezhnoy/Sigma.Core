@@ -20,7 +20,7 @@ namespace Sigma.Core.Controllers
         }
 
         [HttpGet(Name = "GetUser")]
-        public UserEntity? Get()
+        public Dictionary<string, UserEntity> Get()
         {
             var session = _storageProvider.Sessions.GetClentForConnectionID(HttpContext.Connection.Id);
 
@@ -32,7 +32,7 @@ namespace Sigma.Core.Controllers
 
                 if (userClient != null)
                 {
-                    return userClient.User;
+                    return new Dictionary<string, UserEntity> { { userClient.User.Id, userClient.User } };
                 }
             }
 
