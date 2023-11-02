@@ -84,11 +84,11 @@ namespace Sigma.Core.RemoteHotelEntry
             Agreement = agreement;
         }
 
-        public void SetParentDocument(DocumentEntity? parentDocument)
+        public void SetParentDocumentID(string? parentDocumentID)
         {
-            if (parentDocument != ParentDocument)
+            if (parentDocumentID != ParentDocumentID)
             {
-                //ParentDocument = parentDocument;
+                ParentDocumentID = parentDocumentID;
             }
         }
 
@@ -100,18 +100,18 @@ namespace Sigma.Core.RemoteHotelEntry
                 {
                     if (!newChildDocuments.Contains(oldChild))
                     {
-                        if (oldChild.ParentDocument == this)
+                        if (oldChild.ParentDocumentID == this.Id)
                         {
-                            oldChild.SetParentDocument(null);
+                            oldChild.SetParentDocumentID(null);
                         }
                     }
                 }
 
                 foreach (DocumentEntity newChild in newChildDocuments)
                 {
-                    if (newChild.ParentDocument != this)
+                    if (newChild.ParentDocumentID != this.Id)
                     {
-                        newChild.SetParentDocument(this);
+                        newChild.SetParentDocumentID(this.Id);
                     }
                 }
 
@@ -159,7 +159,7 @@ namespace Sigma.Core.RemoteHotelEntry
 
         public DocumentsSet ChildDocuments { get; set; }
 
-        public DocumentEntity? ParentDocument { get; set; }
+        public String? ParentDocumentID { get; set; }
 
         public AgreementEntity Agreement { get; set; }
     }
