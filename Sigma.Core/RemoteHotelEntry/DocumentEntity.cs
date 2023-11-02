@@ -86,21 +86,21 @@ namespace Sigma.Core.RemoteHotelEntry
 
         public void SetParentDocumentID(string? parentDocumentID)
         {
-            if (parentDocumentID != ParentDocumentID)
+            if (parentDocumentID != ParentID)
             {
-                ParentDocumentID = parentDocumentID;
+                ParentID = parentDocumentID;
             }
         }
 
         public void SetChildDocuments(DocumentsSet newChildDocuments)
         {
-            if (!newChildDocuments.Equals(ChildDocuments))
+            if (!newChildDocuments.Equals(Children))
             {
-                foreach(DocumentEntity oldChild in ChildDocuments)
+                foreach(DocumentEntity oldChild in Children)
                 {
                     if (!newChildDocuments.Contains(oldChild))
                     {
-                        if (oldChild.ParentDocumentID == this.Id)
+                        if (oldChild.ParentID == this.Id)
                         {
                             oldChild.SetParentDocumentID(null);
                         }
@@ -109,20 +109,20 @@ namespace Sigma.Core.RemoteHotelEntry
 
                 foreach (DocumentEntity newChild in newChildDocuments)
                 {
-                    if (newChild.ParentDocumentID != this.Id)
+                    if (newChild.ParentID != this.Id)
                     {
                         newChild.SetParentDocumentID(this.Id);
                     }
                 }
 
-                ChildDocuments = newChildDocuments;
+                Children = newChildDocuments;
             }
         }
 
         public DocumentEntity(string id, OrganizationEntity organization, ClientEntity client, DateTime? date, string? comment, UserEntity? user, DocumentEntityType documentType, bool isActive, AgreementEntity agreement)
         {
             Id = id;
-            ChildDocuments = new DocumentsSet();
+            Children = new DocumentsSet();
             Type = documentType;
 
             Organization = organization;
@@ -157,9 +157,9 @@ namespace Sigma.Core.RemoteHotelEntry
 
         public bool IsActive { get; set; }
 
-        public DocumentsSet ChildDocuments { get; set; }
+        public DocumentsSet Children { get; set; }
 
-        public String? ParentDocumentID { get; set; }
+        public String? ParentID { get; set; }
 
         public AgreementEntity Agreement { get; set; }
     }
