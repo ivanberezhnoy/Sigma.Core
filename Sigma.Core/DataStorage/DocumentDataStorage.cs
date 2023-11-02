@@ -200,13 +200,13 @@ namespace Sigma.Core.DataStorage
                     DocumentEntity? existingDocument = null;
                     if (newDocumentsList.TryGetValue(document.Id, out existingDocument))
                     {
-                        DocumentsSet newChildDocuments = new DocumentsSet();
+                        DocumentsDictionary newChildDocuments = new DocumentsDictionary();
                         foreach (string childDocumentID in document.ChildDocumentsId)
                         {
                             DocumentEntity? existingChildDocument = null;
                             if (newDocumentsList.TryGetValue(childDocumentID, out existingChildDocument))
                             {
-                                newChildDocuments.Add(existingChildDocument);
+                                newChildDocuments[childDocumentID] = existingChildDocument;
                             }
                             else
                             {

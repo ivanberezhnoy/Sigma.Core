@@ -1,4 +1,5 @@
 ﻿using HotelManager;
+using Sigma.Core.DataStorage;
 using System.Diagnostics;
 
 namespace Sigma.Core.RemoteHotelEntry
@@ -92,26 +93,26 @@ namespace Sigma.Core.RemoteHotelEntry
             }
         }
 
-        public void SetChildDocuments(DocumentsSet newChildDocuments)
+        public void SetChildDocuments(DocumentsDictionary newChildDocuments)
         {
             if (!newChildDocuments.Equals(Children))
             {
-                foreach(DocumentEntity oldChild in Children)
+                foreach(KeyValuePair<string, DocumentEntity> oldChildPair in Children)
                 {
-                    if (!newChildDocuments.Contains(oldChild))
+                    if (!newChildDocuments.ContainsKey(oldChildPair.Key))
                     {
-                        if (oldChild.ParentID == this.Id)
+                        if (oldChildPair.Value.ParentID == this.Id)
                         {
-                            oldChild.SetParentDocumentID(null);
+                            oldChildPair.Value.SetParentDocumentID(null);
                         }
                     }
                 }
 
-                foreach (DocumentEntity newChild in newChildDocuments)
+                foreach (KeyValuePair<string, DocumentEntity> newChildPair in newChildDocuments)
                 {
-                    if (newChild.ParentID != this.Id)
+                    if (newChildPair.Value.ParentID != this.Id)
                     {
-                        newChild.SetParentDocumentID(this.Id);
+                        newChildPair.Value.SetParentDocumentID(this.Id);
                     }
                 }
 
@@ -122,7 +123,7 @@ namespace Sigma.Core.RemoteHotelEntry
         public DocumentEntity(string id, OrganizationEntity organization, ClientEntity client, DateTime? date, string? comment, UserEntity? user, DocumentEntityType documentType, bool isActive, AgreementEntity agreement)
         {
             Id = id;
-            Children = new DocumentsSet();
+            Children = new DocumentsDictionary();
             Type = documentType;
 
             Organization = organization;
@@ -157,7 +158,7 @@ namespace Sigma.Core.RemoteHotelEntry
 
         public bool IsActive { get; set; }
 
-        public DocumentsSet Children { get; set; }
+        public DocumentsDictionary Children { get; set; }
 
         public String? ParentID { get; set; }
 
