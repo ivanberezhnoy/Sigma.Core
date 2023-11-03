@@ -3,21 +3,21 @@
 namespace Sigma.Core.RemoteHotelEntry
 {
     using ProductID = String;
-    public class ProductsSales : List<ProductSaleEntity> { }
+    public class ProductsSales : Dictionary<uint, ProductSaleEntity> { }
 
     public class ProductDocumentEntity : DocumentEntity
     {
-        public void Fill(OrganizationEntity organization, ClientEntity client, DateTime? date, string? comment, UserEntity? user, bool isActive, AgreementEntity agreement, StoreEntity store, ProductsSales products) 
+        public void Fill(OrganizationEntity organization, ClientEntity client, DateTime? date, string? comment, UserEntity? user, bool isActive, AgreementEntity agreement, StoreEntity store, ProductsSales sales) 
         {
             base.Fill(organization, client, date, comment, user, isActive, agreement);
 
-            Products = products;
+            Sales = sales;
         }
         public ProductDocumentEntity(string id, OrganizationEntity organization, ClientEntity client, DateTime? date, string? comment, UserEntity? user,
-            DocumentEntityType documentType, bool isActive, AgreementEntity agreement, StoreEntity store, ProductsSales products) 
+            DocumentEntityType documentType, bool isActive, AgreementEntity agreement, StoreEntity store, ProductsSales sales) 
             : base(id, organization, client, date, comment, user, documentType, isActive, agreement)
         {
-            Products = products;
+            Sales = sales;
             Store = store;
         }
         
@@ -33,7 +33,7 @@ namespace Sigma.Core.RemoteHotelEntry
                 documentType == HotelManager.DocumentType.MoneyReturnToClient || documentType == HotelManager.DocumentType.MoneyReturnFromClient;
         }
 
-        public ProductsSales Products { get; set; }
+        public ProductsSales Sales { get; set; }
 
         public StoreEntity Store { get; set; }
     }

@@ -99,6 +99,7 @@ namespace Sigma.Core.DataStorage
 
                         if (document.ProductItems != null)
                         {
+                            uint index = 0;
                             foreach (ProductItem productItem in document.ProductItems)
                             {
                                 ProductEntity? productEntity = productDataStorage.GetProduct(session, productItem.ProductId);
@@ -145,7 +146,8 @@ namespace Sigma.Core.DataStorage
                                 }
 
                                 ProductSaleEntity saleEntity = new ProductSaleEntity(productEntity, productItem.Quantity, productItem.Price, unit, characteristic);
-                                sales.Add(saleEntity);
+                                sales[index] = saleEntity;
+                                ++index;
                             }
                         }
 
