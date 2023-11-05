@@ -1,6 +1,8 @@
 ﻿using HotelManager;
 using Sigma.Core.DataStorage;
-using System.Diagnostics;
+using System.Text.Json.Serialization;
+using System.Text.Json;
+using Sigma.Core.RemoteHotelEntry;
 
 namespace Sigma.Core.RemoteHotelEntry
 {
@@ -18,6 +20,7 @@ namespace Sigma.Core.RemoteHotelEntry
 
     public class DocumentsSet : HashSet<DocumentEntity>{}
 
+    [JsonConverter(typeof(SystemTextJsonPolymorphism.DocumentConverter))]
     public class DocumentEntity
     {
         public static DocumentEntityType ConvertDocumentType(DocumentType type)
@@ -163,5 +166,58 @@ namespace Sigma.Core.RemoteHotelEntry
         public String? ParentID { get; set; }
 
         public AgreementEntity Agreement { get; set; }
+    }
+}
+
+namespace SystemTextJsonPolymorphism
+{
+    internal class DocumentConverter: JsonConverter<DocumentEntity>
+    {
+        public override bool CanConvert(Type typeToConvert) => typeof(DocumentEntity).IsAssignableFrom(typeToConvert);
+
+        public override DocumentEntity? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            if (reader.TokenType != JsonTokenType.StartObject)
+            {
+                throw new JsonException();
+            }
+
+            using (var jsonDocument = JsonDocument.ParseValue(ref reader))
+            {
+                if (!jsonDocument.RootElement.TryGetProperty("type", out var typeProperty))
+                {
+                    throw new JsonException();
+                }
+
+                var jsonDoc = jsonDocument.RootElement.GetRawText();
+
+                HotelManager.DocumentType documentType = (HotelManager.DocumentType)typeProperty.GetUInt32();
+
+                if (ProductDocumentEntity.IsProductDocument(documentType))
+                {
+                    return (ProductDocumentEntity?)JsonSerializer.Deserialize(jsonDoc, typeof(ProductDocumentEntity));
+                }
+                else
+                {
+                    return (MoneyStoreDocumentEntity?)JsonSerializer.Deserialize(jsonDoc, typeof(MoneyStoreDocumentEntity));
+                }
+            }
+        }
+        public override void Write(
+        Utf8JsonWriter writer, DocumentEntity documentEntity, JsonSerializerOptions options)
+        {
+
+            JsonSerializerOptions newOptions  = new JsonSerializerOptions(options);
+            newOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                //JsonSerializerDefaults.Web
+            if (documentEntity is ProductDocumentEntity productDocument)
+            {
+                JsonSerializer.Serialize(writer, productDocument, newOptions);
+            }
+            else if (documentEntity is MoneyStoreDocumentEntity moneyDocument)
+            {
+                JsonSerializer.Serialize(writer, moneyDocument, newOptions);
+            }
+        }
     }
 }

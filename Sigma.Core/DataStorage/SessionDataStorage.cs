@@ -139,6 +139,7 @@ namespace Sigma.Core.DataStorage
                 hotelManagerBinding.Security.Transport.ClientCredentialType = System.ServiceModel.HttpClientCredentialType.Basic;
 #if DEBUG
                 var timeout = new TimeSpan(0, 30, 0);
+                hotelManagerBinding.SendTimeout = timeout;
                 hotelManagerBinding.OpenTimeout = timeout;
                 hotelManagerBinding.ReceiveTimeout = timeout;
                 hotelManagerBinding.CloseTimeout = timeout;

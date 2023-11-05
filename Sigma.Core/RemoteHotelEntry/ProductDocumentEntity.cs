@@ -3,7 +3,7 @@
 namespace Sigma.Core.RemoteHotelEntry
 {
     using ProductID = String;
-    public class ProductsSales : Dictionary<uint, ProductSaleEntity> { }
+    public class ProductsSales : Dictionary<string, ProductSaleEntity> { }
 
     public class ProductDocumentEntity : DocumentEntity
     {

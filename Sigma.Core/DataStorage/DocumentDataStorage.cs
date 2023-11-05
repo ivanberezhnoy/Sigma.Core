@@ -145,8 +145,8 @@ namespace Sigma.Core.DataStorage
                                     }
                                 }
 
-                                ProductSaleEntity saleEntity = new ProductSaleEntity(productEntity, productItem.Quantity, productItem.Price, unit, characteristic);
-                                sales[index] = saleEntity;
+                                ProductSaleEntity saleEntity = new ProductSaleEntity(index.ToString(), productEntity, productItem.Quantity, productItem.Price, unit, characteristic);
+                                sales[index.ToString()] = saleEntity;
                                 ++index;
                             }
                         }
