@@ -57,7 +57,7 @@ namespace Sigma.Core.DataStorage
 
                     OrganizationEntity? organization = organizationDataStorage.GetOrganization(session, document.OrganizationId);
                     ClientEntity? client = clientDataStorage.GetClient(session, document.ClientId);
-                    DocumentEntityType documentType = DocumentEntity.ConvertDocumentType(document.DocumentType);
+                    DocumentType documentType = document.DocumentType;
                     AgreementEntity? agreement = clientDataStorage.GetAgreement(session, document.ClientId, document.AgreementId);
 
                     if (client == null)
@@ -85,7 +85,7 @@ namespace Sigma.Core.DataStorage
                     }
 
 
-                    if (ProductDocumentEntity.IsProductDocument(document.DocumentType))
+                    if (ProductDocumentEntity.IsProductDocument(documentType))
                     {
                         StoreEntity? store = storeDataStorage.GetStore(session, document.StoreId);
 
@@ -161,7 +161,7 @@ namespace Sigma.Core.DataStorage
                             ((ProductDocumentEntity)existingDocument).Fill(organization, client, document.Date, document.Comment, user, document.IsActive, agreement, store, sales);
                         }
                     }
-                    else if (ProductDocumentEntity.IsMoneyDocument(document.DocumentType))
+                    else if (ProductDocumentEntity.IsMoneyDocument(documentType))
                     {
                         MoneyStoreEntity? moneyStore = moneyStoreDataStorage.GetMoneyStore(session, document.MoneyStoreId);
 

@@ -433,6 +433,9 @@ namespace HotelManager
         
         /// <remarks/>
         MoneyReturnFromClient,
+        
+        /// <remarks/>
+        MoneyTransfer,
     }
     
     /// <remarks/>
@@ -970,7 +973,7 @@ namespace HotelManager
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute(Order=8)]
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=8)]
         public string ParentDocumentId
         {
             get

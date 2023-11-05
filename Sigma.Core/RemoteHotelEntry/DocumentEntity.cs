@@ -6,70 +6,30 @@ using Sigma.Core.RemoteHotelEntry;
 
 namespace Sigma.Core.RemoteHotelEntry
 {
-    public enum DocumentEntityType
-    {
-        Sell,
-        Buy,
-        ReturnFromClient,
-        ReturnToClient,
-        MoneyGet,
-        MoneyPut,
-        MoneyReturnToClient,
-        MoneyReturnFromClient
-    }
-
     public class DocumentsSet : HashSet<DocumentEntity>{}
 
     [JsonConverter(typeof(SystemTextJsonPolymorphism.DocumentConverter))]
     public class DocumentEntity
     {
-        public static DocumentEntityType ConvertDocumentType(DocumentType type)
-        {
-            switch(type)
-            {
-                case HotelManager.DocumentType.Sell:
-                        return DocumentEntityType.Sell;
-                case HotelManager.DocumentType.Buy:
-                    return DocumentEntityType.Sell;
-                case HotelManager.DocumentType.ReturnToClient:
-                    return DocumentEntityType.ReturnToClient;
-                case HotelManager.DocumentType.ReturnFromClient:
-                    return DocumentEntityType.ReturnFromClient;
-
-                case HotelManager.DocumentType.MoneyGet:
-                    return DocumentEntityType.MoneyGet;
-                case HotelManager.DocumentType.MoneyPut:
-                    return DocumentEntityType.MoneyPut;
-                case HotelManager.DocumentType.MoneyReturnToClient:
-                    return DocumentEntityType.MoneyReturnToClient;
-                case HotelManager.DocumentType.MoneyReturnFromClient:
-                    return DocumentEntityType.MoneyReturnFromClient;
-
-                default:
-                    return DocumentEntityType.Sell;
-            }
-
-        }
-
-        public static string DocumentTypeToString(DocumentEntityType documentType)
+        public static string DocumentTypeToString(DocumentType documentType)
         {
             switch(documentType)
             {
-                case DocumentEntityType.Sell:
+                case DocumentType.Sell:
                     return "Реализация товаров и услуг";
-                case DocumentEntityType.Buy:
+                case DocumentType.Buy:
                     return "Поступление товаров и услуг";
-                case DocumentEntityType.ReturnFromClient:
+                case DocumentType.ReturnFromClient:
                     return "Возврат товаров от покупателя";
-                case DocumentEntityType.ReturnToClient:
+                case DocumentType.ReturnToClient:
                     return "Поступление товаров и услуг";
-                case DocumentEntityType.MoneyGet:
+                case DocumentType.MoneyGet:
                     return "Приходный кассовый ордер";
-                case DocumentEntityType.MoneyPut:
+                case DocumentType.MoneyPut:
                     return "Расходный кассовый ордер";
-                case DocumentEntityType.MoneyReturnToClient:
+                case DocumentType.MoneyReturnToClient:
                     return "Возврат денег покупателю";
-                case DocumentEntityType.MoneyReturnFromClient:
+                case DocumentType.MoneyReturnFromClient:
                     return "Возврат денег от продавца";
 
             }
@@ -123,7 +83,7 @@ namespace Sigma.Core.RemoteHotelEntry
             }
         }
 
-        public DocumentEntity(string id, OrganizationEntity organization, ClientEntity client, DateTime? date, string? comment, UserEntity? user, DocumentEntityType documentType, bool isActive, AgreementEntity agreement)
+        public DocumentEntity(string id, OrganizationEntity organization, ClientEntity client, DateTime? date, string? comment, UserEntity? user, DocumentType documentType, bool isActive, AgreementEntity agreement)
         {
             Id = id;
             Children = new DocumentsDictionary();
@@ -157,7 +117,7 @@ namespace Sigma.Core.RemoteHotelEntry
 
         public UserEntity? User { get; set; }
 
-        public DocumentEntityType Type { get; set; }
+        public DocumentType Type { get; set; }
 
         public bool IsActive { get; set; }
 

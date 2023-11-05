@@ -16,7 +16,7 @@ namespace Sigma.Core.RemoteHotelEntry
             Money = money;
         }
 
-        public MoneyStoreDocumentEntity(string id, OrganizationEntity organization, ClientEntity client, DateTime? date, string? comment, UserEntity? user, DocumentEntityType documentType,
+        public MoneyStoreDocumentEntity(string id, OrganizationEntity organization, ClientEntity client, DateTime? date, string? comment, UserEntity? user, DocumentType documentType,
             bool isActive, AgreementEntity agreement, MoneyStoreEntity moneyStore, float money)
             : base(id, organization, client, date, comment, user, documentType, isActive, agreement)
         {

@@ -14,7 +14,7 @@ namespace Sigma.Core.RemoteHotelEntry
             Sales = sales;
         }
         public ProductDocumentEntity(string id, OrganizationEntity organization, ClientEntity client, DateTime? date, string? comment, UserEntity? user,
-            DocumentEntityType documentType, bool isActive, AgreementEntity agreement, StoreEntity store, ProductsSales sales) 
+            DocumentType documentType, bool isActive, AgreementEntity agreement, StoreEntity store, ProductsSales sales) 
             : base(id, organization, client, date, comment, user, documentType, isActive, agreement)
         {
             Sales = sales;
