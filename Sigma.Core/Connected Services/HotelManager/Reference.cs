@@ -858,6 +858,8 @@ namespace HotelManager
         
         private string moneyStoreIdField;
         
+        private string moneyStoreToIdField;
+        
         private float sumField;
         
         /// <remarks/>
@@ -1044,7 +1046,7 @@ namespace HotelManager
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute(Order=13)]
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=13)]
         public string MoneyStoreId
         {
             get
@@ -1058,7 +1060,21 @@ namespace HotelManager
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute(Order=14)]
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=14)]
+        public string MoneyStoreToId
+        {
+            get
+            {
+                return this.moneyStoreToIdField;
+            }
+            set
+            {
+                this.moneyStoreToIdField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=15)]
         public float Sum
         {
             get

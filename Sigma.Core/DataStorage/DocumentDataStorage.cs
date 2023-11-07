@@ -1,5 +1,7 @@
 ﻿using HotelManager;
 using Microsoft.AspNetCore.Mvc;
+using MySqlX.XDevAPI;
+using Org.BouncyCastle.Crypto.Agreement;
 using Sigma.Core.Controllers;
 using Sigma.Core.RemoteHotelEntry;
 
@@ -56,129 +58,159 @@ namespace Sigma.Core.DataStorage
                     _documents.TryGetValue(document.Id, out existingDocument);
 
                     OrganizationEntity? organization = organizationDataStorage.GetOrganization(session, document.OrganizationId);
-                    ClientEntity? client = clientDataStorage.GetClient(session, document.ClientId);
-                    DocumentType documentType = document.DocumentType;
-                    AgreementEntity? agreement = clientDataStorage.GetAgreement(session, document.ClientId, document.AgreementId);
-
-                    if (client == null)
-                    {
-                        _logger.LogError("Failed to load client with ID : {ClientID} for document with ID: {ClientID}", document.ClientId, document.Id);
-                        continue;
-                    }
                     if (organization == null)
                     {
                         _logger.LogError("Failed to load organization with ID : {OrganizationID} for document with ID: {DocumentID}", document.OrganizationId, document.Id);
                         continue;
                     }
-                    if (agreement == null)
-                    {
-                        _logger.LogError("Failed to load agreement with ID : {AgreementID} for document with ID: {DocumentID}", document.AgreementId, document.Id);
-                        continue;
-                    }
-
 
                     UserEntity? user = sessionDataStorage.GetUserByID(session, document.UserId);
-
                     if (user == null)
                     {
                         _logger.LogError("Failed to load user with ID : {UserID} for document with ID: {DocumentID}", document.UserId, document.Id);
                     }
 
-
-                    if (ProductDocumentEntity.IsProductDocument(documentType))
+                    DocumentType documentType = document.DocumentType;
+                    if (ProductDocumentEntity.IsClientDocument(documentType))
                     {
-                        StoreEntity? store = storeDataStorage.GetStore(session, document.StoreId);
+                        AgreementEntity? agreement = clientDataStorage.GetAgreement(session, document.ClientId, document.AgreementId);
+                        ClientEntity? client = clientDataStorage.GetClient(session, document.ClientId);
 
-                        if (store == null)
+                        if (client == null)
                         {
-                            _logger.LogError("Failed to load store with ID : {StoreID} for document with ID: {DocumentID}", document.StoreId, document.Id);
+                            _logger.LogError("Failed to load client with ID : {ClientID} for document with ID: {ClientID}", document.ClientId, document.Id);
+                            continue;
+                        }
+                        if (agreement == null)
+                        {
+                            _logger.LogError("Failed to load agreement with ID : {AgreementID} for document with ID: {DocumentID}", document.AgreementId, document.Id);
                             continue;
                         }
 
-                        ProductsSales sales = new ProductsSales();
 
-                        if (document.ProductItems != null)
+                        if (ProductDocumentEntity.IsProductDocument(documentType))
                         {
-                            uint index = 0;
-                            foreach (ProductItem productItem in document.ProductItems)
+                            StoreEntity? store = storeDataStorage.GetStore(session, document.StoreId);
+
+                            if (store == null)
                             {
-                                ProductEntity? productEntity = productDataStorage.GetProduct(session, productItem.ProductId);
+                                _logger.LogError("Failed to load store with ID : {StoreID} for document with ID: {DocumentID}", document.StoreId, document.Id);
+                                continue;
+                            }
 
-                                if (productEntity == null)
-                                {
-                                    _logger.LogError("Unable to load product sale with product ID: {ProductID} document ID: {DocumentID}", productItem.ProductId, document.Id);
-                                    continue;
-                                }
+                            ProductsSales sales = new ProductsSales();
 
-                                UnitEntity? unit = productEntity.GetUnitWithID(productItem.UnitID);
-                                CharacteristicEntity? characteristic = null;
-                                if (productItem.CharacteristicID != null)
+                            if (document.ProductItems != null)
+                            {
+                                uint index = 0;
+                                foreach (ProductItem productItem in document.ProductItems)
                                 {
-                                    characteristic = productEntity.GetCharacteristicWithID(productItem.CharacteristicID);
-                                    if (unit == null)
-                                    {
-                                        _logger.LogError("Try to reload unit with unit ID: {UnitID} document ID: {DocumentID} product ID: {ProductID}", productItem.UnitID, document.Id, productItem.ProductId);
-                                    }
-                                    if (characteristic == null)
-                                    {
-                                        _logger.LogError("Try to reload characteristic with characteristic ID: {CharacteristicID} document ID: {DocumentID} product ID: {ProductID}", productItem.CharacteristicID, document.Id, productItem.ProductId);
-                                    }
-                                }
+                                    ProductEntity? productEntity = productDataStorage.GetProduct(session, productItem.ProductId);
 
-                                if (unit == null || characteristic == null && productItem.CharacteristicID != null)
-                                {
-                                    productDataStorage.ReloadProduct(session, productEntity);
-                                    unit = productEntity.GetUnitWithID(productItem.UnitID);
-                                    if (unit == null)
+                                    if (productEntity == null)
                                     {
-                                        _logger.LogError("Filed to reload unit with unit ID: {UnitID} document ID: {DocumentID} product ID: {ProductID}", productItem.UnitID, document.Id, productItem.ProductId);
+                                        _logger.LogError("Unable to load product sale with product ID: {ProductID} document ID: {DocumentID}", productItem.ProductId, document.Id);
                                         continue;
                                     }
+
+                                    UnitEntity? unit = productEntity.GetUnitWithID(productItem.UnitID);
+                                    CharacteristicEntity? characteristic = null;
                                     if (productItem.CharacteristicID != null)
                                     {
                                         characteristic = productEntity.GetCharacteristicWithID(productItem.CharacteristicID);
+                                        if (unit == null)
+                                        {
+                                            _logger.LogError("Try to reload unit with unit ID: {UnitID} document ID: {DocumentID} product ID: {ProductID}", productItem.UnitID, document.Id, productItem.ProductId);
+                                        }
                                         if (characteristic == null)
                                         {
-                                            _logger.LogError("Filed to reload characteristic with characteristic ID: {CharacteristicID} document ID: {DocumentID} product ID: {ProductID}", productItem.CharacteristicID, document.Id, productItem.ProductId);
-                                            continue;
+                                            _logger.LogError("Try to reload characteristic with characteristic ID: {CharacteristicID} document ID: {DocumentID} product ID: {ProductID}", productItem.CharacteristicID, document.Id, productItem.ProductId);
                                         }
                                     }
-                                }
 
-                                ProductSaleEntity saleEntity = new ProductSaleEntity(index.ToString(), productEntity, productItem.Quantity, productItem.Price, unit, characteristic);
-                                sales[index.ToString()] = saleEntity;
-                                ++index;
+                                    if (unit == null || characteristic == null && productItem.CharacteristicID != null)
+                                    {
+                                        productDataStorage.ReloadProduct(session, productEntity);
+                                        unit = productEntity.GetUnitWithID(productItem.UnitID);
+                                        if (unit == null)
+                                        {
+                                            _logger.LogError("Filed to reload unit with unit ID: {UnitID} document ID: {DocumentID} product ID: {ProductID}", productItem.UnitID, document.Id, productItem.ProductId);
+                                            continue;
+                                        }
+                                        if (productItem.CharacteristicID != null)
+                                        {
+                                            characteristic = productEntity.GetCharacteristicWithID(productItem.CharacteristicID);
+                                            if (characteristic == null)
+                                            {
+                                                _logger.LogError("Filed to reload characteristic with characteristic ID: {CharacteristicID} document ID: {DocumentID} product ID: {ProductID}", productItem.CharacteristicID, document.Id, productItem.ProductId);
+                                                continue;
+                                            }
+                                        }
+                                    }
+
+                                    ProductSaleEntity saleEntity = new ProductSaleEntity(index.ToString(), productEntity, productItem.Quantity, productItem.Price, unit, characteristic);
+                                    sales[index.ToString()] = saleEntity;
+                                    ++index;
+                                }
+                            }
+
+                            if (existingDocument == null)
+                            {
+                                existingDocument = new ProductDocumentEntity(document.Id, organization, document.Date, document.Comment, user, documentType, document.IsActive, client, agreement, store, sales);
+                                _documents[document.Id] = existingDocument;
+                            }
+                            else
+                            {
+                                ((ProductDocumentEntity)existingDocument).Fill(organization, document.Date, document.Comment, user, document.IsActive, client, agreement, store, sales);
                             }
                         }
+                        else if (ProductDocumentEntity.IsMoneyStoreDocument(documentType))
+                        {
+                            MoneyStoreEntity? moneyStore = moneyStoreDataStorage.GetMoneyStore(session, document.MoneyStoreId);
 
-                        if (existingDocument == null)
-                        {
-                            existingDocument = new ProductDocumentEntity(document.Id, organization, client, document.Date, document.Comment, user, documentType, document.IsActive, agreement, store, sales);
-                            _documents[document.Id] = existingDocument;
-                        }
-                        else
-                        {
-                            ((ProductDocumentEntity)existingDocument).Fill(organization, client, document.Date, document.Comment, user, document.IsActive, agreement, store, sales);
+                            if (moneyStore == null)
+                            {
+                                _logger.LogError("Failed to load money store with ID : {MoneyStoreID} for document with ID: {DocumentID}", document.MoneyStoreId, document.Id);
+                                continue;
+                            }
+
+                            if (existingDocument == null)
+                            {
+                                existingDocument = new MoneyStoreDocumentEntity(document.Id, organization, document.Date, document.Comment, user, documentType,
+                                    document.IsActive, client, agreement, moneyStore, document.Sum);
+                            }
+                            else
+                            {
+                                ((MoneyStoreDocumentEntity)existingDocument).Fill(organization, document.Date, document.Comment, user, document.IsActive, client, agreement, moneyStore, document.Sum);
+                            }
                         }
                     }
-                    else if (ProductDocumentEntity.IsMoneyDocument(documentType))
+                    else if (documentType == DocumentType.MoneyTransfer)
                     {
-                        MoneyStoreEntity? moneyStore = moneyStoreDataStorage.GetMoneyStore(session, document.MoneyStoreId);
+                        MoneyStoreEntity? moneyStoreFrom = moneyStoreDataStorage.GetMoneyStore(session, document.MoneyStoreToId);
 
-                        if (moneyStore == null)
+                        if (moneyStoreFrom == null)
                         {
-                            _logger.LogError("Failed to load money store with ID : {MoneyStoreID} for document with ID: {DocumentID}", document.MoneyStoreId, document.Id);
+                            _logger.LogError("Failed to load source money store with ID : {MoneyStoreID} for document with ID: {DocumentID}", document.MoneyStoreId, document.Id);
+                            continue;
+                        }
+
+                        MoneyStoreEntity? moneyStoreTo = moneyStoreDataStorage.GetMoneyStore(session, document.MoneyStoreToId);
+
+                        if (moneyStoreTo == null)
+                        {
+                            _logger.LogError("Failed to load target money store with ID : {MoneyStoreID} for document with ID: {DocumentID}", document.MoneyStoreId, document.Id);
                             continue;
                         }
 
                         if (existingDocument == null)
                         {
-                            existingDocument = new MoneyStoreDocumentEntity(document.Id, organization, client, document.Date, document.Comment, user, documentType,
-                                document.IsActive, agreement, moneyStore, document.Sum);
+                            existingDocument = new MoneyTransferDocumentEntity(document.Id, organization, document.Date, document.Comment, user,
+                                document.IsActive, moneyStoreFrom, moneyStoreTo, document.Sum);
                         }
                         else
                         {
-                            ((MoneyStoreDocumentEntity)existingDocument).Fill(organization, client, document.Date, document.Comment, user, document.IsActive, agreement, moneyStore, document.Sum);
+                            ((MoneyTransferDocumentEntity)existingDocument).Fill(organization, document.Date, document.Comment, user, document.IsActive, moneyStoreFrom, moneyStoreTo, document.Sum);
                         }
                     }
 
@@ -205,7 +237,7 @@ namespace Sigma.Core.DataStorage
                         DocumentsDictionary newChildDocuments = new DocumentsDictionary();
                         foreach (string childDocumentID in document.ChildDocumentsId)
                         {
-                            DocumentEntity? existingChildDocument = null;
+                            DocumentEntity? existingChildDocument;
                             if (newDocumentsList.TryGetValue(childDocumentID, out existingChildDocument))
                             {
                                 newChildDocuments[childDocumentID] = existingChildDocument;

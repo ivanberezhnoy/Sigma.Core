@@ -2,23 +2,23 @@
 
 namespace Sigma.Core.RemoteHotelEntry
 {
-    public class MoneyStoreDocumentEntity : DocumentEntity
+    public class MoneyStoreDocumentEntity : ClientDocumentEntity
     {
         public float Money { get; set; }
         public MoneyStoreEntity MoneyStore { get; set; }
 
-        public void Fill(OrganizationEntity organization, ClientEntity client, DateTime? date, string? comment, UserEntity? user, bool isActive, AgreementEntity agreement, 
+        public void Fill(OrganizationEntity organization, DateTime? date, string? comment, UserEntity? user, bool isActive, ClientEntity client, AgreementEntity agreement, 
             MoneyStoreEntity moneystore, float money)
         {
-            base.Fill(organization, client, date, comment, user, isActive, agreement);
+            base.Fill(organization, date, comment, user, isActive, client, agreement);
 
             MoneyStore = moneystore;
             Money = money;
         }
 
-        public MoneyStoreDocumentEntity(string id, OrganizationEntity organization, ClientEntity client, DateTime? date, string? comment, UserEntity? user, DocumentType documentType,
-            bool isActive, AgreementEntity agreement, MoneyStoreEntity moneyStore, float money)
-            : base(id, organization, client, date, comment, user, documentType, isActive, agreement)
+        public MoneyStoreDocumentEntity(string id, OrganizationEntity organization, DateTime? date, string? comment, UserEntity? user, DocumentType documentType,
+            bool isActive, ClientEntity client, AgreementEntity agreement, MoneyStoreEntity moneyStore, float money)
+            : base(id, organization, date, comment, user, documentType, isActive, client, agreement)
         {
             MoneyStore = moneyStore;
             Money = money;

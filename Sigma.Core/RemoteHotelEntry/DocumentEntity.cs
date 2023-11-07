@@ -31,21 +31,20 @@ namespace Sigma.Core.RemoteHotelEntry
                     return "Возврат денег покупателю";
                 case DocumentType.MoneyReturnFromClient:
                     return "Возврат денег от продавца";
-
+                case DocumentType.MoneyTransfer:
+                    return "Сдача кассы";
             }
 
             return "Unknown";
         }
 
-        public void Fill(OrganizationEntity organization, ClientEntity client, DateTime? date, string? comment, UserEntity? user, bool isActive, AgreementEntity agreement)
+        public void Fill(OrganizationEntity organization, DateTime? date, string? comment, UserEntity? user, bool isActive)
         {
             Organization = organization;
-            Client = client;
             Date = date;
             Comment = comment;
             User = user;
             IsActive = isActive;
-            Agreement = agreement;
         }
 
         public void SetParentDocumentID(string? parentDocumentID)
@@ -83,19 +82,17 @@ namespace Sigma.Core.RemoteHotelEntry
             }
         }
 
-        public DocumentEntity(string id, OrganizationEntity organization, ClientEntity client, DateTime? date, string? comment, UserEntity? user, DocumentType documentType, bool isActive, AgreementEntity agreement)
+        public DocumentEntity(string id, OrganizationEntity organization, DateTime? date, string? comment, UserEntity? user, DocumentType documentType, bool isActive)
         {
             Id = id;
             Children = new DocumentsDictionary();
             Type = documentType;
 
             Organization = organization;
-            Client = client;
             Date = date;
             Comment = comment;
             User = user;
             IsActive = isActive;
-            Agreement = agreement;
 
             //Fill(organization, client, date, comment, user, isActive);
         }
@@ -109,8 +106,7 @@ namespace Sigma.Core.RemoteHotelEntry
             }
         }
         public OrganizationEntity Organization { get; set; }
-        public ClientEntity Client { get; set; }
-
+        
         public DateTime? Date { get; set; }
 
         public string? Comment { get; set; }
@@ -124,8 +120,6 @@ namespace Sigma.Core.RemoteHotelEntry
         public DocumentsDictionary Children { get; set; }
 
         public String? ParentID { get; set; }
-
-        public AgreementEntity Agreement { get; set; }
     }
 }
 
@@ -157,11 +151,17 @@ namespace SystemTextJsonPolymorphism
                 {
                     return (ProductDocumentEntity?)JsonSerializer.Deserialize(jsonDoc, typeof(ProductDocumentEntity));
                 }
-                else
+                else if (ProductDocumentEntity.IsMoneyStoreDocument(documentType))
                 {
                     return (MoneyStoreDocumentEntity?)JsonSerializer.Deserialize(jsonDoc, typeof(MoneyStoreDocumentEntity));
                 }
+                else if (documentType == DocumentType.MoneyTransfer)
+                {
+                    return (MoneyTransferDocumentEntity?)JsonSerializer.Deserialize(jsonDoc, typeof(MoneyTransferDocumentEntity));
+                }
             }
+
+            return null;
         }
         public override void Write(
         Utf8JsonWriter writer, DocumentEntity documentEntity, JsonSerializerOptions options)
@@ -177,6 +177,10 @@ namespace SystemTextJsonPolymorphism
             else if (documentEntity is MoneyStoreDocumentEntity moneyDocument)
             {
                 JsonSerializer.Serialize(writer, moneyDocument, newOptions);
+            }
+            else if (documentEntity is MoneyTransferDocumentEntity moneyTransfer)
+            {
+                JsonSerializer.Serialize(writer, moneyTransfer, newOptions);
             }
         }
     }
