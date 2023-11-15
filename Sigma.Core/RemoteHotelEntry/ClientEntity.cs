@@ -2,7 +2,7 @@
 namespace Sigma.Core.RemoteHotelEntry
 {
     public class Agreements : Dictionary<string, AgreementEntity> { }
-    public class ClientEntity
+    public class ClientEntity: Entity
     {
         public void FillClient(Client client, Agreements agreements, AgreementEntity? mainAgreement)
         {
@@ -11,11 +11,8 @@ namespace Sigma.Core.RemoteHotelEntry
             Agreements = agreements;
             MainAgreement = mainAgreement;
         }
-        public ClientEntity(Client client, Agreements agreements, AgreementEntity? mainAgreement)
+        public ClientEntity(Client client, Agreements agreements, AgreementEntity? mainAgreement): base(client.Id, client.Name)
         {
-            Id = client.Id;
-            Name = client.Name;
-
             Agreements = agreements;
             MainAgreement = mainAgreement;
         }
@@ -24,8 +21,6 @@ namespace Sigma.Core.RemoteHotelEntry
         {
             Agreements.Remove(agreement.Id);
         }
-        public string Id { get; set; }
-        public string Name { get; set; }
         public AgreementEntity? MainAgreement { get; set; }
         public Agreements Agreements { get; set; }
     }

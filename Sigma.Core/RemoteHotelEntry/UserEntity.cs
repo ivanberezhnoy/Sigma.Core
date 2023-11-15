@@ -2,19 +2,14 @@
 {
     using Sigma.Core.Utils;
     using System.Drawing;
+    using System.Security.Cryptography.X509Certificates;
     using System.ServiceModel.Security;
-    public class UserEntity
+    public class UserEntity: Entity
     {
-        public UserEntity(string userName, string? userPassword, string userID)
+        public UserEntity(string userName, string? userPassword, string userID): base(userID, userName)
         {
-            Name = userName;
             Password = userPassword;
-            Id = userID;
         }
-
-        public string Id { get; set; }
-
-        public string Name { get; set; }
 
         public string? Password { get; set; }
 

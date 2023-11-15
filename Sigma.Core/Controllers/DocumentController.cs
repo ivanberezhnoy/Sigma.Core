@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Sigma.Core.DataStorage;
+using Sigma.Core.RemoteHotelEntry;
 using System.Net;
 
 namespace Sigma.Core.Controllers
@@ -18,36 +19,30 @@ namespace Sigma.Core.Controllers
         }
 
         [HttpGet(Name = "GetDocuments")]
-        public DocumentsDictionary? Get(DateTime? minDate, DateTime? maxDate)
+        public List<DocumentEntity> Get(EntityFilterDocument? filter, int? pageIndex, int? pageSize)
         {
             var session = _storageProvider.Sessions.GetClentForConnectionID(HttpContext.Connection.Id);
 
             if (session != null)
             {
                 _logger.LogInformation("GetDocuments for connection {ConnectionID}", HttpContext.Connection.Id);
-                DocumentsDictionary documents = _storageProvider.Documents.GetDocuments(session.Client);
+                List<DocumentEntity> documents = (List<DocumentEntity>)_storageProvider.Documents.GetSortedDocuments(session.Client, filter);
 
-                if (minDate == null && maxDate == null)
+                if (pageIndex != null && pageSize != null)
                 {
-                    return documents;
-                }
-                DocumentsDictionary result = new DocumentsDictionary();
-                foreach (var document in documents)
-                {
-                    if (minDate != null && document.Value.Date < minDate)
-                    {
-                        continue;
-                    }
+                    int startIndex = (int)(pageIndex * pageSize);
 
-                    if (maxDate != null && document.Value.Date > maxDate)
+                    if (startIndex >= documents.Count)
                     {
-                        continue;
+                        documents = new DocumentsArray();
                     }
-
-                    result[document.Key] = document.Value;
+                    else 
+                    {
+                        documents = documents.GetRange(startIndex, Math.Min((int)pageSize, documents.Count - startIndex));
+                    }
                 }
 
-                return result;
+                return documents;
             }
 
             _logger.LogWarning("Unable to find user with connection ID {ConnectionID}", HttpContext.Connection.Id);

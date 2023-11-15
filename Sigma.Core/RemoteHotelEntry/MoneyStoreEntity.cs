@@ -2,17 +2,13 @@
 
 namespace Sigma.Core.RemoteHotelEntry
 {
-    public class MoneyStoreEntity
+    public class MoneyStoreEntity: Entity
     {
-        public MoneyStoreEntity(string id, string name, OrganizationEntity organization)
+        public MoneyStoreEntity(string id, string name, OrganizationEntity organization): base(id, name)
         {
-            Id = id;
-            Name = name;
             Organization = organization;
         }
 
-        public string Id { get; set; }
-        public string Name { get; set; }
         public OrganizationEntity Organization { get; set; }
 
         private float? moneyValue { get; set; }

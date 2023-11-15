@@ -20,7 +20,6 @@ namespace Sigma.Core.RemoteHotelEntry
         public ClientDocumentEntity(string id, OrganizationEntity organization, DateTime? date, string? comment, UserEntity? user, DocumentType documentType, bool isActive, ClientEntity client, AgreementEntity agreement)
             : base(id, organization, date, comment, user, documentType, isActive)
         {
-            Id = id;
             Children = new DocumentsDictionary();
             Type = documentType;
 

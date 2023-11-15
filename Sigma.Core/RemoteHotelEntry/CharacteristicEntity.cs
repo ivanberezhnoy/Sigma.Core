@@ -4,12 +4,8 @@ using Id = System.String;
 
 namespace Sigma.Core.RemoteHotelEntry
 {
-    public class CharacteristicEntity
+    public class CharacteristicEntity: Entity
     {
-        [Key]
-        public Id Id { get; set; }
-
-        public string Name { get; set; }
 
         public float? Price { get; set; }
 
@@ -22,11 +18,8 @@ namespace Sigma.Core.RemoteHotelEntry
             Name = characteristic.Name;
         }
 
-        public CharacteristicEntity(Characteristic characteristic)
+        public CharacteristicEntity(Characteristic characteristic): base(characteristic.Id, characteristic.Name)
         {
-            Id = characteristic.Id;
-            Name = characteristic.Name;
-
             Reload(characteristic);
         }
 

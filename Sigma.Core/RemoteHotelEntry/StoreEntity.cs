@@ -2,14 +2,10 @@
 
 namespace Sigma.Core.RemoteHotelEntry
 {
-    public class StoreEntity
+    public class StoreEntity: Entity
     {
-        public StoreEntity(Store store)
+        public StoreEntity(Store store): base(store.Id, store.Name)
         {
-            Id = store.Id;
-            Name = store.Name;
         }
-        public string Id { get; set; }
-        public string Name { get; set; }
     }
 }

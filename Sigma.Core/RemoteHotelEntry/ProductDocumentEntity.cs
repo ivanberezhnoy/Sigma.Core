@@ -1,4 +1,5 @@
 ﻿using HotelManager;
+using Sigma.Core.DataStorage;
 
 namespace Sigma.Core.RemoteHotelEntry
 {
@@ -37,6 +38,24 @@ namespace Sigma.Core.RemoteHotelEntry
         {
             return documentType == HotelManager.DocumentType.MoneyPut || documentType == HotelManager.DocumentType.MoneyGet || 
                 documentType == HotelManager.DocumentType.MoneyReturnToClient || documentType == HotelManager.DocumentType.MoneyReturnFromClient;
+        }
+
+        public override bool filterMatch(EntityFilterDocument filter)
+        {
+            if (base.filterMatch(filter))
+            {
+                return true;
+            }
+
+            foreach (var sale in Sales.Values)
+            {
+                if (sale.filterMatch(filter))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public ProductsSales Sales { get; set; }

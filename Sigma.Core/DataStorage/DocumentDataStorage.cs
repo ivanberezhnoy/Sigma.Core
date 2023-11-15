@@ -9,14 +9,17 @@ namespace Sigma.Core.DataStorage
 {
 
     public class DocumentsDictionary : Dictionary<string, DocumentEntity> { }
+    public class DocumentsArray: List<DocumentEntity>{};
 
     public class DocumentDataStorage : BaseDataStorage
     {
         private DocumentsDictionary? _documents;
+        private Dictionary<EntityFilterDocument, DocumentsArray> _cashedDocumentFilters;
 
         public DocumentDataStorage(ILogger<DocumentDataStorage> logger, StorageProvider storageProvider) : base(logger, storageProvider)
         {
             storageProvider.Documents = this;
+            _cashedDocumentFilters = new Dictionary<EntityFilterDocument, DocumentsArray>();
         }
 
         /*[HttpGet(Name = "GetDocuemnts")]
@@ -44,6 +47,8 @@ namespace Sigma.Core.DataStorage
 
             if (_documents != null)
             {
+                _cashedDocumentFilters.Clear();
+
                 DocumentsList documentsList = session.getDocuments(documentID);
                 DocumentsDictionary newDocumentsList = new DocumentsDictionary();
 
@@ -256,6 +261,39 @@ namespace Sigma.Core.DataStorage
             }
 
             return result;
+        }
+
+        public DocumentsArray GetSortedDocuments(HotelManagerPortTypeClient session, EntityFilterDocument? filter)
+        {
+            EntityFilterDocument targetFilter = filter ?? new EntityFilterDocument();
+
+            DocumentsArray? result;
+            if (_cashedDocumentFilters.TryGetValue(targetFilter, out result))
+            {
+                return result;
+            }
+
+            DocumentsDictionary documents = this.GetDocuments(session);
+            var filteredValues = !targetFilter.IsEmpty() ? documents.Values.Where(document => document.filterMatch(targetFilter)).ToList() : documents.Values.ToList();
+
+            filteredValues.Sort((document1, document2) => 
+            {
+                if (document1.Date == null || document2.Date == null)
+                {
+                    if (document1.Date == null && document2.Date == null)
+                    {
+                        return 0;
+                    }
+
+                    return document1.Date == null ? -1 : 1;
+                }
+
+                return DateTime.Compare((DateTime)document1.Date, (DateTime)document2.Date);
+            });
+
+            _cashedDocumentFilters[targetFilter] = (DocumentsArray)filteredValues;
+
+            return (DocumentsArray)filteredValues;
         }
 
         public DocumentsDictionary GetDocuments(HotelManagerPortTypeClient session)

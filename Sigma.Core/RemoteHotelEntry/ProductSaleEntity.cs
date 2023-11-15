@@ -2,21 +2,16 @@
 
 namespace Sigma.Core.RemoteHotelEntry
 {
-    public class ProductSaleEntity
+    public class ProductSaleEntity: Entity
     {
-        public ProductSaleEntity(string id, ProductEntity product, float quantity, float price, UnitEntity unit, CharacteristicEntity? characteristic)
+        public ProductSaleEntity(string id, ProductEntity product, float quantity, float price, UnitEntity unit, CharacteristicEntity? characteristic): base(id, "")
         {
-            Id = id;
-            Name = "";
             Product = product;
             Quantity = quantity;
             Price = price;
             Unit = unit;
             Characteristic = characteristic;
         }
-        public string Id { get; set; }
-
-        public string Name { get; set; }
         public ProductEntity Product { get; set; }
 
         public float Quantity { get; set; }

@@ -3,13 +3,14 @@ using Sigma.Core.DataStorage;
 using System.Text.Json.Serialization;
 using System.Text.Json;
 using Sigma.Core.RemoteHotelEntry;
+using System.Globalization;
 
 namespace Sigma.Core.RemoteHotelEntry
 {
     public class DocumentsSet : HashSet<DocumentEntity>{}
 
     [JsonConverter(typeof(SystemTextJsonPolymorphism.DocumentConverter))]
-    public class DocumentEntity
+    public class DocumentEntity: Entity
     {
         public static string DocumentTypeToString(DocumentType documentType)
         {
@@ -45,6 +46,12 @@ namespace Sigma.Core.RemoteHotelEntry
             Comment = comment;
             User = user;
             IsActive = isActive;
+            Name = generateName();
+        }
+
+        private string generateName()
+        { 
+            return DocumentTypeToString(Type) + " " + stripId + " " + stripTime;
         }
 
         public void SetParentDocumentID(string? parentDocumentID)
@@ -82,9 +89,64 @@ namespace Sigma.Core.RemoteHotelEntry
             }
         }
 
-        public DocumentEntity(string id, OrganizationEntity organization, DateTime? date, string? comment, UserEntity? user, DocumentType documentType, bool isActive)
+        public virtual bool filterMatch(EntityFilterDocument filter)
         {
-            Id = id;
+            if (filter.DocumentType != null)
+            {
+                if (this.Type != filter.DocumentType)
+                {
+                    return false;
+                }
+            }
+
+            if (filter.CreatorID != null)
+            {
+                if (this.User?.Id != filter.CreatorID)
+                {
+                    return false;
+                }
+            }
+
+            if (filter.StartDate != null)
+            {
+                if (this.Date == null || this.Date < filter.StartDate)
+                {
+                    return false;
+                }
+            }
+
+            if (filter.EndDate != null)
+            {
+                if (this.Date > filter.EndDate)
+                {
+                    return false;
+                }
+            }
+
+            if (filter.StringFilter != null && filter.StringFilter.Trim().Length > 0)
+            {
+                if (filter.CreatorID == null && this.User != null)
+                {
+                    if (filter.Culture.CompareInfo.IndexOf(this.User.Name, filter.StringFilter, CompareOptions.IgnoreCase) >= 0)
+                    {
+                        return true;
+                    }
+                }
+
+                if (this.Date != null)
+                {
+                    if (this.Date.ToString()!.Contains(filter.StringFilter, StringComparison.CurrentCulture))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        public DocumentEntity(string id, OrganizationEntity organization, DateTime? date, string? comment, UserEntity? user, DocumentType documentType, bool isActive): base(id, "")
+        {
             Children = new DocumentsDictionary();
             Type = documentType;
 
@@ -94,10 +156,9 @@ namespace Sigma.Core.RemoteHotelEntry
             User = user;
             IsActive = isActive;
 
+            Name = generateName();
             //Fill(organization, client, date, comment, user, isActive);
         }
-
-        public string Id { get; set; }
 
         private string stripId 
         {
@@ -120,14 +181,6 @@ namespace Sigma.Core.RemoteHotelEntry
             }
         }
 
-
-        public string Name 
-        {
-            get
-            { 
-                return DocumentTypeToString(Type) + " " + stripId + " " + Date.ToString();
-            }
-        }
         public OrganizationEntity Organization { get; set; }
         
         public DateTime? Date { get; set; }

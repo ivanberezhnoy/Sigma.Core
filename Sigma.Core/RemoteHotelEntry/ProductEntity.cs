@@ -15,15 +15,9 @@ namespace Sigma.Core.RemoteHotelEntry
     { }
 
 
-    public class ProductEntity
+    public class ProductEntity: Entity
     {
-        [Key]
-        public Id Id { get; set; }
-
         public bool IsDeleted { get; set; }
-
-        [Required]
-        public string Name { get; set; }
 
         public string? Sku { get; set; }
 
@@ -116,11 +110,8 @@ namespace Sigma.Core.RemoteHotelEntry
             return result;
         }
 
-        public ProductEntity(Product product)
+        public ProductEntity(Product product): base(product.Id, product.Name)
         {
-            Id = product.Id;
-            Name = product.Name;
-
             Units = new UnitsDictionary();
 
             Characteristics = new CharacteristicDictionary();

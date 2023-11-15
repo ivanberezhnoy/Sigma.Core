@@ -2,14 +2,10 @@
 
 namespace Sigma.Core.RemoteHotelEntry
 {
-    public class OrganizationEntity
+    public class OrganizationEntity: Entity
     {
-        public OrganizationEntity(Organization organization)
+        public OrganizationEntity(Organization organization): base(organization.Id, organization.Name)
         {
-            Id = organization.Id;
-            Name = organization.Name;
         }
-        public string Id { get; set; }
-        public string Name { get; set; }
     }
 }
