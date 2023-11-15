@@ -98,11 +98,34 @@ namespace Sigma.Core.RemoteHotelEntry
         }
 
         public string Id { get; set; }
+
+        private string stripId 
+        {
+            get
+            {
+                int indexOfDots = Id.IndexOf(':');
+
+                return Id.Substring(0, indexOfDots > 0 ? indexOfDots - 1 : Id.Length - 1);
+            }
+        }
+
+        private string stripTime
+        {
+            get
+            {
+                string dateString = Date != null ? (Date!.ToString() ?? "") : "";
+                int indexOfDots = dateString.LastIndexOf(':');
+
+                return Id.Substring(0, indexOfDots > 0 ? indexOfDots - 1 : dateString.Length - 1);
+            }
+        }
+
+
         public string Name 
         {
             get
             { 
-                return DocumentTypeToString(Type) + " " + Id + " " + Date.ToString();
+                return DocumentTypeToString(Type) + " " + stripId + " " + Date.ToString();
             }
         }
         public OrganizationEntity Organization { get; set; }

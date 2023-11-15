@@ -18,14 +18,36 @@ namespace Sigma.Core.Controllers
         }
 
         [HttpGet(Name = "GetDocuments")]
-        public DocumentsDictionary? Get()
+        public DocumentsDictionary? Get(DateTime? minDate, DateTime? maxDate)
         {
             var session = _storageProvider.Sessions.GetClentForConnectionID(HttpContext.Connection.Id);
 
             if (session != null)
             {
                 _logger.LogInformation("GetDocuments for connection {ConnectionID}", HttpContext.Connection.Id);
-                return _storageProvider.Documents.GetDocuments(session.Client);
+                DocumentsDictionary documents = _storageProvider.Documents.GetDocuments(session.Client);
+
+                if (minDate == null && maxDate == null)
+                {
+                    return documents;
+                }
+                DocumentsDictionary result = new DocumentsDictionary();
+                foreach (var document in documents)
+                {
+                    if (minDate != null && document.Value.Date < minDate)
+                    {
+                        continue;
+                    }
+
+                    if (maxDate != null && document.Value.Date > maxDate)
+                    {
+                        continue;
+                    }
+
+                    result[document.Key] = document.Value;
+                }
+
+                return result;
             }
 
             _logger.LogWarning("Unable to find user with connection ID {ConnectionID}", HttpContext.Connection.Id);
