@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Sigma.Core.Controllers.Query;
 using Sigma.Core.DataStorage;
 using Sigma.Core.RemoteHotelEntry;
 using System.Net;
@@ -19,18 +20,18 @@ namespace Sigma.Core.Controllers
         }
 
         [HttpGet(Name = "GetDocuments")]
-        public List<DocumentEntity> Get(EntityFilterDocument? filter, int? pageIndex, int? pageSize)
+        public List<DocumentEntity> Get(GetDocumentsQuery? query)
         {
             var session = _storageProvider.Sessions.GetClentForConnectionID(HttpContext.Connection.Id);
 
             if (session != null)
             {
                 _logger.LogInformation("GetDocuments for connection {ConnectionID}", HttpContext.Connection.Id);
-                List<DocumentEntity> documents = (List<DocumentEntity>)_storageProvider.Documents.GetSortedDocuments(session.Client, filter);
+                List<DocumentEntity> documents = _storageProvider.Documents.GetSortedDocuments(session.Client, query?.Filter);
 
-                if (pageIndex != null && pageSize != null)
+                if (query?.PageIndex != null && query?.PageSize != null)
                 {
-                    int startIndex = (int)(pageIndex * pageSize);
+                    int startIndex = (int)(query.PageIndex * query.PageSize);
 
                     if (startIndex >= documents.Count)
                     {
@@ -38,7 +39,7 @@ namespace Sigma.Core.Controllers
                     }
                     else 
                     {
-                        documents = documents.GetRange(startIndex, Math.Min((int)pageSize, documents.Count - startIndex));
+                        documents = documents.GetRange(startIndex, Math.Min((int)query.PageSize, documents.Count - startIndex));
                     }
                 }
 
