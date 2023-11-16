@@ -9,17 +9,16 @@ namespace Sigma.Core.DataStorage
 {
 
     public class DocumentsDictionary : Dictionary<string, DocumentEntity> { }
-    public class DocumentsArray: List<DocumentEntity>{};
 
     public class DocumentDataStorage : BaseDataStorage
     {
         private DocumentsDictionary? _documents;
-        private Dictionary<EntityFilterDocument, DocumentsArray> _cashedDocumentFilters;
+        private Dictionary<EntityFilterDocument, List<DocumentEntity>> _cashedDocumentFilters;
 
         public DocumentDataStorage(ILogger<DocumentDataStorage> logger, StorageProvider storageProvider) : base(logger, storageProvider)
         {
             storageProvider.Documents = this;
-            _cashedDocumentFilters = new Dictionary<EntityFilterDocument, DocumentsArray>();
+            _cashedDocumentFilters = new Dictionary<EntityFilterDocument, List<DocumentEntity>>();
         }
 
         /*[HttpGet(Name = "GetDocuemnts")]
@@ -161,12 +160,12 @@ namespace Sigma.Core.DataStorage
 
                             if (existingDocument == null)
                             {
-                                existingDocument = new ProductDocumentEntity(document.Id, organization, document.Date, document.Comment, user, documentType, document.IsActive, client, agreement, store, sales);
+                                existingDocument = new ProductDocumentEntity(document.Id, organization, document.Date, document.Sum, document.Comment, user, documentType, document.IsActive, client, agreement, store, sales);
                                 _documents[document.Id] = existingDocument;
                             }
                             else
                             {
-                                ((ProductDocumentEntity)existingDocument).Fill(organization, document.Date, document.Comment, user, document.IsActive, client, agreement, store, sales);
+                                ((ProductDocumentEntity)existingDocument).Fill(organization, document.Date, document.Sum, document.Comment, user, document.IsActive, client, agreement, store, sales);
                             }
                         }
                         else if (ProductDocumentEntity.IsMoneyStoreDocument(documentType))
@@ -181,12 +180,12 @@ namespace Sigma.Core.DataStorage
 
                             if (existingDocument == null)
                             {
-                                existingDocument = new MoneyStoreDocumentEntity(document.Id, organization, document.Date, document.Comment, user, documentType,
-                                    document.IsActive, client, agreement, moneyStore, document.Sum);
+                                existingDocument = new MoneyStoreDocumentEntity(document.Id, organization, document.Date, document.Sum, document.Comment, user, documentType,
+                                    document.IsActive, client, agreement, moneyStore);
                             }
                             else
                             {
-                                ((MoneyStoreDocumentEntity)existingDocument).Fill(organization, document.Date, document.Comment, user, document.IsActive, client, agreement, moneyStore, document.Sum);
+                                ((MoneyStoreDocumentEntity)existingDocument).Fill(organization, document.Date, document.Sum, document.Comment, user, document.IsActive, client, agreement, moneyStore);
                             }
                         }
                     }
@@ -210,12 +209,12 @@ namespace Sigma.Core.DataStorage
 
                         if (existingDocument == null)
                         {
-                            existingDocument = new MoneyTransferDocumentEntity(document.Id, organization, document.Date, document.Comment, user,
-                                document.IsActive, moneyStoreFrom, moneyStoreTo, document.Sum);
+                            existingDocument = new MoneyTransferDocumentEntity(document.Id, organization, document.Date, document.Sum, document.Comment, user,
+                                document.IsActive, moneyStoreFrom, moneyStoreTo);
                         }
                         else
                         {
-                            ((MoneyTransferDocumentEntity)existingDocument).Fill(organization, document.Date, document.Comment, user, document.IsActive, moneyStoreFrom, moneyStoreTo, document.Sum);
+                            ((MoneyTransferDocumentEntity)existingDocument).Fill(organization, document.Date, document.Sum, document.Comment, user, document.IsActive, moneyStoreFrom, moneyStoreTo);
                         }
                     }
 
@@ -263,18 +262,28 @@ namespace Sigma.Core.DataStorage
             return result;
         }
 
-        public DocumentsArray GetSortedDocuments(HotelManagerPortTypeClient session, EntityFilterDocument? filter)
+        public List<DocumentEntity> GetSortedDocuments(HotelManagerPortTypeClient session, EntityFilterDocument? filter)
         {
             EntityFilterDocument targetFilter = filter ?? new EntityFilterDocument();
 
-            DocumentsArray? result;
+            List<DocumentEntity>? result;
             if (_cashedDocumentFilters.TryGetValue(targetFilter, out result))
             {
                 return result;
             }
 
             DocumentsDictionary documents = this.GetDocuments(session);
-            var filteredValues = !targetFilter.IsEmpty() ? documents.Values.Where(document => document.filterMatch(targetFilter)).ToList() : documents.Values.ToList();
+            bool completeMismatch = false;
+            var filteredValues = !targetFilter.IsEmpty() ? documents.Values.Where(document => document.filterMatch(targetFilter, out completeMismatch)).ToList() : documents.Values.ToList();
+
+            foreach (var document in filteredValues)
+            {
+                if (document.Type != DocumentType.Sell || document.Name.Contains("Поступление") || !document.Name.Contains("Реализация"))
+                {
+                    //document.filterMatch(targetFilter);
+                    _logger.LogError("Error doccumet {DocumentID}", document.Id);
+                }
+            }
 
             filteredValues.Sort((document1, document2) => 
             {
@@ -288,12 +297,12 @@ namespace Sigma.Core.DataStorage
                     return document1.Date == null ? -1 : 1;
                 }
 
-                return DateTime.Compare((DateTime)document1.Date, (DateTime)document2.Date);
+                return DateTime.Compare((DateTime)document2.Date, (DateTime)document1.Date);
             });
 
-            _cashedDocumentFilters[targetFilter] = (DocumentsArray)filteredValues;
+            _cashedDocumentFilters[targetFilter] = filteredValues;
 
-            return (DocumentsArray)filteredValues;
+            return filteredValues;
         }
 
         public DocumentsDictionary GetDocuments(HotelManagerPortTypeClient session)

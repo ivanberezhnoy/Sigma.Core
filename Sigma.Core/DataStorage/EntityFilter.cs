@@ -1,11 +1,14 @@
 ﻿using System.Globalization;
+using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Sigma.Core.DataStorage
 {
     public class EntityFilter
     {
         public String? StringFilter { get; }
-        public CultureInfo? _cultureInfo;
+
+        private CultureInfo? _cultureInfo;
 
         public EntityFilter()
         { 
@@ -20,6 +23,7 @@ namespace Sigma.Core.DataStorage
             return StringFilter == null;
         }
 
+        [JsonIgnore]
         public CultureInfo Culture
         {
             get

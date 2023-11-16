@@ -15,8 +15,9 @@ namespace Sigma.Core.RemoteHotelEntry
 
         public string Name { get; set; }
 
-        public bool filterMatch(EntityFilter filter)
+        public bool filterMatch(EntityFilter filter, out bool completeMismatch)
         {
+            completeMismatch = false;
             return filter.StringFilter == null || filter.Culture.CompareInfo.IndexOf(Name, filter.StringFilter, CompareOptions.IgnoreCase) > 0;
         }
     }

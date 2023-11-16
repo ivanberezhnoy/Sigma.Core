@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using System.Text.Json;
 using Sigma.Core.RemoteHotelEntry;
 using System.Globalization;
+using System.Transactions;
 
 namespace Sigma.Core.RemoteHotelEntry
 {
@@ -17,11 +18,11 @@ namespace Sigma.Core.RemoteHotelEntry
             switch(documentType)
             {
                 case DocumentType.Sell:
-                    return "Реализация товаров и услуг";
+                    return "Реализация";
                 case DocumentType.Buy:
-                    return "Поступление товаров и услуг";
+                    return "Покупка";
                 case DocumentType.ReturnFromClient:
-                    return "Возврат товаров от покупателя";
+                    return "Возврат от покупателя";
                 case DocumentType.ReturnToClient:
                     return "Поступление товаров и услуг";
                 case DocumentType.MoneyGet:
@@ -39,10 +40,11 @@ namespace Sigma.Core.RemoteHotelEntry
             return "Unknown";
         }
 
-        public void Fill(OrganizationEntity organization, DateTime? date, string? comment, UserEntity? user, bool isActive)
+        public void Fill(OrganizationEntity organization, DateTime? date, float money, string? comment, UserEntity? user, bool isActive)
         {
             Organization = organization;
             Date = date;
+            Money = money;
             Comment = comment;
             User = user;
             IsActive = isActive;
@@ -89,8 +91,9 @@ namespace Sigma.Core.RemoteHotelEntry
             }
         }
 
-        public virtual bool filterMatch(EntityFilterDocument filter)
+        public virtual bool filterMatch(EntityFilterDocument filter, out bool completeMismatch)
         {
+            completeMismatch = true;
             if (filter.DocumentType != null)
             {
                 if (this.Type != filter.DocumentType)
@@ -123,6 +126,15 @@ namespace Sigma.Core.RemoteHotelEntry
                 }
             }
 
+            if (base.filterMatch(filter, out completeMismatch))
+            {
+                return true;
+            }
+            else if (completeMismatch)
+            {
+                return false;
+            }
+
             if (filter.StringFilter != null && filter.StringFilter.Trim().Length > 0)
             {
                 if (filter.CreatorID == null && this.User != null)
@@ -142,22 +154,15 @@ namespace Sigma.Core.RemoteHotelEntry
                 }
             }
 
-            return true;
+            return false;
         }
 
-        public DocumentEntity(string id, OrganizationEntity organization, DateTime? date, string? comment, UserEntity? user, DocumentType documentType, bool isActive): base(id, "")
+        public DocumentEntity(string id, OrganizationEntity organization, DateTime? date, float money, string? comment, UserEntity? user, DocumentType documentType, bool isActive) : base(id, "")
         {
             Children = new DocumentsDictionary();
             Type = documentType;
 
-            Organization = organization;
-            Date = date;
-            Comment = comment;
-            User = user;
-            IsActive = isActive;
-
-            Name = generateName();
-            //Fill(organization, client, date, comment, user, isActive);
+            Fill(organization, date, money, comment, user, isActive);
         }
 
         private string stripId 
@@ -165,8 +170,14 @@ namespace Sigma.Core.RemoteHotelEntry
             get
             {
                 int indexOfDots = Id.IndexOf(':');
+                string result = Id.Substring(0, indexOfDots > 0 ? indexOfDots : Id.Length);
+                int trimEnd = 0;
+                while (result[trimEnd] == '0')
+                {
+                    ++trimEnd;
+                }
 
-                return Id.Substring(0, indexOfDots > 0 ? indexOfDots - 1 : Id.Length - 1);
+                return trimEnd > 0 ? result.Substring(trimEnd) : result;
             }
         }
 
@@ -177,9 +188,10 @@ namespace Sigma.Core.RemoteHotelEntry
                 string dateString = Date != null ? (Date!.ToString() ?? "") : "";
                 int indexOfDots = dateString.LastIndexOf(':');
 
-                return Id.Substring(0, indexOfDots > 0 ? indexOfDots - 1 : dateString.Length - 1);
+                return dateString.Substring(0, indexOfDots > 0 ? indexOfDots : dateString.Length);
             }
         }
+        public float Money { get; set; }
 
         public OrganizationEntity Organization { get; set; }
         

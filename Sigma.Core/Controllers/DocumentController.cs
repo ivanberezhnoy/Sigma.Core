@@ -19,8 +19,8 @@ namespace Sigma.Core.Controllers
             _storageProvider = storageProvider;
         }
 
-        [HttpGet(Name = "GetDocuments")]
-        public List<DocumentEntity> Get(GetDocumentsQuery? query)
+        [HttpPost(Name = "Documents")]
+        public List<DocumentEntity> Post(GetDocumentsQuery? query)
         {
             var session = _storageProvider.Sessions.GetClentForConnectionID(HttpContext.Connection.Id);
 
@@ -35,7 +35,7 @@ namespace Sigma.Core.Controllers
 
                     if (startIndex >= documents.Count)
                     {
-                        documents = new DocumentsArray();
+                        documents = new List<DocumentEntity>();
                     }
                     else 
                     {

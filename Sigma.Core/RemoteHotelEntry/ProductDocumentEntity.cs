@@ -1,5 +1,6 @@
 ﻿using HotelManager;
 using Sigma.Core.DataStorage;
+using System.Numerics;
 
 namespace Sigma.Core.RemoteHotelEntry
 {
@@ -8,16 +9,17 @@ namespace Sigma.Core.RemoteHotelEntry
 
     public class ProductDocumentEntity : ClientDocumentEntity
     {
-        public void Fill(OrganizationEntity organization, DateTime? date, string? comment, UserEntity? user, bool isActive, ClientEntity client, AgreementEntity agreement, StoreEntity store, ProductsSales sales) 
+        public void Fill(OrganizationEntity organization, DateTime? date, float money, string? comment, UserEntity? user, bool isActive, ClientEntity client, AgreementEntity agreement, StoreEntity store, ProductsSales sales) 
         {
-            base.Fill(organization, date, comment, user, isActive, client, agreement);
+            base.Fill(organization, date, money, comment, user, isActive, client, agreement);
 
             Sales = sales;
+            Store = store;
         }
 
-        public ProductDocumentEntity(string id, OrganizationEntity organization, DateTime? date, string? comment, UserEntity? user,
+        public ProductDocumentEntity(string id, OrganizationEntity organization, DateTime? date, float money, string? comment, UserEntity? user,
             DocumentType documentType, bool isActive, ClientEntity client, AgreementEntity agreement, StoreEntity store, ProductsSales sales) 
-            : base(id, organization, date, comment, user, documentType, isActive, client, agreement)
+            : base(id, organization, date, money, comment, user, documentType, isActive, client, agreement)
         {
             Sales = sales;
             Store = store;
@@ -40,18 +42,26 @@ namespace Sigma.Core.RemoteHotelEntry
                 documentType == HotelManager.DocumentType.MoneyReturnToClient || documentType == HotelManager.DocumentType.MoneyReturnFromClient;
         }
 
-        public override bool filterMatch(EntityFilterDocument filter)
+        public override bool filterMatch(EntityFilterDocument filter, out bool completeMismatch)
         {
-            if (base.filterMatch(filter))
+            if (base.filterMatch(filter, out completeMismatch))
             {
                 return true;
+            }
+            else if (completeMismatch)
+            {
+                return false;
             }
 
             foreach (var sale in Sales.Values)
             {
-                if (sale.filterMatch(filter))
+                if (sale.filterMatch(filter, out completeMismatch))
                 {
                     return true;
+                }
+                else if (completeMismatch)
+                {
+                    return false;
                 }
             }
 

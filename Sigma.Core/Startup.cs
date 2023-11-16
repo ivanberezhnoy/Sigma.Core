@@ -22,6 +22,7 @@ namespace Sigma.Core
 
             services.AddHttpContextAccessor();
 
+            
             services.AddSingleton<AgreementDataStorage>();
             services.AddSingleton<ClientDataStorage>();
             services.AddSingleton<DocumentDataStorage>();
@@ -32,6 +33,7 @@ namespace Sigma.Core
             services.AddSingleton<StorageProvider>();
             services.AddSingleton<StoreDataStorage>();
 
+            services.AddTransient<ErrorController>();
             services.AddTransient<ClientController>();
             services.AddTransient<DocumentController>();
             services.AddTransient<LoginController>();
