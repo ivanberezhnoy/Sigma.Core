@@ -16,15 +16,6 @@ namespace HotelManager
     public interface HotelManagerPortType
     {
         
-        [System.ServiceModel.OperationContractAttribute(Action="HotelManager#HotelManager:getHello", ReplyAction="*")]
-        [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
-        [return: System.ServiceModel.MessageParameterAttribute(Name="return")]
-        string getHello();
-        
-        [System.ServiceModel.OperationContractAttribute(Action="HotelManager#HotelManager:getHello", ReplyAction="*")]
-        [return: System.ServiceModel.MessageParameterAttribute(Name="return")]
-        System.Threading.Tasks.Task<string> getHelloAsync();
-        
         // CODEGEN: Параметр "productID" требует дополнительной информации о схеме, которую невозможно получить в режиме параметров. Указан атрибут "Microsoft.Xml.Serialization.XmlElementAttribute".
         [System.ServiceModel.OperationContractAttribute(Action="HotelManager#HotelManager:getProducts", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -114,6 +105,15 @@ namespace HotelManager
         
         [System.ServiceModel.OperationContractAttribute(Action="HotelManager#HotelManager:getAgrementsList", ReplyAction="*")]
         System.Threading.Tasks.Task<HotelManager.getAgrementsListResponse> getAgrementsListAsync(HotelManager.getAgrementsListRequest request);
+        
+        // CODEGEN: Параметр "return" требует дополнительной информации о схеме, которую невозможно получить в режиме параметров. Указан атрибут "Microsoft.Xml.Serialization.XmlElementAttribute".
+        [System.ServiceModel.OperationContractAttribute(Action="HotelManager#HotelManager:setCharacteristicEasyMSRoomId", ReplyAction="*")]
+        [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
+        [return: System.ServiceModel.MessageParameterAttribute(Name="return")]
+        HotelManager.setCharacteristicEasyMSRoomIdResponse setCharacteristicEasyMSRoomId(HotelManager.setCharacteristicEasyMSRoomIdRequest request);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="HotelManager#HotelManager:setCharacteristicEasyMSRoomId", ReplyAction="*")]
+        System.Threading.Tasks.Task<HotelManager.setCharacteristicEasyMSRoomIdResponse> setCharacteristicEasyMSRoomIdAsync(HotelManager.setCharacteristicEasyMSRoomIdRequest request);
     }
     
     /// <remarks/>
@@ -336,6 +336,46 @@ namespace HotelManager
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.hotel-manager.org")]
+    public partial class Result
+    {
+        
+        private System.Nullable<int> errorCodeField;
+        
+        private string errorDescriptionField;
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=0)]
+        public System.Nullable<int> errorCode
+        {
+            get
+            {
+                return this.errorCodeField;
+            }
+            set
+            {
+                this.errorCodeField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=1)]
+        public string errorDescription
+        {
+            get
+            {
+                return this.errorDescriptionField;
+            }
+            set
+            {
+                this.errorDescriptionField = value;
+            }
+        }
+    }
+    
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.hotel-manager.org")]
     public partial class Agreement
     {
         
@@ -429,10 +469,10 @@ namespace HotelManager
         MoneyPut,
         
         /// <remarks/>
-        MoneyReturnToClient,
+        MoneyReturnFromClient,
         
         /// <remarks/>
-        MoneyReturnFromClient,
+        MoneyReturnToClient,
         
         /// <remarks/>
         MoneyTransfer,
@@ -1407,6 +1447,8 @@ namespace HotelManager
         
         private string eANField;
         
+        private string easyMSRoomIdField;
+        
         /// <remarks/>
         [System.Xml.Serialization.XmlElementAttribute(Order=0)]
         public string Id
@@ -1460,6 +1502,20 @@ namespace HotelManager
             set
             {
                 this.eANField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=4)]
+        public string EasyMSRoomId
+        {
+            get
+            {
+                return this.easyMSRoomIdField;
+            }
+            set
+            {
+                this.easyMSRoomIdField = value;
             }
         }
     }
@@ -1834,6 +1890,51 @@ namespace HotelManager
         }
     }
     
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="setCharacteristicEasyMSRoomId", WrapperNamespace="HotelManager", IsWrapped=true)]
+    public partial class setCharacteristicEasyMSRoomIdRequest
+    {
+        
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="HotelManager", Order=0)]
+        public string CharacteristicId;
+        
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="HotelManager", Order=1)]
+        public string EasyMSRoomId;
+        
+        public setCharacteristicEasyMSRoomIdRequest()
+        {
+        }
+        
+        public setCharacteristicEasyMSRoomIdRequest(string CharacteristicId, string EasyMSRoomId)
+        {
+            this.CharacteristicId = CharacteristicId;
+            this.EasyMSRoomId = EasyMSRoomId;
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="setCharacteristicEasyMSRoomIdResponse", WrapperNamespace="HotelManager", IsWrapped=true)]
+    public partial class setCharacteristicEasyMSRoomIdResponse
+    {
+        
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="HotelManager", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true)]
+        public HotelManager.Result @return;
+        
+        public setCharacteristicEasyMSRoomIdResponse()
+        {
+        }
+        
+        public setCharacteristicEasyMSRoomIdResponse(HotelManager.Result @return)
+        {
+            this.@return = @return;
+        }
+    }
+    
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
     public interface HotelManagerPortTypeChannel : HotelManager.HotelManagerPortType, System.ServiceModel.IClientChannel
     {
@@ -1875,16 +1976,6 @@ namespace HotelManager
         public HotelManagerPortTypeClient(System.ServiceModel.Channels.Binding binding, System.ServiceModel.EndpointAddress remoteAddress) : 
                 base(binding, remoteAddress)
         {
-        }
-        
-        public string getHello()
-        {
-            return base.Channel.getHello();
-        }
-        
-        public System.Threading.Tasks.Task<string> getHelloAsync()
-        {
-            return base.Channel.getHelloAsync();
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
@@ -2138,6 +2229,35 @@ namespace HotelManager
             HotelManager.getAgrementsListRequest inValue = new HotelManager.getAgrementsListRequest();
             inValue.agreementId = agreementId;
             return ((HotelManager.HotelManagerPortType)(this)).getAgrementsListAsync(inValue);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        HotelManager.setCharacteristicEasyMSRoomIdResponse HotelManager.HotelManagerPortType.setCharacteristicEasyMSRoomId(HotelManager.setCharacteristicEasyMSRoomIdRequest request)
+        {
+            return base.Channel.setCharacteristicEasyMSRoomId(request);
+        }
+        
+        public HotelManager.Result setCharacteristicEasyMSRoomId(string CharacteristicId, string EasyMSRoomId)
+        {
+            HotelManager.setCharacteristicEasyMSRoomIdRequest inValue = new HotelManager.setCharacteristicEasyMSRoomIdRequest();
+            inValue.CharacteristicId = CharacteristicId;
+            inValue.EasyMSRoomId = EasyMSRoomId;
+            HotelManager.setCharacteristicEasyMSRoomIdResponse retVal = ((HotelManager.HotelManagerPortType)(this)).setCharacteristicEasyMSRoomId(inValue);
+            return retVal.@return;
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        System.Threading.Tasks.Task<HotelManager.setCharacteristicEasyMSRoomIdResponse> HotelManager.HotelManagerPortType.setCharacteristicEasyMSRoomIdAsync(HotelManager.setCharacteristicEasyMSRoomIdRequest request)
+        {
+            return base.Channel.setCharacteristicEasyMSRoomIdAsync(request);
+        }
+        
+        public System.Threading.Tasks.Task<HotelManager.setCharacteristicEasyMSRoomIdResponse> setCharacteristicEasyMSRoomIdAsync(string CharacteristicId, string EasyMSRoomId)
+        {
+            HotelManager.setCharacteristicEasyMSRoomIdRequest inValue = new HotelManager.setCharacteristicEasyMSRoomIdRequest();
+            inValue.CharacteristicId = CharacteristicId;
+            inValue.EasyMSRoomId = EasyMSRoomId;
+            return ((HotelManager.HotelManagerPortType)(this)).setCharacteristicEasyMSRoomIdAsync(inValue);
         }
         
         public virtual System.Threading.Tasks.Task OpenAsync()

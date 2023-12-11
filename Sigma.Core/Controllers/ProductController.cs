@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Sigma.Core.DataStorage;
+using Sigma.Core.Utils;
 using System.Net;
 
 namespace Sigma.Core.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]/[action]")]
     public class ProductController: Controller
     {
         private ILogger<ProductController> _logger;
@@ -17,8 +18,8 @@ namespace Sigma.Core.Controllers
             _storageProvider = storageProvider;
         }
 
-        [HttpGet(Name = "GetProducts")]
-        public ProductsDicrionary? Get()
+        [HttpGet]
+        public ProductsDicrionary? Products()
         {
             var session = _storageProvider.Sessions.GetClentForConnectionID(HttpContext.Connection.Id);
 
@@ -33,6 +34,20 @@ namespace Sigma.Core.Controllers
             HttpContext.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
 
             return null;
+        }
+
+        [HttpPost]
+        public RequestResult BindCharacteristic(string productId, string characteristicId, string easyMSRoomId)
+        {
+            var session = _storageProvider.Sessions.GetClentForConnectionID(HttpContext.Connection.Id);
+
+            if (session != null)
+            {
+                _logger.LogInformation("BingCharacteristic for connection {ConnectionID}", HttpContext.Connection.Id);
+                return _storageProvider.Products.BingCharacteristic(session.Client, productId, characteristicId, easyMSRoomId);
+            }
+
+            return new RequestResult(ErrorCode.NotAuthorizied, "BingCharacteristic: user not authorized");
         }
     }
 }

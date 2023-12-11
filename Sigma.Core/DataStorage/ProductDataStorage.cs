@@ -87,6 +87,29 @@ namespace Sigma.Core.DataStorage
             return _products;
         }
 
+        public RequestResult BingCharacteristic(HotelManagerPortTypeClient session, String productId, String characteristicId, String easyMSRoomId)
+        {
+            ProductEntity? product = GetProduct(session, productId);
+            if (product == null)
+            { 
+                return new RequestResult(new Error(ErrorCode.UnableToFindObjectWithId, "Unable to find product with Id:" + productId), null);
+            }
+
+            CharacteristicEntity? characteristicEntity = null;
+            if (!product.Characteristics.TryGetValue(characteristicId, out characteristicEntity))
+            {
+                return new RequestResult(new Error(ErrorCode.UnableToFindObjectWithId, "Unable to find characteristic with Id:" + characteristicId), null);
+            }
+
+            RequestResult result = new RequestResult(session.setCharacteristicEasyMSRoomId(characteristicId, easyMSRoomId));
+
+            if (!result.HasError)
+            {
+                characteristicEntity.easyMSRoomID = easyMSRoomId;
+            }
+
+            return result;
+        }
         public ProductEntity? GetProduct(HotelManagerPortTypeClient session, string? productID)
         {
             ProductEntity? result = null;
