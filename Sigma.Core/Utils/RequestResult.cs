@@ -1,9 +1,18 @@
 ﻿namespace Sigma.Core.Utils
 {
     public enum ErrorCode
-    { 
+    {
+        // Ошибки 1C
+        // 1 - объект не найден по идентификатору
+        // 2 - ошибка формата
+        // 3 - не найден объект заданного типа
+        // 4 - несоответствие типа
         UnableToFindObjectWithId = 1,
-        NotAuthorizied,
+        FormatError = 2,
+        ObjectTypeError = 3,
+        TypeIncompatibility = 4,
+
+        NotAuthorizied = 5,
         Unknown
     }
 
@@ -17,23 +26,34 @@
             this.errorCode = errorCode;
             this.description = description;
         }
+
+        public Error(HotelManager.Error error) 
+        {
+            errorCode = (ErrorCode)error.errorCode;
+            description = error.errorDescription;
+        }
     }
     public class RequestResult
     {
-        public Error? error;
+        public List<Error>? errors;
         public dynamic? data;
 
         public bool HasError
         {
             get
             {
-                return error != null;
+                return errors != null && errors.Count > 0;
             }
         }
 
         public RequestResult(Error? error, dynamic? data)
         {
-            this.error = error;
+            if (error != null)
+            {
+                errors = new List<Error>();
+                errors.Add(error);
+            }
+            
             this.data = data;
         }
 
@@ -42,25 +62,17 @@
 
         }
 
-        public RequestResult(HotelManager.Result requestResult)
-        {
-            if (requestResult.errorCode.HasValue && requestResult.errorCode != 0)
-            {
-                ErrorCode errorCode = ErrorCode.Unknown;
-                switch (requestResult.errorCode.Value)
-                {
-                    case 1:
-                        {
-                            errorCode = ErrorCode.UnableToFindObjectWithId;
-                            break;
-                        }
-                }
 
-                error = new Error(errorCode, requestResult.errorDescription);
-            }
-            else
+        public RequestResult(HotelManager.Error[] resultErrors)
+        {
+            if (resultErrors.Length > 0)
             {
-                data = "OK";
+                errors = new List<Error>();
+
+                foreach (HotelManager.Error resultError in resultErrors)
+                {
+                    errors.Add(new Error(resultError));
+                }
             }
         }
         

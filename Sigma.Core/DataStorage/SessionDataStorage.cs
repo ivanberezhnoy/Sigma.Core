@@ -173,6 +173,7 @@ namespace Sigma.Core.DataStorage
                 OrganizationDataStorage OrganizationDataStorage = _storageProvider.Organizations;
                 MoneyStoreDataStorage moneyStoreDataStorage = _storageProvider.MoneyStores;
                 StoreDataStorage StoreDataStorage = _storageProvider.Stores;
+                ClientDataStorage ClientDataStorage = _storageProvider.Clients;
 
                 if (connectedUserInfo == null)
                 {
@@ -188,6 +189,7 @@ namespace Sigma.Core.DataStorage
                 user.DefaultOrganization = OrganizationDataStorage.GetOrganization(client, userSettings.DefaultOrganizationId);
                 user.DefaultMoneyStore = moneyStoreDataStorage.GetMoneyStore(client, userSettings.DefaultMoneyStoreId);
                 user.DefaultStore = StoreDataStorage.GetStore(client, userSettings.DefaultStoreId);
+                user.DefaultClient = ClientDataStorage.GetClient(client, userSettings.DefaultClientId);
 
                 if (connectedUserInfo != null && connectedUserInfo.Client != null)
                 {

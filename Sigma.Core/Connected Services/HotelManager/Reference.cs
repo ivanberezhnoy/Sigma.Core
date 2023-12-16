@@ -106,7 +106,7 @@ namespace HotelManager
         [System.ServiceModel.OperationContractAttribute(Action="HotelManager#HotelManager:getAgrementsList", ReplyAction="*")]
         System.Threading.Tasks.Task<HotelManager.getAgrementsListResponse> getAgrementsListAsync(HotelManager.getAgrementsListRequest request);
         
-        // CODEGEN: Параметр "return" требует дополнительной информации о схеме, которую невозможно получить в режиме параметров. Указан атрибут "Microsoft.Xml.Serialization.XmlElementAttribute".
+        // CODEGEN: Параметр "return" требует дополнительной информации о схеме, которую невозможно получить в режиме параметров. Указан атрибут "Microsoft.Xml.Serialization.XmlArrayAttribute".
         [System.ServiceModel.OperationContractAttribute(Action="HotelManager#HotelManager:setCharacteristicEasyMSRoomId", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
         [return: System.ServiceModel.MessageParameterAttribute(Name="return")]
@@ -114,6 +114,15 @@ namespace HotelManager
         
         [System.ServiceModel.OperationContractAttribute(Action="HotelManager#HotelManager:setCharacteristicEasyMSRoomId", ReplyAction="*")]
         System.Threading.Tasks.Task<HotelManager.setCharacteristicEasyMSRoomIdResponse> setCharacteristicEasyMSRoomIdAsync(HotelManager.setCharacteristicEasyMSRoomIdRequest request);
+        
+        // CODEGEN: Параметр "return" требует дополнительной информации о схеме, которую невозможно получить в режиме параметров. Указан атрибут "Microsoft.Xml.Serialization.XmlArrayItemAttribute".
+        [System.ServiceModel.OperationContractAttribute(Action="HotelManager#HotelManager:setDocuments", ReplyAction="*")]
+        [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
+        [return: System.ServiceModel.MessageParameterAttribute(Name="return")]
+        HotelManager.setDocumentsResponse setDocuments(HotelManager.setDocumentsRequest request);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="HotelManager#HotelManager:setDocuments", ReplyAction="*")]
+        System.Threading.Tasks.Task<HotelManager.setDocumentsResponse> setDocumentsAsync(HotelManager.setDocumentsRequest request);
     }
     
     /// <remarks/>
@@ -336,16 +345,16 @@ namespace HotelManager
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.hotel-manager.org")]
-    public partial class Result
+    public partial class Error
     {
         
-        private System.Nullable<int> errorCodeField;
+        private int errorCodeField;
         
         private string errorDescriptionField;
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=0)]
-        public System.Nullable<int> errorCode
+        [System.Xml.Serialization.XmlElementAttribute(Order=0)]
+        public int errorCode
         {
             get
             {
@@ -358,7 +367,7 @@ namespace HotelManager
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=1)]
+        [System.Xml.Serialization.XmlElementAttribute(Order=1)]
         public string errorDescription
         {
             get
@@ -788,9 +797,9 @@ namespace HotelManager
         
         private float priceField;
         
-        private string unitIDField;
+        private string unitIdField;
         
-        private string characteristicIDField;
+        private string characteristicIdField;
         
         /// <remarks/>
         [System.Xml.Serialization.XmlElementAttribute(Order=0)]
@@ -836,29 +845,29 @@ namespace HotelManager
         
         /// <remarks/>
         [System.Xml.Serialization.XmlElementAttribute(Order=3)]
-        public string UnitID
+        public string UnitId
         {
             get
             {
-                return this.unitIDField;
+                return this.unitIdField;
             }
             set
             {
-                this.unitIDField = value;
+                this.unitIdField = value;
             }
         }
         
         /// <remarks/>
         [System.Xml.Serialization.XmlElementAttribute(Order=4)]
-        public string CharacteristicID
+        public string CharacteristicId
         {
             get
             {
-                return this.characteristicIDField;
+                return this.characteristicIdField;
             }
             set
             {
-                this.characteristicIDField = value;
+                this.characteristicIdField = value;
             }
         }
     }
@@ -901,6 +910,8 @@ namespace HotelManager
         private string moneyStoreToIdField;
         
         private float sumField;
+        
+        private string easyMSBookingIdField;
         
         /// <remarks/>
         [System.Xml.Serialization.XmlElementAttribute(Order=0)]
@@ -1126,6 +1137,20 @@ namespace HotelManager
                 this.sumField = value;
             }
         }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=16)]
+        public string easyMSBookingId
+        {
+            get
+            {
+                return this.easyMSBookingIdField;
+            }
+            set
+            {
+                this.easyMSBookingIdField = value;
+            }
+        }
     }
     
     /// <remarks/>
@@ -1265,6 +1290,8 @@ namespace HotelManager
         
         private string errorField;
         
+        private string defaultClientIdField;
+        
         /// <remarks/>
         [System.Xml.Serialization.XmlElementAttribute(Order=0)]
         public string UserID
@@ -1332,6 +1359,20 @@ namespace HotelManager
             set
             {
                 this.errorField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=5)]
+        public string DefaultClientId
+        {
+            get
+            {
+                return this.defaultClientIdField;
+            }
+            set
+            {
+                this.defaultClientIdField = value;
             }
         }
     }
@@ -1922,14 +1963,56 @@ namespace HotelManager
     {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="HotelManager", Order=0)]
-        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true)]
-        public HotelManager.Result @return;
+        [System.Xml.Serialization.XmlArrayAttribute(IsNullable=true)]
+        [System.Xml.Serialization.XmlArrayItemAttribute("errors", Namespace="http://www.hotel-manager.org", IsNullable=false)]
+        public HotelManager.Error[] @return;
         
         public setCharacteristicEasyMSRoomIdResponse()
         {
         }
         
-        public setCharacteristicEasyMSRoomIdResponse(HotelManager.Result @return)
+        public setCharacteristicEasyMSRoomIdResponse(HotelManager.Error[] @return)
+        {
+            this.@return = @return;
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="setDocuments", WrapperNamespace="HotelManager", IsWrapped=true)]
+    public partial class setDocumentsRequest
+    {
+        
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="HotelManager", Order=0)]
+        public HotelManager.DocumentsList documents;
+        
+        public setDocumentsRequest()
+        {
+        }
+        
+        public setDocumentsRequest(HotelManager.DocumentsList documents)
+        {
+            this.documents = documents;
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+    [System.ServiceModel.MessageContractAttribute(WrapperName="setDocumentsResponse", WrapperNamespace="HotelManager", IsWrapped=true)]
+    public partial class setDocumentsResponse
+    {
+        
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="HotelManager", Order=0)]
+        [System.Xml.Serialization.XmlArrayItemAttribute("errors", Namespace="http://www.hotel-manager.org", IsNullable=false)]
+        public HotelManager.Error[] @return;
+        
+        public setDocumentsResponse()
+        {
+        }
+        
+        public setDocumentsResponse(HotelManager.Error[] @return)
         {
             this.@return = @return;
         }
@@ -2237,7 +2320,7 @@ namespace HotelManager
             return base.Channel.setCharacteristicEasyMSRoomId(request);
         }
         
-        public HotelManager.Result setCharacteristicEasyMSRoomId(string CharacteristicId, string EasyMSRoomId)
+        public HotelManager.Error[] setCharacteristicEasyMSRoomId(string CharacteristicId, string EasyMSRoomId)
         {
             HotelManager.setCharacteristicEasyMSRoomIdRequest inValue = new HotelManager.setCharacteristicEasyMSRoomIdRequest();
             inValue.CharacteristicId = CharacteristicId;
@@ -2258,6 +2341,33 @@ namespace HotelManager
             inValue.CharacteristicId = CharacteristicId;
             inValue.EasyMSRoomId = EasyMSRoomId;
             return ((HotelManager.HotelManagerPortType)(this)).setCharacteristicEasyMSRoomIdAsync(inValue);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        HotelManager.setDocumentsResponse HotelManager.HotelManagerPortType.setDocuments(HotelManager.setDocumentsRequest request)
+        {
+            return base.Channel.setDocuments(request);
+        }
+        
+        public HotelManager.Error[] setDocuments(HotelManager.DocumentsList documents)
+        {
+            HotelManager.setDocumentsRequest inValue = new HotelManager.setDocumentsRequest();
+            inValue.documents = documents;
+            HotelManager.setDocumentsResponse retVal = ((HotelManager.HotelManagerPortType)(this)).setDocuments(inValue);
+            return retVal.@return;
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        System.Threading.Tasks.Task<HotelManager.setDocumentsResponse> HotelManager.HotelManagerPortType.setDocumentsAsync(HotelManager.setDocumentsRequest request)
+        {
+            return base.Channel.setDocumentsAsync(request);
+        }
+        
+        public System.Threading.Tasks.Task<HotelManager.setDocumentsResponse> setDocumentsAsync(HotelManager.DocumentsList documents)
+        {
+            HotelManager.setDocumentsRequest inValue = new HotelManager.setDocumentsRequest();
+            inValue.documents = documents;
+            return ((HotelManager.HotelManagerPortType)(this)).setDocumentsAsync(inValue);
         }
         
         public virtual System.Threading.Tasks.Task OpenAsync()

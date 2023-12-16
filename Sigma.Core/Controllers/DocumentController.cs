@@ -1,13 +1,18 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using HotelManager;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Query.Internal;
 using Sigma.Core.Controllers.Query;
+using Sigma.Core.Controllers.TransfterObjects;
 using Sigma.Core.DataStorage;
 using Sigma.Core.RemoteHotelEntry;
+using Sigma.Core.Utils;
 using System.Net;
+using System.Reflection.PortableExecutable;
 
 namespace Sigma.Core.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]/[action]")]
     public class DocumentController : Controller
     {
         private ILogger<DocumentController> _logger;
@@ -19,8 +24,8 @@ namespace Sigma.Core.Controllers
             _storageProvider = storageProvider;
         }
 
-        [HttpPost(Name = "Documents")]
-        public List<DocumentEntity> Post(GetDocumentsQuery? query)
+        [HttpPost]
+        public List<DocumentEntity> documents(GetDocumentsQuery? query)
         {
             var session = _storageProvider.Sessions.GetClentForConnectionID(HttpContext.Connection.Id);
 
@@ -52,5 +57,21 @@ namespace Sigma.Core.Controllers
 
             return null;
         }
+
+        [HttpPost]
+        public RequestResult setDocuments(HotelManager.Document[] documents)
+        {
+            var session = _storageProvider.Sessions.GetClentForConnectionID(HttpContext.Connection.Id);
+
+            if (session != null)
+            {
+                _logger.LogInformation("BingCharacteristic for connection {ConnectionID}", HttpContext.Connection.Id);
+                return _storageProvider.Documents.setDocuments(session.Client, documents);
+            }
+
+
+            return new RequestResult(ErrorCode.NotAuthorizied, "setDocuments: user not authorized");
+        }
     }
+
 }

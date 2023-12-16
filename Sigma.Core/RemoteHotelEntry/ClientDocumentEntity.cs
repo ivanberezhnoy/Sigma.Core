@@ -8,30 +8,23 @@ namespace Sigma.Core.RemoteHotelEntry
         public AgreementEntity Agreement { get; set; }
 
         public ClientEntity Client { get; set; }
+        public string? EasyMSBookingId { get; set; }
 
-        public void Fill(OrganizationEntity organization, DateTime? date, float money, string? comment, UserEntity? user, bool isActive, ClientEntity client, AgreementEntity agreement)
+        public void Fill(OrganizationEntity organization, DateTime? date, float money, string? comment, UserEntity? user, 
+            bool isActive, ClientEntity client, AgreementEntity agreement, string easyMSBookingId)
         {
-            base.Fill(organization, date, money, comment, user, isActive);
+            Fill(organization, date, money, comment, user, isActive);
 
-            Client = Client;
+            Client = client;
             Agreement = agreement;
+            EasyMSBookingId = easyMSBookingId;
         }
 
-        public ClientDocumentEntity(string id, OrganizationEntity organization, DateTime? date, float money, string? comment, UserEntity? user, DocumentType documentType, bool isActive, ClientEntity client, AgreementEntity agreement)
+        public ClientDocumentEntity(string id, OrganizationEntity organization, DateTime? date, float money, string? comment, 
+            UserEntity? user, DocumentType documentType, bool isActive, ClientEntity client, AgreementEntity agreement, string easyMSBookingId)
             : base(id, organization, date, money, comment, user, documentType, isActive)
         {
-            Children = new DocumentsDictionary();
-            Type = documentType;
-
-            Organization = organization;
-            Client = client;
-            Date = date;
-            Comment = comment;
-            User = user;
-            IsActive = isActive;
-            Agreement = agreement;
-
-            //Fill(organization, client, date, comment, user, isActive);
+            Fill(organization, date, money, comment, user, isActive, client, agreement, easyMSBookingId);
         }
     }
 }

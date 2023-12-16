@@ -18,6 +18,8 @@
 
         public MoneyStoreEntity? DefaultMoneyStore { get; set; } = null;
 
+        public ClientEntity? DefaultClient { get; set; } = null;
+
         public UserEntity MakeNakedCopy()
         {
             UserEntity copy = new UserEntity(Name, null, Id);
