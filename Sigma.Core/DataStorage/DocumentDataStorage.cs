@@ -15,16 +15,17 @@ namespace Sigma.Core.DataStorage
 {
 
     public class DocumentsDictionary : Dictionary<string, DocumentEntity> { }
+    public class FilteredDocuments : Dictionary<EntityFilterDocument, List<DocumentEntity>> { };
 
     public class DocumentDataStorage : BaseDataStorage
     {
         private DocumentsDictionary? _documents;
-        private Dictionary<EntityFilterDocument, List<DocumentEntity>> _cashedDocumentFilters;
+        private FilteredDocuments _cashedDocumentFilters;
 
         public DocumentDataStorage(ILogger<DocumentDataStorage> logger, StorageProvider storageProvider) : base(logger, storageProvider)
         {
             storageProvider.Documents = this;
-            _cashedDocumentFilters = new Dictionary<EntityFilterDocument, List<DocumentEntity>>();
+            _cashedDocumentFilters = new FilteredDocuments();
         }
 
         private DocumentEntity? fillDocuments(HotelManagerPortTypeClient session, HotelManager.Document[] documents, string? documentID = null, Dictionary<string, DocumentEntity>? newDocuments = null)
@@ -356,12 +357,39 @@ namespace Sigma.Core.DataStorage
             Dictionary<string, DocumentEntity> newDocuments = new Dictionary<string, DocumentEntity>();
             fillDocuments(session, documents, null, newDocuments);
 
-            foreach (DocumentEntity document in newDocuments.Values)
-            { 
+            foreach (KeyValuePair<EntityFilterDocument, List<DocumentEntity>> filter in _cashedDocumentFilters)
+            {
+                bool isFilterChanged = false;
+                foreach (DocumentEntity document in newDocuments.Values)
+                {
+                    bool completeMismatch = false;
+                    if (document.filterMatch(filter.Key, out completeMismatch))
+                    {
+                        filter.Value.Add(document);
+                        isFilterChanged = true;
+                    }
+                }
 
+                if (isFilterChanged)
+                {
+                    filter.Value.Sort((document1, document2) =>
+                    {
+                        if (document1.Date == null || document2.Date == null)
+                        {
+                            if (document1.Date == null && document2.Date == null)
+                            {
+                                return 0;
+                            }
+
+                            return document1.Date == null ? -1 : 1;
+                        }
+
+                        return DateTime.Compare((DateTime)document2.Date, (DateTime)document1.Date);
+                    });
+                }
             }
 
-            RequestResult result = new RequestResult(errors);
+            RequestResult result = new RequestResult(errors, newDocuments);
 
             return result;
         }

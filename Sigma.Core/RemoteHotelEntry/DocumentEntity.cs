@@ -102,6 +102,36 @@ namespace Sigma.Core.RemoteHotelEntry
                 }
             }
 
+            if (filter.BookingIDs.Count > 0)
+            {
+                if (!ProductDocumentEntity.IsClientDocument(Type))
+                {
+                    return false;
+                }
+
+                ClientDocumentEntity clientDocument = (ClientDocumentEntity)this;
+                if (clientDocument.EasyMSBookingId == null)
+                {
+                    return false;
+                }
+
+                bool accept = false;
+
+                foreach (string bookingId in filter.BookingIDs)
+                {
+                    if (!clientDocument.EasyMSBookingId.Contains(bookingId))
+                    {
+                        accept = true;
+                        break;
+                    }
+                }
+
+                if (!accept)
+                {
+                    return false;
+                }
+            }
+
             if (filter.CreatorID != null)
             {
                 if (this.User?.Id != filter.CreatorID)

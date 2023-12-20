@@ -12,6 +12,8 @@ namespace Sigma.Core.DataStorage
 
         public string? CreatorID { get; set; }
 
+        public List<string> BookingIDs { get; set; }
+
         public EntityFilterDocument() : base()
         { 
 
@@ -22,12 +24,13 @@ namespace Sigma.Core.DataStorage
             return StartDate == null && EndDate == null && DocumentType == null && CreatorID == null && base.IsEmpty();
         }
 
-        public EntityFilterDocument(DateTime? startDate, DateTime? endDate, DocumentType? documentType, string? stringFilter, string? creatorID): base(stringFilter)
+        public EntityFilterDocument(DateTime? startDate, DateTime? endDate, DocumentType? documentType, string? stringFilter, string? creatorID, List<string> bookingIDs) : base(stringFilter)
         {
             this.StartDate = startDate;
             this.EndDate = endDate;
             this.DocumentType = documentType;
             this.CreatorID = creatorID;
+            this.BookingIDs = bookingIDs;
         }
     }
 
@@ -44,12 +47,13 @@ namespace Sigma.Core.DataStorage
                 Equals(documentFilter1.EndDate, documentFilter2.EndDate) &&
                 documentFilter1.DocumentType == documentFilter2.DocumentType &&
                 Equals(documentFilter1.StringFilter, documentFilter2.StringFilter) &&
-                Equals(documentFilter1.CreatorID, documentFilter2.CreatorID);
+                Equals(documentFilter1.CreatorID, documentFilter2.CreatorID) &&
+                Equals(documentFilter1.BookingIDs, documentFilter2.BookingIDs);
         }
 
         public int GetHashCode(EntityFilterDocument documentFilter)
         {
-            return HashCode.Combine(documentFilter.StartDate, documentFilter.EndDate, documentFilter.DocumentType, documentFilter.StringFilter, documentFilter.CreatorID);
+            return HashCode.Combine(documentFilter.StartDate, documentFilter.EndDate, documentFilter.DocumentType, documentFilter.StringFilter, documentFilter.CreatorID, documentFilter.BookingIDs);
         }
     }
 }

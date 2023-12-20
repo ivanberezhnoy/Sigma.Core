@@ -63,7 +63,7 @@
         }
 
 
-        public RequestResult(HotelManager.Error[] resultErrors)
+        public RequestResult(HotelManager.Error[] resultErrors, dynamic? data = null)
         {
             if (resultErrors.Length > 0)
             {
@@ -74,6 +74,8 @@
                     errors.Add(new Error(resultError));
                 }
             }
+
+            this.data = data;
         }
         
     }
