@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Query.Internal;
 using Sigma.Core.Controllers.Query;
-using Sigma.Core.Controllers.TransfterObjects;
 using Sigma.Core.DataStorage;
 using Sigma.Core.RemoteHotelEntry;
 using Sigma.Core.Utils;

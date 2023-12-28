@@ -10,8 +10,9 @@ namespace Sigma.Core.RemoteHotelEntry
 
             Agreements = agreements;
             MainAgreement = mainAgreement;
+            IsDeleted = client.IsDeleted;
         }
-        public ClientEntity(Client client, Agreements agreements, AgreementEntity? mainAgreement): base(client.Id, client.Name)
+        public ClientEntity(Client client, Agreements agreements, AgreementEntity? mainAgreement): base(client.Id, client.Name, client.IsDeleted)
         {
             Agreements = agreements;
             MainAgreement = mainAgreement;

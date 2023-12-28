@@ -70,15 +70,6 @@ namespace HotelManager
         [System.ServiceModel.OperationContractAttribute(Action="HotelManager#HotelManager:getStoresList", ReplyAction="*")]
         System.Threading.Tasks.Task<HotelManager.getStoresListResponse> getStoresListAsync(HotelManager.getStoresListRequest request);
         
-        // CODEGEN: Параметр "return" требует дополнительной информации о схеме, которую невозможно получить в режиме параметров. Указан атрибут "Microsoft.Xml.Serialization.XmlElementAttribute".
-        [System.ServiceModel.OperationContractAttribute(Action="HotelManager#HotelManager:getMoneyValue", ReplyAction="*")]
-        [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
-        [return: System.ServiceModel.MessageParameterAttribute(Name="return")]
-        HotelManager.getMoneyValueResponse getMoneyValue(HotelManager.getMoneyValueRequest request);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="HotelManager#HotelManager:getMoneyValue", ReplyAction="*")]
-        System.Threading.Tasks.Task<HotelManager.getMoneyValueResponse> getMoneyValueAsync(HotelManager.getMoneyValueRequest request);
-        
         // CODEGEN: Параметр "clientID" требует дополнительной информации о схеме, которую невозможно получить в режиме параметров. Указан атрибут "Microsoft.Xml.Serialization.XmlElementAttribute".
         [System.ServiceModel.OperationContractAttribute(Action="HotelManager#HotelManager:getClients", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -123,6 +114,15 @@ namespace HotelManager
         
         [System.ServiceModel.OperationContractAttribute(Action="HotelManager#HotelManager:setDocuments", ReplyAction="*")]
         System.Threading.Tasks.Task<HotelManager.setDocumentsResponse> setDocumentsAsync(HotelManager.setDocumentsRequest request);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="HotelManager#HotelManager:getMoneyStoreBalance", ReplyAction="*")]
+        [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
+        [return: System.ServiceModel.MessageParameterAttribute(Name="return")]
+        HotelManager.MoneyStoreBalance getMoneyStoreBalance(string moenyStoreId);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="HotelManager#HotelManager:getMoneyStoreBalance", ReplyAction="*")]
+        [return: System.ServiceModel.MessageParameterAttribute(Name="return")]
+        System.Threading.Tasks.Task<HotelManager.MoneyStoreBalance> getMoneyStoreBalanceAsync(string moenyStoreId);
     }
     
     /// <remarks/>
@@ -345,6 +345,78 @@ namespace HotelManager
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.hotel-manager.org")]
+    public partial class MoneyStoreBalance
+    {
+        
+        private double currentBalanceField;
+        
+        private double dayBalancePositiveField;
+        
+        private double dayBalanceNegativeField;
+        
+        private Error[] errorsField;
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=0)]
+        public double currentBalance
+        {
+            get
+            {
+                return this.currentBalanceField;
+            }
+            set
+            {
+                this.currentBalanceField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=1)]
+        public double dayBalancePositive
+        {
+            get
+            {
+                return this.dayBalancePositiveField;
+            }
+            set
+            {
+                this.dayBalancePositiveField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=2)]
+        public double dayBalanceNegative
+        {
+            get
+            {
+                return this.dayBalanceNegativeField;
+            }
+            set
+            {
+                this.dayBalanceNegativeField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute("errors", Order=3)]
+        public Error[] errors
+        {
+            get
+            {
+                return this.errorsField;
+            }
+            set
+            {
+                this.errorsField = value;
+            }
+        }
+    }
+    
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.hotel-manager.org")]
     public partial class Error
     {
         
@@ -395,6 +467,8 @@ namespace HotelManager
         private DocumentType typeField;
         
         private string clientIdField;
+        
+        private bool isDeletedField;
         
         /// <remarks/>
         [System.Xml.Serialization.XmlElementAttribute(Order=0)]
@@ -449,6 +523,20 @@ namespace HotelManager
             set
             {
                 this.clientIdField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=4)]
+        public bool IsDeleted
+        {
+            get
+            {
+                return this.isDeletedField;
+            }
+            set
+            {
+                this.isDeletedField = value;
             }
         }
     }
@@ -620,6 +708,8 @@ namespace HotelManager
         
         private string[] agreementsIdField;
         
+        private bool isDeletedField;
+        
         /// <remarks/>
         [System.Xml.Serialization.XmlElementAttribute(Order=0)]
         public string Id
@@ -660,6 +750,20 @@ namespace HotelManager
             set
             {
                 this.agreementsIdField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=3)]
+        public bool IsDeleted
+        {
+            get
+            {
+                return this.isDeletedField;
+            }
+            set
+            {
+                this.isDeletedField = value;
             }
         }
     }
@@ -715,6 +819,8 @@ namespace HotelManager
         
         private string nameField;
         
+        private bool isDeletedField;
+        
         /// <remarks/>
         [System.Xml.Serialization.XmlElementAttribute(Order=0)]
         public string Id
@@ -740,6 +846,20 @@ namespace HotelManager
             set
             {
                 this.nameField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=2)]
+        public bool IsDeleted
+        {
+            get
+            {
+                return this.isDeletedField;
+            }
+            set
+            {
+                this.isDeletedField = value;
             }
         }
     }
@@ -895,6 +1015,8 @@ namespace HotelManager
         
         private bool isActiveField;
         
+        private bool isDeletedField;
+        
         private string parentDocumentIdField;
         
         private string[] childDocumentsIdField;
@@ -1026,7 +1148,21 @@ namespace HotelManager
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=8)]
+        [System.Xml.Serialization.XmlElementAttribute(Order=8)]
+        public bool IsDeleted
+        {
+            get
+            {
+                return this.isDeletedField;
+            }
+            set
+            {
+                this.isDeletedField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=9)]
         public string ParentDocumentId
         {
             get
@@ -1040,7 +1176,7 @@ namespace HotelManager
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlArrayAttribute(Order=9)]
+        [System.Xml.Serialization.XmlArrayAttribute(Order=10)]
         [System.Xml.Serialization.XmlArrayItemAttribute("data", IsNullable=false)]
         public string[] ChildDocumentsId
         {
@@ -1055,7 +1191,7 @@ namespace HotelManager
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute(Order=10)]
+        [System.Xml.Serialization.XmlElementAttribute(Order=11)]
         public DocumentType DocumentType
         {
             get
@@ -1069,7 +1205,7 @@ namespace HotelManager
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute(Order=11)]
+        [System.Xml.Serialization.XmlElementAttribute(Order=12)]
         public string AgreementId
         {
             get
@@ -1083,7 +1219,7 @@ namespace HotelManager
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute("ProductItems", Order=12)]
+        [System.Xml.Serialization.XmlElementAttribute("ProductItems", Order=13)]
         public ProductItem[] ProductItems
         {
             get
@@ -1097,7 +1233,7 @@ namespace HotelManager
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=13)]
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=14)]
         public string MoneyStoreId
         {
             get
@@ -1111,7 +1247,7 @@ namespace HotelManager
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=14)]
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=15)]
         public string MoneyStoreToId
         {
             get
@@ -1125,7 +1261,7 @@ namespace HotelManager
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute(Order=15)]
+        [System.Xml.Serialization.XmlElementAttribute(Order=16)]
         public float Sum
         {
             get
@@ -1139,7 +1275,7 @@ namespace HotelManager
         }
         
         /// <remarks/>
-        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=16)]
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=17)]
         public string easyMSBookingId
         {
             get
@@ -1204,6 +1340,8 @@ namespace HotelManager
         
         private string nameField;
         
+        private bool isDeletedField;
+        
         /// <remarks/>
         [System.Xml.Serialization.XmlElementAttribute(Order=0)]
         public string Id
@@ -1229,6 +1367,20 @@ namespace HotelManager
             set
             {
                 this.nameField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=2)]
+        public bool IsDeleted
+        {
+            get
+            {
+                return this.isDeletedField;
+            }
+            set
+            {
+                this.isDeletedField = value;
             }
         }
     }
@@ -1291,6 +1443,12 @@ namespace HotelManager
         private string errorField;
         
         private string defaultClientIdField;
+        
+        private string defaultMoneyStoreCashIdField;
+        
+        private string defaultMoneyStoreTerminalIdField;
+        
+        private string defaultMoneyStoreTransferIdField;
         
         /// <remarks/>
         [System.Xml.Serialization.XmlElementAttribute(Order=0)]
@@ -1375,6 +1533,48 @@ namespace HotelManager
                 this.defaultClientIdField = value;
             }
         }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=6)]
+        public string DefaultMoneyStoreCashId
+        {
+            get
+            {
+                return this.defaultMoneyStoreCashIdField;
+            }
+            set
+            {
+                this.defaultMoneyStoreCashIdField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=7)]
+        public string DefaultMoneyStoreTerminalId
+        {
+            get
+            {
+                return this.defaultMoneyStoreTerminalIdField;
+            }
+            set
+            {
+                this.defaultMoneyStoreTerminalIdField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=8)]
+        public string DefaultMoneyStoreTransferId
+        {
+            get
+            {
+                return this.defaultMoneyStoreTransferIdField;
+            }
+            set
+            {
+                this.defaultMoneyStoreTransferIdField = value;
+            }
+        }
     }
     
     /// <remarks/>
@@ -1389,6 +1589,8 @@ namespace HotelManager
         private string nameField;
         
         private string organizationIdField;
+        
+        private bool isDeletedField;
         
         /// <remarks/>
         [System.Xml.Serialization.XmlElementAttribute(Order=0)]
@@ -1429,6 +1631,20 @@ namespace HotelManager
             set
             {
                 this.organizationIdField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=3)]
+        public bool IsDeleted
+        {
+            get
+            {
+                return this.isDeletedField;
+            }
+            set
+            {
+                this.isDeletedField = value;
             }
         }
     }
@@ -1489,6 +1705,8 @@ namespace HotelManager
         private string eANField;
         
         private string easyMSRoomIdField;
+        
+        private bool isDeletedField;
         
         /// <remarks/>
         [System.Xml.Serialization.XmlElementAttribute(Order=0)]
@@ -1557,6 +1775,20 @@ namespace HotelManager
             set
             {
                 this.easyMSRoomIdField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=5)]
+        public bool IsDeleted
+        {
+            get
+            {
+                return this.isDeletedField;
+            }
+            set
+            {
+                this.isDeletedField = value;
             }
         }
     }
@@ -1802,48 +2034,6 @@ namespace HotelManager
         }
         
         public getStoresListResponse(HotelManager.StoresList @return)
-        {
-            this.@return = @return;
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
-    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-    [System.ServiceModel.MessageContractAttribute(WrapperName="getMoneyValue", WrapperNamespace="HotelManager", IsWrapped=true)]
-    public partial class getMoneyValueRequest
-    {
-        
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="HotelManager", Order=0)]
-        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true)]
-        public string moneyStoreID;
-        
-        public getMoneyValueRequest()
-        {
-        }
-        
-        public getMoneyValueRequest(string moneyStoreID)
-        {
-            this.moneyStoreID = moneyStoreID;
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.3")]
-    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-    [System.ServiceModel.MessageContractAttribute(WrapperName="getMoneyValueResponse", WrapperNamespace="HotelManager", IsWrapped=true)]
-    public partial class getMoneyValueResponse
-    {
-        
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="HotelManager", Order=0)]
-        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true)]
-        public System.Nullable<float> @return;
-        
-        public getMoneyValueResponse()
-        {
-        }
-        
-        public getMoneyValueResponse(System.Nullable<float> @return)
         {
             this.@return = @return;
         }
@@ -2224,33 +2414,6 @@ namespace HotelManager
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        HotelManager.getMoneyValueResponse HotelManager.HotelManagerPortType.getMoneyValue(HotelManager.getMoneyValueRequest request)
-        {
-            return base.Channel.getMoneyValue(request);
-        }
-        
-        public System.Nullable<float> getMoneyValue(string moneyStoreID)
-        {
-            HotelManager.getMoneyValueRequest inValue = new HotelManager.getMoneyValueRequest();
-            inValue.moneyStoreID = moneyStoreID;
-            HotelManager.getMoneyValueResponse retVal = ((HotelManager.HotelManagerPortType)(this)).getMoneyValue(inValue);
-            return retVal.@return;
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        System.Threading.Tasks.Task<HotelManager.getMoneyValueResponse> HotelManager.HotelManagerPortType.getMoneyValueAsync(HotelManager.getMoneyValueRequest request)
-        {
-            return base.Channel.getMoneyValueAsync(request);
-        }
-        
-        public System.Threading.Tasks.Task<HotelManager.getMoneyValueResponse> getMoneyValueAsync(string moneyStoreID)
-        {
-            HotelManager.getMoneyValueRequest inValue = new HotelManager.getMoneyValueRequest();
-            inValue.moneyStoreID = moneyStoreID;
-            return ((HotelManager.HotelManagerPortType)(this)).getMoneyValueAsync(inValue);
-        }
-        
-        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
         HotelManager.getClientsResponse HotelManager.HotelManagerPortType.getClients(HotelManager.getClientsRequest request)
         {
             return base.Channel.getClients(request);
@@ -2368,6 +2531,16 @@ namespace HotelManager
             HotelManager.setDocumentsRequest inValue = new HotelManager.setDocumentsRequest();
             inValue.documents = documents;
             return ((HotelManager.HotelManagerPortType)(this)).setDocumentsAsync(inValue);
+        }
+        
+        public HotelManager.MoneyStoreBalance getMoneyStoreBalance(string moenyStoreId)
+        {
+            return base.Channel.getMoneyStoreBalance(moenyStoreId);
+        }
+        
+        public System.Threading.Tasks.Task<HotelManager.MoneyStoreBalance> getMoneyStoreBalanceAsync(string moenyStoreId)
+        {
+            return base.Channel.getMoneyStoreBalanceAsync(moenyStoreId);
         }
         
         public virtual System.Threading.Tasks.Task OpenAsync()

@@ -188,6 +188,9 @@ namespace Sigma.Core.DataStorage
 
                 user.DefaultOrganization = OrganizationDataStorage.GetOrganization(client, userSettings.DefaultOrganizationId);
                 user.DefaultMoneyStore = moneyStoreDataStorage.GetMoneyStore(client, userSettings.DefaultMoneyStoreId);
+                user.DefaultMoneyStoreCash = moneyStoreDataStorage.GetMoneyStore(client, userSettings.DefaultMoneyStoreCashId);
+                user.DefaultMoneyStoreTransfer = moneyStoreDataStorage.GetMoneyStore(client, userSettings.DefaultMoneyStoreTransferId);
+                user.DefaultMoneyStoreTerminal = moneyStoreDataStorage.GetMoneyStore(client, userSettings.DefaultMoneyStoreTerminalId);
                 user.DefaultStore = StoreDataStorage.GetStore(client, userSettings.DefaultStoreId);
                 user.DefaultClient = ClientDataStorage.GetClient(client, userSettings.DefaultClientId);
 

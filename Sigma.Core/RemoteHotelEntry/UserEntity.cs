@@ -6,7 +6,7 @@
     using System.ServiceModel.Security;
     public class UserEntity: Entity
     {
-        public UserEntity(string userName, string? userPassword, string userID): base(userID, userName)
+        public UserEntity(string userName, string? userPassword, string userID): base(userID, userName, false)
         {
             Password = userPassword;
         }
@@ -17,6 +17,9 @@
         public StoreEntity? DefaultStore { get; set; } = null;
 
         public MoneyStoreEntity? DefaultMoneyStore { get; set; } = null;
+        public MoneyStoreEntity? DefaultMoneyStoreCash { get; set; } = null;
+        public MoneyStoreEntity? DefaultMoneyStoreTerminal { get; set; } = null;
+        public MoneyStoreEntity? DefaultMoneyStoreTransfer { get; set; } = null;
 
         public ClientEntity? DefaultClient { get; set; } = null;
 

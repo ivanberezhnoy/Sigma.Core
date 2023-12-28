@@ -36,7 +36,7 @@ namespace Sigma.Core.DataStorage
 
                     if (organization != null)
                     {
-                        MoneyStoreEntity newMoneyStore = new MoneyStoreEntity(moneyStore.Id, moneyStore.Name, organization);
+                        MoneyStoreEntity newMoneyStore = new MoneyStoreEntity(moneyStore.Id, moneyStore.Name, organization, moneyStore.IsDeleted);
                         _moneyStores[newMoneyStore.Id] = newMoneyStore;
 
                         result = newMoneyStore;
@@ -72,15 +72,20 @@ namespace Sigma.Core.DataStorage
                 return result;
             }
 
-            MoneyStoresDicrionary monetStores = GetMoneyStores(session);
+            MoneyStoresDicrionary moneyStores = GetMoneyStores(session);
 
-            if (!monetStores.TryGetValue(moneyStoreID, out result))
+            if (!moneyStores.TryGetValue(moneyStoreID, out result))
             {
                 _logger.LogInformation("Loading money store with ID {MoenyStoreID}", moneyStoreID);
                 result = fillMoneyStores(session, moneyStoreID);
             }
 
             return result;
+        }
+
+        public MoneyStoreBalance GetBalance(HotelManagerPortTypeClient session, string moneyStoreID)
+        {
+            return session.getMoneyStoreBalance(moneyStoreID);
         }
     }
 }

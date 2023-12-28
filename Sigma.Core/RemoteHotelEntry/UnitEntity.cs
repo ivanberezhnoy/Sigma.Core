@@ -11,7 +11,7 @@ namespace Sigma.Core.RemoteHotelEntry
             Name = unit.Name;
         }
 
-        public UnitEntity(Unit unit): base(unit.Id, unit.Name)
+        public UnitEntity(Unit unit): base(unit.Id, unit.Name, false)
         {
         }
     }

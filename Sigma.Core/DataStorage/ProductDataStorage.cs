@@ -92,13 +92,13 @@ namespace Sigma.Core.DataStorage
             ProductEntity? product = GetProduct(session, productId);
             if (product == null)
             { 
-                return new RequestResult(new Sigma.Core.Utils.Error(ErrorCode.UnableToFindObjectWithId, "Unable to find product with Id:" + productId), null);
+                return new RequestResult(new Sigma.Core.Utils.Error(ErrorCode.UnableToFindObjectWithId, "Unable to find product with Id:" + productId), null, false);
             }
 
             CharacteristicEntity? characteristicEntity = null;
             if (!product.Characteristics.TryGetValue(characteristicId, out characteristicEntity))
             {
-                return new RequestResult(new Sigma.Core.Utils.Error(ErrorCode.UnableToFindObjectWithId, "Unable to find characteristic with Id:" + characteristicId), null);
+                return new RequestResult(new Sigma.Core.Utils.Error(ErrorCode.UnableToFindObjectWithId, "Unable to find characteristic with Id:" + characteristicId), null, false);
             }
 
             RequestResult result = new RequestResult(session.setCharacteristicEasyMSRoomId(characteristicId, easyMSRoomId));

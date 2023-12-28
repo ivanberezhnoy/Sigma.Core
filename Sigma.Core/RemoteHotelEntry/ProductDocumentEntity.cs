@@ -9,17 +9,17 @@ namespace Sigma.Core.RemoteHotelEntry
 
     public class ProductDocumentEntity : ClientDocumentEntity
     {
-        public void Fill(OrganizationEntity organization, DateTime? date, float money, string? comment, UserEntity? user, bool isActive, ClientEntity client, AgreementEntity agreement, StoreEntity store, ProductsSales sales, string easyMSBookingId) 
+        public void Fill(OrganizationEntity organization, DateTime? date, float money, string? comment, UserEntity? user, bool isActive, bool isDeleted, ClientEntity client, AgreementEntity agreement, StoreEntity store, ProductsSales sales, string easyMSBookingId) 
         {
-            base.Fill(organization, date, money, comment, user, isActive, client, agreement, easyMSBookingId);
+            base.Fill(organization, date, money, comment, user, isActive, isDeleted, client, agreement, easyMSBookingId);
 
             Sales = sales;
             Store = store;
         }
 
         public ProductDocumentEntity(string id, OrganizationEntity organization, DateTime? date, float money, string? comment, UserEntity? user,
-            DocumentType documentType, bool isActive, ClientEntity client, AgreementEntity agreement, StoreEntity store, ProductsSales sales, string easyMSBookingId) 
-            : base(id, organization, date, money, comment, user, documentType, isActive, client, agreement, easyMSBookingId)
+            DocumentType documentType, bool isActive, bool isDeleted, ClientEntity client, AgreementEntity agreement, StoreEntity store, ProductsSales sales, string easyMSBookingId) 
+            : base(id, organization, date, money, comment, user, documentType, isActive, isDeleted, client, agreement, easyMSBookingId)
         {
             Sales = sales;
             Store = store;

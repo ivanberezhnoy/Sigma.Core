@@ -5,7 +5,6 @@ using MySqlX.XDevAPI;
 using MySqlX.XDevAPI.Common;
 using Org.BouncyCastle.Crypto.Agreement;
 using Sigma.Core.Controllers;
-using Sigma.Core.Controllers.TransfterObjects;
 using Sigma.Core.RemoteHotelEntry;
 using Sigma.Core.Utils;
 using System.Linq;
@@ -15,20 +14,20 @@ namespace Sigma.Core.DataStorage
 {
 
     public class DocumentsDictionary : Dictionary<string, DocumentEntity> { }
-    public class FilteredDocuments : Dictionary<EntityFilterDocument, List<DocumentEntity>> { };
 
     public class DocumentDataStorage : BaseDataStorage
     {
         private DocumentsDictionary? _documents;
-        private FilteredDocuments _cashedDocumentFilters;
+        private Dictionary<EntityFilterDocument, List<DocumentEntity>> _cashedDocumentFilters;
 
         public DocumentDataStorage(ILogger<DocumentDataStorage> logger, StorageProvider storageProvider) : base(logger, storageProvider)
         {
             storageProvider.Documents = this;
-            _cashedDocumentFilters = new FilteredDocuments();
+            _cashedDocumentFilters = new Dictionary<EntityFilterDocument, List<DocumentEntity>>(new EntityFilterDocumentComparer());
         }
 
-        private DocumentEntity? fillDocuments(HotelManagerPortTypeClient session, HotelManager.Document[] documents, string? documentID = null, Dictionary<string, DocumentEntity>? newDocuments = null)
+        private DocumentEntity? fillDocuments(HotelManagerPortTypeClient session, HotelManager.Document[] documents, string? documentID = null, DocumentsDictionary? createdDocuments = null, 
+            bool foolReload = true)
         {
             OrganizationDataStorage organizationDataStorage = _storageProvider.Organizations;
             MoneyStoreDataStorage moneyStoreDataStorage = _storageProvider.MoneyStores;
@@ -37,7 +36,8 @@ namespace Sigma.Core.DataStorage
             ProductDataStorage productDataStorage = _storageProvider.Products;
             SessionDataStorage sessionDataStorage = _storageProvider.Sessions;
 
-            DocumentsDictionary newDocumentsList = new DocumentsDictionary();
+            DocumentsDictionary newDocuments = createdDocuments ?? new DocumentsDictionary();
+            DocumentsDictionary documentsList = new DocumentsDictionary();
 
             DocumentEntity? result = null;
 
@@ -149,12 +149,12 @@ namespace Sigma.Core.DataStorage
 
                         if (existingDocument == null)
                         {
-                            existingDocument = new ProductDocumentEntity(document.Id, organization, document.Date, document.Sum, document.Comment, user, documentType, document.IsActive, client, agreement, store, sales, document.easyMSBookingId);
+                            existingDocument = new ProductDocumentEntity(document.Id, organization, document.Date, document.Sum, document.Comment, user, documentType, document.IsActive, document.IsDeleted, client, agreement, store, sales, document.easyMSBookingId);
                             _documents[document.Id] = existingDocument;
                         }
                         else
                         {
-                            ((ProductDocumentEntity)existingDocument).Fill(organization, document.Date, document.Sum, document.Comment, user, document.IsActive, client, agreement, store, sales, document.easyMSBookingId);
+                            ((ProductDocumentEntity)existingDocument).Fill(organization, document.Date, document.Sum, document.Comment, user, document.IsActive, document.IsDeleted, client, agreement, store, sales, document.easyMSBookingId);
                         }
                     }
                     else if (ProductDocumentEntity.IsMoneyStoreDocument(documentType))
@@ -170,11 +170,11 @@ namespace Sigma.Core.DataStorage
                         if (existingDocument == null)
                         {
                             existingDocument = new MoneyStoreDocumentEntity(document.Id, organization, document.Date, document.Sum, document.Comment, user, documentType,
-                                document.IsActive, client, agreement, moneyStore, document.easyMSBookingId);
+                                document.IsActive, document.IsDeleted, client, agreement, moneyStore, document.easyMSBookingId);
                         }
                         else
                         {
-                            ((MoneyStoreDocumentEntity)existingDocument).Fill(organization, document.Date, document.Sum, document.Comment, user, document.IsActive, client, agreement, moneyStore, document.easyMSBookingId);
+                            ((MoneyStoreDocumentEntity)existingDocument).Fill(organization, document.Date, document.Sum, document.Comment, user, document.IsActive, document.IsDeleted, client, agreement, moneyStore, document.easyMSBookingId);
                         }
                     }
                 }
@@ -199,17 +199,17 @@ namespace Sigma.Core.DataStorage
                     if (existingDocument == null)
                     {
                         existingDocument = new MoneyTransferDocumentEntity(document.Id, organization, document.Date, document.Sum, document.Comment, user,
-                            document.IsActive, moneyStoreFrom, moneyStoreTo);
+                            document.IsActive, document.IsDeleted, moneyStoreFrom, moneyStoreTo);
                     }
                     else
                     {
-                        ((MoneyTransferDocumentEntity)existingDocument).Fill(organization, document.Date, document.Sum, document.Comment, user, document.IsActive, moneyStoreFrom, moneyStoreTo);
+                        ((MoneyTransferDocumentEntity)existingDocument).Fill(organization, document.Date, document.Sum, document.Comment, user, document.IsActive, document.IsDeleted, moneyStoreFrom, moneyStoreTo);
                     }
                 }
 
                 if (existingDocument != null)
                 {
-                    newDocumentsList[existingDocument.Id] = existingDocument;
+                    documentsList[existingDocument.Id] = existingDocument;
 
                     if (documentID != null && documentID == existingDocument.Id)
                     {
@@ -230,13 +230,13 @@ namespace Sigma.Core.DataStorage
             foreach (var document in documents)
             {
                 DocumentEntity? existingDocument = null;
-                if (newDocumentsList.TryGetValue(document.Id, out existingDocument))
+                if (documentsList.TryGetValue(document.Id, out existingDocument))
                 {
                     DocumentsDictionary newChildDocuments = new DocumentsDictionary();
                     foreach (string childDocumentID in document.ChildDocumentsId)
                     {
                         DocumentEntity? existingChildDocument;
-                        if (newDocumentsList.TryGetValue(childDocumentID, out existingChildDocument))
+                        if (documentsList.TryGetValue(childDocumentID, out existingChildDocument))
                         {
                             newChildDocuments[childDocumentID] = existingChildDocument;
                         }
@@ -250,7 +250,17 @@ namespace Sigma.Core.DataStorage
                 }
             }
 
-            _documents = newDocumentsList;
+            if (foolReload)
+            {
+                _documents = documentsList;
+            }
+            else 
+            {
+                foreach (var documentInfo in newDocuments)
+                {
+                    _documents[documentInfo.Key] = documentInfo.Value;
+                }
+            }
 
             return result;
         }
@@ -270,7 +280,7 @@ namespace Sigma.Core.DataStorage
                     _logger.LogError("Failed to load documents list. Error : {Error}, organizations: {Organizations} documentID: {DocumentID}", documentsList.error, documentsList, documentID != null ? documentID : "null");
                 }
 
-                result = fillDocuments(session, documentsList.data, documentID);
+                result = fillDocuments(session, documentsList.data, documentID, null, documentID == null);
             }
 
             return result;
@@ -354,8 +364,8 @@ namespace Sigma.Core.DataStorage
                 _logger.LogError("setDocuments errorCode: {ErrorCode}, desciption: {ErrorDescription}", error.errorCode, error.errorDescription);
             }
 
-            Dictionary<string, DocumentEntity> newDocuments = new Dictionary<string, DocumentEntity>();
-            fillDocuments(session, documents, null, newDocuments);
+            DocumentsDictionary newDocuments = new DocumentsDictionary();
+            fillDocuments(session, documents, null, newDocuments, false);
 
             foreach (KeyValuePair<EntityFilterDocument, List<DocumentEntity>> filter in _cashedDocumentFilters)
             {

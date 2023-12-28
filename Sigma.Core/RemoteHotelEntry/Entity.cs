@@ -5,11 +5,14 @@ namespace Sigma.Core.RemoteHotelEntry
 {
     public class Entity
     {
-        public Entity(string ID, string name)
+        public Entity(string ID, string name, bool isDeleted)
         {
             Id = ID;
             Name = name;
+            IsDeleted = isDeleted;
         }
+
+        public bool IsDeleted { get; set; }
 
         public string Id { get; set; }
 

@@ -2,9 +2,9 @@
 
 namespace Sigma.Core.RemoteHotelEntry
 {
-    public class AgreementEntity
+    public class AgreementEntity: Entity
     {
-        public AgreementEntity(Agreement agreement)
+        public AgreementEntity(Agreement agreement): base(agreement.Id, agreement.Name, agreement.IsDeleted)
         {
             Id = agreement.Id;
             Name = agreement.Name;
@@ -18,8 +18,6 @@ namespace Sigma.Core.RemoteHotelEntry
             Type = type;
         }
 
-        public string Id { get; set; }
-        public string Name { get; set; }
         public DocumentType Type { get; set; }
 
         public string ClientID { get; set; }

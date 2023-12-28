@@ -22,17 +22,17 @@ namespace Sigma.Core.RemoteHotelEntry
                 case DocumentType.Buy:
                     return "Покупка";
                 case DocumentType.ReturnFromClient:
-                    return "Возврат от покупателя";
+                    return "Возврат";
                 case DocumentType.ReturnToClient:
-                    return "Поступление товаров и услуг";
+                    return "Покупка товаров и услуг";
                 case DocumentType.MoneyGet:
-                    return "Приходный кассовый ордер";
+                    return "Прих. ордер";
                 case DocumentType.MoneyPut:
-                    return "Расходный кассовый ордер";
+                    return "Расх. ордер";
                 case DocumentType.MoneyReturnToClient:
-                    return "Возврат денег покупателю";
+                    return "Возв. денег";
                 case DocumentType.MoneyReturnFromClient:
-                    return "Возврат денег от продавца";
+                    return "Возв. денег от продавца";
                 case DocumentType.MoneyTransfer:
                     return "Сдача кассы";
             }
@@ -40,7 +40,7 @@ namespace Sigma.Core.RemoteHotelEntry
             return "Unknown";
         }
 
-        public void Fill(OrganizationEntity organization, DateTime? date, float money, string? comment, UserEntity? user, bool isActive)
+        public void Fill(OrganizationEntity organization, DateTime? date, float money, string? comment, UserEntity? user, bool isActive, bool isDeleted)
         {
             Organization = organization;
             Date = date;
@@ -48,12 +48,13 @@ namespace Sigma.Core.RemoteHotelEntry
             Comment = comment;
             User = user;
             IsActive = isActive;
+            IsDeleted = isDeleted;
             Name = generateName();
         }
 
         private string generateName()
         { 
-            return DocumentTypeToString(Type) + " " + stripId + " " + stripTime;
+            return DocumentTypeToString(Type) + " " + stripTime;
         }
 
         public void SetParentDocumentID(string? parentDocumentID)
@@ -187,12 +188,12 @@ namespace Sigma.Core.RemoteHotelEntry
             return false;
         }
 
-        public DocumentEntity(string id, OrganizationEntity organization, DateTime? date, float money, string? comment, UserEntity? user, DocumentType documentType, bool isActive) : base(id, "")
+        public DocumentEntity(string id, OrganizationEntity organization, DateTime? date, float money, string? comment, UserEntity? user, DocumentType documentType, bool isActive, bool isDeleted) : base(id, "", isDeleted)
         {
             Children = new DocumentsDictionary();
             Type = documentType;
 
-            Fill(organization, date, money, comment, user, isActive);
+            Fill(organization, date, money, comment, user, isActive, isDeleted);
         }
 
         private string stripId 

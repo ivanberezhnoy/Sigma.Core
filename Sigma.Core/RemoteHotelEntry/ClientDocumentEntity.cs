@@ -11,9 +11,9 @@ namespace Sigma.Core.RemoteHotelEntry
         public string? EasyMSBookingId { get; set; }
 
         public void Fill(OrganizationEntity organization, DateTime? date, float money, string? comment, UserEntity? user, 
-            bool isActive, ClientEntity client, AgreementEntity agreement, string easyMSBookingId)
+            bool isActive, bool isDeleted, ClientEntity client, AgreementEntity agreement, string easyMSBookingId)
         {
-            Fill(organization, date, money, comment, user, isActive);
+            Fill(organization, date, money, comment, user, isActive, isDeleted);
 
             Client = client;
             Agreement = agreement;
@@ -21,10 +21,10 @@ namespace Sigma.Core.RemoteHotelEntry
         }
 
         public ClientDocumentEntity(string id, OrganizationEntity organization, DateTime? date, float money, string? comment, 
-            UserEntity? user, DocumentType documentType, bool isActive, ClientEntity client, AgreementEntity agreement, string easyMSBookingId)
-            : base(id, organization, date, money, comment, user, documentType, isActive)
+            UserEntity? user, DocumentType documentType, bool isActive, bool isDeleted, ClientEntity client, AgreementEntity agreement, string easyMSBookingId)
+            : base(id, organization, date, money, comment, user, documentType, isActive, isDeleted)
         {
-            Fill(organization, date, money, comment, user, isActive, client, agreement, easyMSBookingId);
+            Fill(organization, date, money, comment, user, isActive, isDeleted, client, agreement, easyMSBookingId);
         }
     }
 }

@@ -35,8 +35,8 @@
     }
     public class RequestResult
     {
-        public List<Error>? errors;
-        public dynamic? data;
+        List<Error>? errors;
+        dynamic? data;
 
         public bool HasError
         {
@@ -46,7 +46,23 @@
             }
         }
 
-        public RequestResult(Error? error, dynamic? data)
+        public List<Error>? Errors
+        {
+            get 
+            {
+                return errors;
+            }
+        }
+
+        public dynamic? Data
+        {
+            get 
+            {
+                return data;
+            }
+        }
+
+        public RequestResult(Error? error, dynamic? data, bool val)
         {
             if (error != null)
             {
@@ -57,7 +73,7 @@
             this.data = data;
         }
 
-        public RequestResult(ErrorCode errorCode, string errorDescription) : this(new Error(errorCode, errorDescription), null)
+        public RequestResult(ErrorCode errorCode, string errorDescription) : this(new Error(errorCode, errorDescription), null, false)
         { 
 
         }

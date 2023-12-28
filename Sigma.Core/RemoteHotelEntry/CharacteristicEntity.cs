@@ -22,7 +22,7 @@ namespace Sigma.Core.RemoteHotelEntry
             easyMSRoomID = characteristic.EasyMSRoomId;
         }
 
-        public CharacteristicEntity(Characteristic characteristic): base(characteristic.Id, characteristic.Name)
+        public CharacteristicEntity(Characteristic characteristic): base(characteristic.Id, characteristic.Name, characteristic.IsDeleted)
         {
             Reload(characteristic);
         }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using HotelManager;
+using Microsoft.AspNetCore.Mvc;
 using Sigma.Core.DataStorage;
 using Sigma.Core.RemoteHotelEntry;
 using System.Net;
@@ -8,7 +9,7 @@ using static Sigma.Core.DataStorage.StoreDataStorage;
 namespace Sigma.Core.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]/[action]")]
     public class UserController : Controller
     {
         private ILogger<UserController> _logger;
@@ -20,8 +21,8 @@ namespace Sigma.Core.Controllers
             _storageProvider = storageProvider;
         }
 
-        [HttpGet(Name = "GetUser")]
-        public Dictionary<string, UserEntity>? Get()
+        [HttpGet]
+        public Dictionary<string, UserEntity>? GetUsers()
         {
             var session = _storageProvider.Sessions.GetClentForConnectionID(HttpContext.Connection.Id);
 
@@ -48,4 +49,5 @@ namespace Sigma.Core.Controllers
             return null;
         }
     }
+
 }

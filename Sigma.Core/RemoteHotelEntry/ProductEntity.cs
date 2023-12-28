@@ -17,7 +17,6 @@ namespace Sigma.Core.RemoteHotelEntry
 
     public class ProductEntity: Entity
     {
-        public bool IsDeleted { get; set; }
 
         public string? Sku { get; set; }
 
@@ -38,6 +37,7 @@ namespace Sigma.Core.RemoteHotelEntry
             IsDeleted = product.IsDeleted;
             EAN = product.EAN;
             Price = product.Price;
+            IsDeleted = product.IsDeleted;
 
             CharacteristicDictionary newCharacteristics = new CharacteristicDictionary();
 
@@ -110,7 +110,7 @@ namespace Sigma.Core.RemoteHotelEntry
             return result;
         }
 
-        public ProductEntity(Product product): base(product.Id, product.Name)
+        public ProductEntity(Product product): base(product.Id, product.Name, product.IsDeleted)
         {
             Units = new UnitsDictionary();
 

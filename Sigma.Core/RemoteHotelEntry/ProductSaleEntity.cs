@@ -4,7 +4,7 @@ namespace Sigma.Core.RemoteHotelEntry
 {
     public class ProductSaleEntity: Entity
     {
-        public ProductSaleEntity(string id, ProductEntity product, float quantity, float price, UnitEntity unit, CharacteristicEntity? characteristic): base(id, "")
+        public ProductSaleEntity(string id, ProductEntity product, float quantity, float price, UnitEntity unit, CharacteristicEntity? characteristic) : base(id, "", false)
         {
             Product = product;
             Quantity = quantity;
