@@ -19,14 +19,16 @@ namespace Sigma.Core.DataStorage
     {
         private DocumentsDictionary? _documents;
         private Dictionary<EntityFilterDocument, List<DocumentEntity>> _cashedDocumentFilters;
+        private HashSet<string> _documentsToUpdate;
 
         public DocumentDataStorage(ILogger<DocumentDataStorage> logger, StorageProvider storageProvider) : base(logger, storageProvider)
         {
             storageProvider.Documents = this;
             _cashedDocumentFilters = new Dictionary<EntityFilterDocument, List<DocumentEntity>>(new EntityFilterDocumentComparer());
+            _documentsToUpdate = new HashSet<string>();
         }
 
-        private DocumentEntity? fillDocuments(HotelManagerPortTypeClient session, HotelManager.Document[] documents, string? documentID = null, DocumentsDictionary? createdDocuments = null, 
+        private DocumentsDictionary? fillDocuments(HotelManagerPortTypeClient session, HotelManager.Document[] documents, HashSet<string>? documentsToUpdate, DocumentsDictionary? createdDocuments = null, 
             bool foolReload = true)
         {
             OrganizationDataStorage organizationDataStorage = _storageProvider.Organizations;
@@ -39,7 +41,12 @@ namespace Sigma.Core.DataStorage
             DocumentsDictionary newDocuments = createdDocuments ?? new DocumentsDictionary();
             DocumentsDictionary documentsList = new DocumentsDictionary();
 
-            DocumentEntity? result = null;
+            DocumentsDictionary? result = null;
+
+            if (documentsToUpdate != null)
+            {
+                result = new DocumentsDictionary();
+            }
 
             if (_documents == null)
             {
@@ -211,9 +218,9 @@ namespace Sigma.Core.DataStorage
                 {
                     documentsList[existingDocument.Id] = existingDocument;
 
-                    if (documentID != null && documentID == existingDocument.Id)
+                    if (result != null && documentsToUpdate != null && documentsToUpdate.Contains(existingDocument.Id))
                     {
-                        result = existingDocument;
+                        result[existingDocument.Id] = existingDocument;
                     }
 
                     if (!documentExists && newDocuments != null)
@@ -265,22 +272,22 @@ namespace Sigma.Core.DataStorage
             return result;
         }
 
-        private DocumentEntity? fillDocuments(HotelManagerPortTypeClient session, string? documentID = null)
+        private DocumentsDictionary? fillDocuments(HotelManagerPortTypeClient session, HashSet<String>? documentsToUpdate = null)
         {
-            DocumentEntity? result = null;
+            DocumentsDictionary? result = null;
 
             if (_documents != null)
             {
                 _cashedDocumentFilters.Clear();
 
-                DocumentsList documentsList = session.getDocuments(documentID);
+                DocumentsList documentsList = session.getDocuments(documentsToUpdate != null ? documentsToUpdate.ToArray(): null);
 
                 if (documentsList.error != null && documentsList.error.Length > 0)
                 {
-                    _logger.LogError("Failed to load documents list. Error : {Error}, organizations: {Organizations} documentID: {DocumentID}", documentsList.error, documentsList, documentID != null ? documentID : "null");
+                    _logger.LogError("Failed to load documents list. Error : {Error}, organizations: {Organizations} documentID: {DocumentID}", documentsList.error, documentsList, documentsToUpdate.ToString());
                 }
 
-                result = fillDocuments(session, documentsList.data, documentID, null, documentID == null);
+                result = fillDocuments(session, documentsList.data, documentsToUpdate, null, documentsToUpdate == null);
             }
 
             return result;
@@ -288,6 +295,8 @@ namespace Sigma.Core.DataStorage
 
         public List<DocumentEntity> GetSortedDocuments(HotelManagerPortTypeClient session, EntityFilterDocument? filter)
         {
+            updateChangedDocuments(session);
+
             EntityFilterDocument targetFilter = filter ?? new EntityFilterDocument();
 
             List<DocumentEntity>? result;
@@ -296,7 +305,7 @@ namespace Sigma.Core.DataStorage
                 return result;
             }
 
-            DocumentsDictionary documents = this.GetDocuments(session);
+            DocumentsDictionary documents = GetDocuments(session);
             bool completeMismatch = false;
             var filteredValues = !targetFilter.IsEmpty() ? documents.Values.Where(document => document.filterMatch(targetFilter, out completeMismatch)).ToList() : documents.Values.ToList();
 
@@ -328,59 +337,57 @@ namespace Sigma.Core.DataStorage
 
                 _logger.LogInformation("Reloading documents list started");
 
+                _documentsToUpdate.Clear();
+
                 fillDocuments(session);
 
                 _logger.LogInformation("Reloading documents list finished");
             }
 
+            updateChangedDocuments(session);
+
             return _documents;
         }
 
-        DocumentEntity? GetDocument(HotelManagerPortTypeClient session, string documentId, bool logError = false)
+        private void updateChangedDocuments(HotelManagerPortTypeClient session)
         {
-            DocumentsDictionary documents = GetDocuments(session);
-            DocumentEntity? result;
-
-            if (!documents.TryGetValue(documentId, out result))
+            if (_documentsToUpdate.Count > 0)
             {
-                if (logError)
-                {
-                    _logger.LogError("GetDocument: Unable to find document with ID: {DocumentID}", documentId);
-                }
-            }
+                DocumentsDictionary? changedDocuments = fillDocuments(session, _documentsToUpdate);
 
-            return result;
+                if (changedDocuments != null)
+                {
+                    updateCashedDocumentsFilters(changedDocuments);
+                }
+                _documentsToUpdate.Clear();
+            }
         }
 
-        public RequestResult setDocuments(HotelManagerPortTypeClient session, HotelManager.Document[] documents)
+        private void updateCashedDocumentsFilters(DocumentsDictionary changedDocuments)
         {
-            HotelManager.DocumentsList documentsList = new DocumentsList();
-            documentsList.data = documents;
-
-            HotelManager.Error[] errors = session.setDocuments(documentsList);
-
-            foreach (HotelManager.Error error in errors)
-            {
-                _logger.LogError("setDocuments errorCode: {ErrorCode}, desciption: {ErrorDescription}", error.errorCode, error.errorDescription);
-            }
-
-            DocumentsDictionary newDocuments = new DocumentsDictionary();
-            fillDocuments(session, documents, null, newDocuments, false);
-
             foreach (KeyValuePair<EntityFilterDocument, List<DocumentEntity>> filter in _cashedDocumentFilters)
             {
-                bool isFilterChanged = false;
-                foreach (DocumentEntity document in newDocuments.Values)
+                bool isFilterSortChanged = false;
+                foreach (DocumentEntity document in changedDocuments.Values)
                 {
                     bool completeMismatch = false;
-                    if (document.filterMatch(filter.Key, out completeMismatch))
+                    //TODO: use seak in sorted array
+                    bool containsDocument = filter.Value.Contains(document);
+                    bool shouldContain = document.filterMatch(filter.Key, out completeMismatch);
+
+                    if (!containsDocument && shouldContain)
                     {
+                        //TODO: insert in sorted array
                         filter.Value.Add(document);
-                        isFilterChanged = true;
+                        isFilterSortChanged = true;
+                    }
+                    else if (containsDocument && !shouldContain)
+                    {
+                        filter.Value.Remove(document);
                     }
                 }
 
-                if (isFilterChanged)
+                if (isFilterSortChanged)
                 {
                     filter.Value.Sort((document1, document2) =>
                     {
@@ -398,6 +405,29 @@ namespace Sigma.Core.DataStorage
                     });
                 }
             }
+        }
+
+        public void UpdateDocument(string documentId)
+        {
+            _documentsToUpdate.Add(documentId);
+        }
+
+        public RequestResult setDocuments(HotelManagerPortTypeClient session, HotelManager.Document[] documents)
+        {
+            HotelManager.DocumentsList documentsList = new DocumentsList();
+            documentsList.data = documents;
+
+            HotelManager.Error[] errors = session.setDocuments(documentsList);
+
+            foreach (HotelManager.Error error in errors)
+            {
+                _logger.LogError("setDocuments errorCode: {ErrorCode}, desciption: {ErrorDescription}", error.errorCode, error.errorDescription);
+            }
+
+            DocumentsDictionary newDocuments = new DocumentsDictionary();
+            fillDocuments(session, documents, null, newDocuments, false);
+
+            updateCashedDocumentsFilters(newDocuments);
 
             RequestResult result = new RequestResult(errors, newDocuments);
 

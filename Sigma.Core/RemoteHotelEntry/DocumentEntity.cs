@@ -35,6 +35,8 @@ namespace Sigma.Core.RemoteHotelEntry
                     return "Возв. денег от продавца";
                 case DocumentType.MoneyTransfer:
                     return "Сдача кассы";
+                case DocumentType.Unknown:
+                    return "Handled Unknown";
             }
 
             return "Unknown";

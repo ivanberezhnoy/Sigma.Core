@@ -52,7 +52,7 @@ namespace HotelManager
         [System.ServiceModel.OperationContractAttribute(Action="HotelManager#HotelManager:getOrganizationsList", ReplyAction="*")]
         System.Threading.Tasks.Task<HotelManager.getOrganizationsListResponse> getOrganizationsListAsync(HotelManager.getOrganizationsListRequest request);
         
-        // CODEGEN: Параметр "documentID" требует дополнительной информации о схеме, которую невозможно получить в режиме параметров. Указан атрибут "Microsoft.Xml.Serialization.XmlElementAttribute".
+        // CODEGEN: Параметр "documentsIDs" требует дополнительной информации о схеме, которую невозможно получить в режиме параметров. Указан атрибут "Microsoft.Xml.Serialization.XmlArrayAttribute".
         [System.ServiceModel.OperationContractAttribute(Action="HotelManager#HotelManager:getDocuments", ReplyAction="*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
         [return: System.ServiceModel.MessageParameterAttribute(Name="return")]
@@ -573,6 +573,9 @@ namespace HotelManager
         
         /// <remarks/>
         MoneyTransfer,
+        
+        /// <remarks/>
+        Unknown,
     }
     
     /// <remarks/>
@@ -1965,16 +1968,17 @@ namespace HotelManager
     {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="HotelManager", Order=0)]
-        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true)]
-        public string documentID;
+        [System.Xml.Serialization.XmlArrayAttribute(IsNullable=true)]
+        [System.Xml.Serialization.XmlArrayItemAttribute("data", Namespace="http://www.hotel-manager.org", IsNullable=false)]
+        public string[] documentsIDs;
         
         public getDocumentsRequest()
         {
         }
         
-        public getDocumentsRequest(string documentID)
+        public getDocumentsRequest(string[] documentsIDs)
         {
-            this.documentID = documentID;
+            this.documentsIDs = documentsIDs;
         }
     }
     
@@ -2365,10 +2369,10 @@ namespace HotelManager
             return base.Channel.getDocuments(request);
         }
         
-        public HotelManager.DocumentsList getDocuments(string documentID)
+        public HotelManager.DocumentsList getDocuments(string[] documentsIDs)
         {
             HotelManager.getDocumentsRequest inValue = new HotelManager.getDocumentsRequest();
-            inValue.documentID = documentID;
+            inValue.documentsIDs = documentsIDs;
             HotelManager.getDocumentsResponse retVal = ((HotelManager.HotelManagerPortType)(this)).getDocuments(inValue);
             return retVal.@return;
         }
@@ -2379,10 +2383,10 @@ namespace HotelManager
             return base.Channel.getDocumentsAsync(request);
         }
         
-        public System.Threading.Tasks.Task<HotelManager.getDocumentsResponse> getDocumentsAsync(string documentID)
+        public System.Threading.Tasks.Task<HotelManager.getDocumentsResponse> getDocumentsAsync(string[] documentsIDs)
         {
             HotelManager.getDocumentsRequest inValue = new HotelManager.getDocumentsRequest();
-            inValue.documentID = documentID;
+            inValue.documentsIDs = documentsIDs;
             return ((HotelManager.HotelManagerPortType)(this)).getDocumentsAsync(inValue);
         }
         

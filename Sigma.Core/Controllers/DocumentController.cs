@@ -71,6 +71,14 @@ namespace Sigma.Core.Controllers
 
             return new RequestResult(ErrorCode.NotAuthorizied, "setDocuments: user not authorized");
         }
+
+        [HttpGet]
+        public RequestResult updateDocument(string documentId)
+        {
+            _storageProvider.Documents.UpdateDocument(documentId);
+
+            return new RequestResult(null, null, true);
+        }
     }
 
 }
