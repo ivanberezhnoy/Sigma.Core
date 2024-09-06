@@ -12,64 +12,54 @@ namespace Sigma.Core.Controllers
 {
     [ApiController]
     [Route("api/[controller]/[action]")]
-    public class DocumentController : Controller
+    public class DocumentController : BaseController
     {
-        private ILogger<DocumentController> _logger;
-        private StorageProvider _storageProvider;
-
-        public DocumentController(ILogger<DocumentController> logger, StorageProvider storageProvider)
+        public DocumentController(ILogger<DocumentController> logger, StorageProvider storageProvider) : base(logger, storageProvider)
         {
-            _logger = logger;
-            _storageProvider = storageProvider;
         }
 
         [HttpPost]
-        public List<DocumentEntity> documents(GetDocumentsQuery? query)
+        public List<DocumentEntity>? documents(GetDocumentsQuery? query)
         {
-            var session = _storageProvider.Sessions.GetClentForConnectionID(HttpContext.Connection.Id);
+            UserClient? userClient = GetClient();
 
-            if (session != null)
+            if (userClient?.Client == null)
             {
-                _logger.LogInformation("GetDocuments for connection {ConnectionID}", HttpContext.Connection.Id);
-                List<DocumentEntity> documents = _storageProvider.Documents.GetSortedDocuments(session.Client, query?.Filter);
-
-                if (query?.PageIndex != null && query?.PageSize != null)
-                {
-                    int startIndex = (int)(query.PageIndex * query.PageSize);
-
-                    if (startIndex >= documents.Count)
-                    {
-                        documents = new List<DocumentEntity>();
-                    }
-                    else 
-                    {
-                        documents = documents.GetRange(startIndex, Math.Min((int)query.PageSize, documents.Count - startIndex));
-                    }
-                }
-
-                return documents;
+                return null;
             }
 
-            _logger.LogWarning("Unable to find user with connection ID {ConnectionID}", HttpContext.Connection.Id);
+            _logger.LogInformation("GetDocuments for connection {ConnectionID}", HttpContext.Connection.Id);
+            List<DocumentEntity> documents = _storageProvider.Documents.GetSortedDocuments(userClient.Client, query?.Filter);
 
-            HttpContext.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+            if (query?.PageIndex != null && query?.PageSize != null)
+            {
+                int startIndex = (int)(query.PageIndex * query.PageSize);
 
-            return null;
+                if (startIndex >= documents.Count)
+                {
+                    documents = new List<DocumentEntity>();
+                }
+                else
+                {
+                    documents = documents.GetRange(startIndex, Math.Min((int)query.PageSize, documents.Count - startIndex));
+                }
+            }
+
+            return documents;
         }
 
         [HttpPost]
         public RequestResult setDocuments(HotelManager.Document[] documents)
         {
-            var session = _storageProvider.Sessions.GetClentForConnectionID(HttpContext.Connection.Id);
+            UserClient? userClient = GetClient();
 
-            if (session != null)
+            if (userClient?.Client == null)
             {
-                _logger.LogInformation("BingCharacteristic for connection {ConnectionID}", HttpContext.Connection.Id);
-                return _storageProvider.Documents.setDocuments(session.Client, documents);
+                return new RequestResult(ErrorCode.NotAuthorizied, "setDocuments: user not authorized"); ;
             }
 
-
-            return new RequestResult(ErrorCode.NotAuthorizied, "setDocuments: user not authorized");
+            _logger.LogInformation("BingCharacteristic for connection {ConnectionID}", HttpContext.Connection.Id);
+            return _storageProvider.Documents.setDocuments(userClient.Client, documents);
         }
 
         [HttpGet]

@@ -4,6 +4,7 @@ using HotelManager;
 using System;
 using Sigma.Core.Controllers;
 using Sigma.Core.DataStorage;
+using System.Web.Services.Description;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +13,14 @@ builder.Services.AddCors();
 builder.WebHost.ConfigureKestrel((context, options) =>
 {
     options.AllowSynchronousIO = true;
+});
+
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.Cookie.Name = ".MyApp.Session";
+    options.IdleTimeout = TimeSpan.FromSeconds(360000);
+    options.Cookie.IsEssential = true;
 });
 
 Sigma.Core.Startup startup = new Sigma.Core.Startup(builder.Configuration);
@@ -25,6 +34,8 @@ app.UseCors(builder => builder.AllowAnyOrigin()
                              .AllowAnyHeader());
 
 app.UseDeveloperExceptionPage();
+
+app.UseSession();
 
 /*System.ServiceModel.BasicHttpBinding hotelManagerBinding = new System.ServiceModel.BasicHttpBinding();
 hotelManagerBinding.MaxBufferSize = int.MaxValue;
@@ -56,11 +67,12 @@ app.Use(async (context, next) =>
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
 app.UseAuthentication();
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
+app.UseCookiePolicy();
+
 
 app.Services.GetService<StorageProvider>();
 
@@ -73,8 +85,6 @@ app.Services.GetService<OrganizationDataStorage>();
 app.Services.GetService<ProductDataStorage>();
 app.Services.GetService<SessionDataStorage>();
 app.Services.GetService<StoreDataStorage>();
-
-
 
 /*var dbContext = app.Services.GetService<DatabaseContext>();
 if (dbContext != null)

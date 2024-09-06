@@ -1,5 +1,6 @@
 ﻿using HotelManager;
 using Microsoft.AspNetCore.Mvc;
+using MySqlX.XDevAPI;
 using Sigma.Core.DataStorage;
 using Sigma.Core.RemoteHotelEntry;
 using System.Net;
@@ -10,43 +11,35 @@ namespace Sigma.Core.Controllers
 {
     [ApiController]
     [Route("api/[controller]/[action]")]
-    public class UserController : Controller
+    public class UserController : BaseController
     {
-        private ILogger<UserController> _logger;
-        private StorageProvider _storageProvider;
-
-        public UserController(ILogger<UserController> logger, StorageProvider storageProvider)
+        public UserController(ILogger<UserController> logger, StorageProvider storageProvider) : base(logger, storageProvider)
         {
-            _logger = logger;
-            _storageProvider = storageProvider;
         }
 
         [HttpGet]
         public Dictionary<string, UserEntity>? GetUsers()
         {
-            var session = _storageProvider.Sessions.GetClentForConnectionID(HttpContext.Connection.Id);
+            UserClient? userClient = GetClient();
 
-            if (session != null)
+            if (userClient?.Client == null)
             {
-                _logger.LogInformation("GetUsers for connection {ConnectionID}", HttpContext.Connection.Id);
-
-                var users = _storageProvider.Sessions.GetUsers(session.Client);
-
-                Dictionary<string, UserEntity> result = new Dictionary<string, UserEntity>();
-                foreach (var user in users.Values)
-                {
-                    result[user.Id] = user.Id == session.User.Id ? user : user.MakeNakedCopy();
-                    if (user.Id == session.User.Id)
-                    { }
-                }
-                
-                return result;
+                return null;
             }
 
-            _logger.LogWarning("Unable to find user with connection ID {ConnectionID}", HttpContext.Connection.Id);
+            _logger.LogInformation("GetUsers for connection {ConnectionID}", HttpContext.Connection.Id);
 
-            HttpContext.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-            return null;
+            var users = _storageProvider.Sessions.GetUsers(userClient.Client);
+
+            Dictionary<string, UserEntity> result = new Dictionary<string, UserEntity>();
+            foreach (var user in users.Values)
+            {
+                result[user.Id] = user.Id == userClient.User.Id ? user : user.MakeNakedCopy();
+                if (user.Id == userClient.User.Id)
+                { }
+            }
+
+            return result;
         }
     }
 

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Sigma.Core.DataStorage;
 using System.Net;
 using static Sigma.Core.DataStorage.OrganizationDataStorage;
@@ -8,33 +9,24 @@ namespace Sigma.Core.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class StoreController : Controller
+    public class StoreController : BaseController
     {
-        private ILogger<StoreController> _logger;
-        private StorageProvider _storageProvider;
-
-        public StoreController(ILogger<StoreController> logger, StorageProvider storageProvider)
+        public StoreController(ILogger<StoreController> logger, StorageProvider storageProvider) : base(logger, storageProvider)
         {
-            _logger = logger;
-            _storageProvider = storageProvider;
         }
 
         [HttpGet(Name = "GetStorages")]
         public StoresDicrionary? Get()
         {
-            var session = _storageProvider.Sessions.GetClentForConnectionID(HttpContext.Connection.Id);
+            UserClient? userClient = GetClient();
 
-            if (session != null)
+            if (userClient?.Client == null)
             {
-                _logger.LogInformation("GetStorages for connection {ConnectionID}", HttpContext.Connection.Id);
-                return _storageProvider.Stores.GetStores(session.Client);
+                return null;
             }
 
-            _logger.LogWarning("Unable to find user with connection ID {ConnectionID}", HttpContext.Connection.Id);
-
-            HttpContext.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-
-            return null;
+            _logger.LogInformation("GetStorages for connection {ConnectionID}", HttpContext.Connection.Id);
+            return _storageProvider.Stores.GetStores(userClient.Client);
         }
     }
 }

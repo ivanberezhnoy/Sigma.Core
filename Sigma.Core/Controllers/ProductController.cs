@@ -7,47 +7,38 @@ namespace Sigma.Core.Controllers
 {
     [ApiController]
     [Route("api/[controller]/[action]")]
-    public class ProductController: Controller
+    public class ProductController: BaseController
     {
-        private ILogger<ProductController> _logger;
-        private StorageProvider _storageProvider;
-
-        public ProductController(ILogger<ProductController> logger, StorageProvider storageProvider)
+        public ProductController(ILogger<ProductController> logger, StorageProvider storageProvider) : base(logger, storageProvider)
         {
-            _logger = logger;
-            _storageProvider = storageProvider;
         }
 
         [HttpGet]
         public ProductsDicrionary? Products()
         {
-            var session = _storageProvider.Sessions.GetClentForConnectionID(HttpContext.Connection.Id);
+            UserClient? userClient = GetClient();
 
-            if (session != null)
+            if (userClient?.Client == null)
             {
-                _logger.LogInformation("GetProducts for connection {ConnectionID}", HttpContext.Connection.Id);
-                return _storageProvider.Products.GetProducts(session.Client);
+                return null;
             }
 
-            _logger.LogWarning("Unable to find user with connection ID {ConnectionID}", HttpContext.Connection.Id);
-
-            HttpContext.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-
-            return null;
+            _logger.LogInformation("GetProducts for connection {ConnectionID}", HttpContext.Connection.Id);
+            return _storageProvider.Products.GetProducts(userClient.Client);
         }
 
         [HttpPost]
         public RequestResult BindCharacteristic(string productId, string characteristicId, string easyMSRoomId)
         {
-            var session = _storageProvider.Sessions.GetClentForConnectionID(HttpContext.Connection.Id);
+            UserClient? userClient = GetClient();
 
-            if (session != null)
+            if (userClient?.Client == null)
             {
-                _logger.LogInformation("BingCharacteristic for connection {ConnectionID}", HttpContext.Connection.Id);
-                return _storageProvider.Products.BingCharacteristic(session.Client, productId, characteristicId, easyMSRoomId);
+                return new RequestResult(ErrorCode.NotAuthorizied, "BingCharacteristic: user not authorized"); ;
             }
 
-            return new RequestResult(ErrorCode.NotAuthorizied, "BingCharacteristic: user not authorized");
+            _logger.LogInformation("BingCharacteristic for connection {ConnectionID}", HttpContext.Connection.Id);
+            return _storageProvider.Products.BingCharacteristic(userClient.Client, productId, characteristicId, easyMSRoomId);
         }
     }
 }

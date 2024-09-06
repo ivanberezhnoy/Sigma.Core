@@ -27,7 +27,7 @@ namespace Sigma.Core.Controllers
             }
             if (userCredentional.UserName.Length != 0 && userCredentional.Password.Length != 0)
             {
-                bool connectionResult = _clientProvier.ConnectClient(userCredentional, HttpContext.Connection.Id);
+                bool connectionResult = _clientProvier.ConnectClient(userCredentional);
 
                 if (connectionResult)
                 {
@@ -39,6 +39,7 @@ namespace Sigma.Core.Controllers
                     var claimsIdentity = new ClaimsIdentity(claims, "Cookies");
                     var newClaimsPrincipal = new ClaimsPrincipal(claimsIdentity);
                     HttpContext.SignInAsync(newClaimsPrincipal).Wait();
+
 
                     return Results.Accepted();
                 }

@@ -8,33 +8,24 @@ namespace Sigma.Core.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class ClientController : Controller
+    public class ClientController : BaseController
     {
-        private ILogger<ClientController> _logger;
-        private StorageProvider _storageProvider;
-
-        public ClientController(ILogger<ClientController> logger, StorageProvider storageProvider)
+        public ClientController(ILogger<ClientController> logger, StorageProvider storageProvider) : base(logger, storageProvider)
         {
-            _logger = logger;
-            _storageProvider = storageProvider;
         }
 
         [HttpGet(Name = "GetClients")]
         public ClientDicrionary? Get()
         {
-            var session = _storageProvider.Sessions.GetClentForConnectionID(HttpContext.Connection.Id);
+            UserClient? userClient = GetClient();
 
-            if (session != null)
+            if (userClient?.Client == null)
             {
-                _logger.LogInformation("GetClients for connection {ConnectionID}", HttpContext.Connection.Id);
-                return _storageProvider.Clients.GetClients(session.Client);
+                return null;
             }
 
-            _logger.LogWarning("Unable to find user with connection ID {ConnectionID}", HttpContext.Connection.Id);
-
-            HttpContext.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-
-            return null;
+            _logger.LogInformation("GetClients for connection {ConnectionID}", HttpContext.Connection.Id);
+            return _storageProvider.Clients.GetClients(userClient.Client);
         }
     }
 }

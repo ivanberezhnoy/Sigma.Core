@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Sigma.Core.DataStorage;
+using Sigma.Core.Utils;
 using System.Net;
 using static Sigma.Core.DataStorage.OrganizationDataStorage;
 
@@ -7,33 +8,24 @@ namespace Sigma.Core.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class OrganizationController : Controller
+    public class OrganizationController : BaseController
     {
-        private ILogger<OrganizationController> _logger;
-        private StorageProvider _storageProvider;
-
-        public OrganizationController(ILogger<OrganizationController> logger, StorageProvider storageProvider)
+        public OrganizationController(ILogger<OrganizationController> logger, StorageProvider storageProvider) : base(logger, storageProvider)
         {
-            _logger = logger;
-            _storageProvider = storageProvider;
         }
 
         [HttpGet(Name = "GetOrganizations")]
         public OrganizationsDicrionary? Get()
         {
-            var session = _storageProvider.Sessions.GetClentForConnectionID(HttpContext.Connection.Id);
+            UserClient? userClient = GetClient();
 
-            if (session != null)
+            if (userClient?.Client == null)
             {
-                _logger.LogInformation("GetOrganizations for connection {ConnectionID}", HttpContext.Connection.Id);
-                return _storageProvider.Organizations.GetOrganizations(session.Client);
+                return null;
             }
 
-            _logger.LogWarning("Unable to find user with connection ID {ConnectionID}", HttpContext.Connection.Id);
-
-            HttpContext.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-
-            return null;
+            _logger.LogInformation("GetOrganizations for connection {ConnectionID}", HttpContext.Connection.Id);
+            return _storageProvider.Organizations.GetOrganizations(userClient.Client);
         }
     }
 }
