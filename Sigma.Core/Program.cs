@@ -5,8 +5,14 @@ using System;
 using Sigma.Core.Controllers;
 using Sigma.Core.DataStorage;
 using System.Web.Services.Description;
+using Sigma.Core.logs;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Logging.AddDbLogger(options =>
+{
+    builder.Configuration.GetSection("Logging").GetSection("Database").GetSection("Options").Bind(options);
+});
 
 builder.Services.AddCors();
 

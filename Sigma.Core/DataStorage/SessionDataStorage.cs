@@ -154,6 +154,7 @@ namespace Sigma.Core.DataStorage
             hotelManagerBinding.CloseTimeout = timeout;
 #endif
 
+            //var hotelManagerEndpoint = new System.ServiceModel.EndpointAddress("http://192.168.1.152/ApartmentDeveloper/ws/ws2.1cws");
             var hotelManagerEndpoint = new System.ServiceModel.EndpointAddress("http://192.168.1.152/HotelManager/ws/ws2.1cws");
 
             HotelManagerPortTypeClient client = new HotelManagerPortTypeClient(hotelManagerBinding, hotelManagerEndpoint);
