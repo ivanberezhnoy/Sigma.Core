@@ -42,8 +42,6 @@ namespace Sigma.Core
             services.AddTransient<ProductController>();
             services.AddTransient<StoreController>();
             services.AddTransient<UserController>();
-
-            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options => options.LoginPath = "/login");
         }
     }
 }

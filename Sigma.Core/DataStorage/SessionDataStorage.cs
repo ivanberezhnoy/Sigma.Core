@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using Sigma.Core.RemoteHotelEntry;
 using Sigma.Core.Utils;
+using System.Security.Claims;
 
 using Microsoft.AspNetCore.Mvc;
 using MySqlX.XDevAPI.Common;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using Microsoft.AspNetCore.Http;
 
 namespace Sigma.Core.DataStorage
 {
@@ -224,9 +226,8 @@ namespace Sigma.Core.DataStorage
 
         static public UserName? GetCurrentUserName(HttpContext context)
         {
-            var claimsList = context.User.Claims.ToList();
-
-            return claimsList.Count == 0 ? null : claimsList[0].Value;
+            return context.User.Identity?.Name
+                   ?? context.User.FindFirst(ClaimTypes.Name)?.Value;
         }
 
         public UserClient? GetClientForUserWithName(String? userName, bool logWarning = true)

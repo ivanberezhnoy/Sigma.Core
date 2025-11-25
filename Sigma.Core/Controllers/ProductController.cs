@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Sigma.Core.DataStorage;
 using Sigma.Core.Utils;
 using System.Net;
@@ -14,6 +15,7 @@ namespace Sigma.Core.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public ProductsDicrionary? Products()
         {
             UserClient? userClient = GetClient();
