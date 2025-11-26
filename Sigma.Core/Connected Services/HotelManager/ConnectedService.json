@@ -1,7 +1,7 @@
 {
   "ExtendedData": {
     "inputs": [
-      "http://192.168.1.152/Apartments82/ws/ws2.1cws?wsdl"
+      "http://192.168.1.152/HotelManager/ws/ws2.1cws?wsdl"
     ],
     "collectionTypes": [
       "System.Array",

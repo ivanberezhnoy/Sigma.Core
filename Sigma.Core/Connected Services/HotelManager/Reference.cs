@@ -188,6 +188,8 @@ namespace HotelManager
         
         private string eANField;
         
+        private System.Nullable<bool> isServiceField;
+        
         /// <remarks/>
         [System.Xml.Serialization.XmlElementAttribute(Order=0)]
         public string Id
@@ -297,6 +299,20 @@ namespace HotelManager
             set
             {
                 this.eANField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=8)]
+        public System.Nullable<bool> IsService
+        {
+            get
+            {
+                return this.isServiceField;
+            }
+            set
+            {
+                this.isServiceField = value;
             }
         }
     }
@@ -2588,11 +2604,11 @@ namespace HotelManager
         {
             if ((endpointConfiguration == EndpointConfiguration.HotelManagerSoap))
             {
-                return new System.ServiceModel.EndpointAddress("http://192.168.1.152/ApartmentDeveloper/ws/ws2.1cws");
+                return new System.ServiceModel.EndpointAddress("http://192.168.1.152/HotelManager/ws/ws2.1cws");
             }
             if ((endpointConfiguration == EndpointConfiguration.HotelManagerSoap12))
             {
-                return new System.ServiceModel.EndpointAddress("http://192.168.1.152/ApartmentDeveloper/ws/ws2.1cws");
+                return new System.ServiceModel.EndpointAddress("http://192.168.1.152/HotelManager/ws/ws2.1cws");
             }
             throw new System.InvalidOperationException(string.Format("Не удалось найти конечную точку с именем \"{0}\".", endpointConfiguration));
         }

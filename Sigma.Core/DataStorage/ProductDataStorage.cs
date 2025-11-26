@@ -87,29 +87,93 @@ namespace Sigma.Core.DataStorage
             return _products;
         }
 
-        public RequestResult BingCharacteristic(HotelManagerPortTypeClient session, String productId, String characteristicId, String easyMSRoomId)
+        public RequestResult BingCharacteristic(
+            HotelManagerPortTypeClient session,
+            string productId,
+            string characteristicId,
+            string easyMSRoomId)
         {
+            // 1. Находим продукт в кэше
             ProductEntity? product = GetProduct(session, productId);
             if (product == null)
-            { 
-                return new RequestResult(new Sigma.Core.Utils.Error(ErrorCode.UnableToFindObjectWithId, "Unable to find product with Id:" + productId), null, false);
-            }
-
-            CharacteristicEntity? characteristicEntity = null;
-            if (!product.Characteristics.TryGetValue(characteristicId, out characteristicEntity))
             {
-                return new RequestResult(new Sigma.Core.Utils.Error(ErrorCode.UnableToFindObjectWithId, "Unable to find characteristic with Id:" + characteristicId), null, false);
+                return new RequestResult(
+                    new Sigma.Core.Utils.Error(
+                        ErrorCode.UnableToFindObjectWithId,
+                        "Unable to find product with Id: " + productId),
+                    null,
+                    false);
             }
 
-            RequestResult result = new RequestResult(session.setCharacteristicEasyMSRoomId(characteristicId, easyMSRoomId));
-
-            if (!result.HasError)
+            // 2. Находим характеристику в кэше
+            if (!product.Characteristics.TryGetValue(characteristicId, out var characteristicEntity) ||
+                characteristicEntity == null)
             {
-                characteristicEntity.easyMSRoomID = easyMSRoomId;
+                return new RequestResult(
+                    new Sigma.Core.Utils.Error(
+                        ErrorCode.UnableToFindObjectWithId,
+                        "Unable to find characteristic with Id: " + characteristicId),
+                    null,
+                    false);
             }
+
+            // 3. Вызываем 1С-метод, который меняет значение в базе
+            //    Логика уникальности реализована там.
+            RequestResult result = new RequestResult(
+                session.setCharacteristicEasyMSRoomId(characteristicId, easyMSRoomId));
+
+            if (result.HasError)
+            {
+                return result;
+            }
+
+            // 4. Синхронизируем кэш с логикой на стороне 1С
+
+            // Получаем весь словарь продуктов для текущей сессии
+            ProductsDicrionary products = GetProducts(session);
+
+            // Нормализуем "пустое" значение (как у тебя заведено — null или "")
+            // Предположим, что null в кэше = "не привязано"
+            bool isEmpty = string.IsNullOrEmpty(easyMSRoomId);
+
+            if (!isEmpty)
+            {
+                // 4.1. Очистить easyMSRoomID у ВСЕХ других характеристик,
+                //      которые имеют такой же easyMSRoomId
+                foreach (var kvpProduct in products)
+                {
+                    var otherProduct = kvpProduct.Value;
+                    if (otherProduct?.Characteristics == null)
+                        continue;
+
+                    foreach (var kvpChar in otherProduct.Characteristics)
+                    {
+                        var otherCharId = kvpChar.Key;
+                        var otherChar = kvpChar.Value;
+
+                        if (otherChar == null)
+                            continue;
+
+                        // пропускаем текущую характеристику
+                        if (otherProduct.Id == productId && otherCharId == characteristicId)
+                            continue;
+
+                        if (string.Equals(otherChar.easyMSRoomID, easyMSRoomId, StringComparison.Ordinal))
+                        {
+                            // "Отвязываем" комнату от других характеристик
+                            otherChar.easyMSRoomID = null; // или "" — под твой стиль хранения "пусто"
+                        }
+                    }
+                }
+            }
+
+            // 4.2. Обновляем текущую характеристику в кэше
+            //       Если значение не поменялось — просто присвоим то же самое, это безопасно.
+            characteristicEntity.easyMSRoomID = isEmpty ? null : easyMSRoomId;
 
             return result;
         }
+
         public ProductEntity? GetProduct(HotelManagerPortTypeClient session, string? productID)
         {
             ProductEntity? result = null;

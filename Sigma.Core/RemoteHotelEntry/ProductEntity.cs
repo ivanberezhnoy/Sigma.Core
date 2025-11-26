@@ -30,7 +30,7 @@ namespace Sigma.Core.RemoteHotelEntry
 
         public CharacteristicDictionary Characteristics { get; set; }
 
-        public bool IsService { get; set; }
+        public bool? IsService { get; set; }
 
         public void Reload(Product product)
         {
