@@ -30,6 +30,8 @@ namespace Sigma.Core.RemoteHotelEntry
 
         public CharacteristicDictionary Characteristics { get; set; }
 
+        public bool IsService { get; set; }
+
         public void Reload(Product product)
         {
             Name = product.Name;
@@ -38,6 +40,7 @@ namespace Sigma.Core.RemoteHotelEntry
             EAN = product.EAN;
             Price = product.Price;
             IsDeleted = product.IsDeleted;
+            IsService = product.IsService;
 
             CharacteristicDictionary newCharacteristics = new CharacteristicDictionary();
 

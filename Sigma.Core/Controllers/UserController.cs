@@ -1,4 +1,5 @@
 ﻿using HotelManager;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MySqlX.XDevAPI;
 using Sigma.Core.DataStorage;
@@ -18,6 +19,7 @@ namespace Sigma.Core.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public Dictionary<string, UserEntity>? GetUsers()
         {
             UserClient? userClient = GetClient();

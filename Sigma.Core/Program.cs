@@ -10,6 +10,7 @@ using Sigma.Core.Utils;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Sigma.Core.DB;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,6 +43,11 @@ builder.Logging.AddDbLogger(options =>
 {
     builder.Configuration.GetSection("Logging").GetSection("Database").GetSection("Options").Bind(options);
 });
+
+builder.Services.Configure<DatabaseOptions>(
+    builder.Configuration.GetSection("Database"));
+
+builder.Services.AddScoped<IRefreshTokenRepository, MySqlRefreshTokenRepository>();
 
 builder.Services.AddCors();
 
@@ -109,17 +115,21 @@ app.UseAuthorization();
 app.UseCookiePolicy();
 
 
-app.Services.GetService<StorageProvider>();
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
 
-app.Services.GetService<AgreementDataStorage>();
-app.Services.GetService<ClientDataStorage>();
-app.Services.GetService<DocumentDataStorage>();
-app.Services.GetService<LoginController>();
-app.Services.GetService<MoneyStoreDataStorage>();
-app.Services.GetService<OrganizationDataStorage>();
-app.Services.GetService<ProductDataStorage>();
-app.Services.GetService<SessionDataStorage>();
-app.Services.GetService<StoreDataStorage>();
+    services.GetRequiredService<StorageProvider>();
+    services.GetRequiredService<AgreementDataStorage>();
+    services.GetRequiredService<ClientDataStorage>();
+    services.GetRequiredService<DocumentDataStorage>();
+    services.GetRequiredService<MoneyStoreDataStorage>();
+    services.GetRequiredService<OrganizationDataStorage>();
+    services.GetRequiredService<ProductDataStorage>();
+    services.GetRequiredService<SessionDataStorage>();
+    services.GetRequiredService<StoreDataStorage>();
+}
+
 
 /*var dbContext = app.Services.GetService<DatabaseContext>();
 if (dbContext != null)

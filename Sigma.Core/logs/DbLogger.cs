@@ -1,26 +1,20 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Xml;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using MySql.Data.MySqlClient;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
-using Google.Protobuf.WellKnownTypes;
 
 namespace Sigma.Core.logs
 {
     public class DbLogger : ILogger
     {
-        /// <summary>
-        /// Instance of <see cref="DbLoggerProvider" />.
-        /// </summary>
         private readonly DbLoggerProvider _dbLoggerProvider;
-        private readonly MySqlConnection _sqlConnection;
-        private readonly MySqlCommand _mySQLCommand;
 
-        /// <summary>
-        /// Creates a new instance of <see cref="FileLogger" />.
-        /// </summary>
-        /// <param name="fileLoggerProvider">Instance of <see cref="FileLoggerProvider" />.</param>
+        private readonly MySqlConnection _sqlConnection;
+        private readonly MySqlCommand _sqlCommand;
+
+        // Потокобезопасность
+        private readonly object _syncRoot = new object();
+
         public DbLogger([NotNull] DbLoggerProvider dbLoggerProvider)
         {
             _dbLoggerProvider = dbLoggerProvider;
@@ -28,126 +22,116 @@ namespace Sigma.Core.logs
             _sqlConnection = new MySqlConnection(_dbLoggerProvider.Options.ConnectionString);
             _sqlConnection.Open();
 
-            _mySQLCommand = new MySqlCommand();
-            _mySQLCommand.Connection = _sqlConnection;
-            _mySQLCommand.CommandType = System.Data.CommandType.Text;
-            _mySQLCommand.CommandText = string.Format("INSERT INTO {0} VALUES (@Values, @Created)", _dbLoggerProvider.Options.LogTable);
+            // Готовим команду
+            _sqlCommand = new MySqlCommand();
+            _sqlCommand.Connection = _sqlConnection;
+            _sqlCommand.CommandType = System.Data.CommandType.Text;
 
-            _mySQLCommand.Parameters.Add("@Values", MySqlDbType.VarChar);
-            _mySQLCommand.Parameters.Add("@Created", MySqlDbType.DateTime);
+            // Указываем список колонок!
+            _sqlCommand.CommandText = $@"
+                        INSERT INTO `{_dbLoggerProvider.Options.LogTable}`
+                        (`Values`, `Created`)
+                        VALUES (@Values, @Created);
+                        ";
+
+            // Создаём параметры 1 раз
+            _sqlCommand.Parameters.Add("@Values", MySqlDbType.LongText);
+            _sqlCommand.Parameters.Add("@Created", MySqlDbType.DateTime);
         }
 
-        ~DbLogger()
-        {
-            _sqlConnection.Close();
-        }
+        public IDisposable BeginScope<TState>(TState state) => null;
 
-        public IDisposable BeginScope<TState>(TState state)
-        {
-            return null;
-        }
+        public bool IsEnabled(LogLevel logLevel) => logLevel != LogLevel.None;
 
-        /// <summary>
-        /// Whether to log the entry.
-        /// </summary>
-        /// <param name="logLevel"></param>
-        /// <returns></returns>
-        public bool IsEnabled(LogLevel logLevel)
-        {
-            return logLevel != LogLevel.None;
-        }
-
-
-        /// <summary>
-        /// Used to log the entry.
-        /// </summary>
-        /// <typeparam name="TState"></typeparam>
-        /// <param name="logLevel">An instance of <see cref="LogLevel"/>.</param>
-        /// <param name="eventId">The event's ID. An instance of <see cref="EventId"/>.</param>
-        /// <param name="state">The event's state.</param>
-        /// <param name="exception">The event's exception. An instance of <see cref="Exception" /></param>
-        /// <param name="formatter">A delegate that formats </param>
-        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state,
+            Exception exception, Func<TState, Exception, string> formatter)
         {
             if (!IsEnabled(logLevel))
-            {
-                // Don't log the entry if it's not enabled.
                 return;
-            }
 
-            var threadId = Thread.CurrentThread.ManagedThreadId; // Get the current thread ID to use in the log file. 
-
+            var threadId = Thread.CurrentThread.ManagedThreadId;
             var values = new JObject();
 
+            // Заполняем json
             if (_dbLoggerProvider?.Options?.LogFields?.Any() ?? false)
             {
-                foreach (var logField in _dbLoggerProvider.Options.LogFields)
+                foreach (var field in _dbLoggerProvider.Options.LogFields)
                 {
-                    switch (logField)
+                    switch (field)
                     {
                         case "LogLevel":
-                            if (!string.IsNullOrWhiteSpace(logLevel.ToString()))
-                            {
-                                values["LogLevel"] = logLevel.ToString();
-                            }
+                            values["LogLevel"] = logLevel.ToString();
                             break;
+
                         case "ThreadId":
                             values["ThreadId"] = threadId;
                             break;
+
                         case "EventId":
                             values["EventId"] = eventId.Id;
                             break;
+
                         case "EventName":
                             if (!string.IsNullOrWhiteSpace(eventId.Name))
-                            {
                                 values["EventName"] = eventId.Name;
-                            }
                             break;
+
                         case "Message":
-                            if (!string.IsNullOrWhiteSpace(formatter(state, exception)))
-                            {
-                                values["Message"] = formatter(state, exception);
-                            }
+                            var msg = formatter(state, exception);
+                            if (!string.IsNullOrWhiteSpace(msg))
+                                values["Message"] = msg;
                             break;
+
                         case "ExceptionMessage":
-                            if (exception != null && !string.IsNullOrWhiteSpace(exception.Message))
-                            {
-                                values["ExceptionMessage"] = exception?.Message;
-                            }
+                            if (exception?.Message != null)
+                                values["ExceptionMessage"] = exception.Message;
                             break;
+
                         case "ExceptionStackTrace":
-                            if (exception != null && !string.IsNullOrWhiteSpace(exception.StackTrace))
-                            {
-                                values["ExceptionStackTrace"] = exception?.StackTrace;
-                            }
+                            if (!string.IsNullOrWhiteSpace(exception?.StackTrace))
+                                values["ExceptionStackTrace"] = exception.StackTrace;
                             break;
+
                         case "ExceptionSource":
-                            if (exception != null && !string.IsNullOrWhiteSpace(exception.Source))
-                            {
-                                values["ExceptionSource"] = exception?.Source;
-                            }
+                            if (!string.IsNullOrWhiteSpace(exception?.Source))
+                                values["ExceptionSource"] = exception.Source;
                             break;
+
                         case "TextMessage":
                             if (state != null)
-                            {
-                                values["Messge"] = state.ToString();
-                            }
+                                values["Message"] = state.ToString();
                             break;
                     }
                 }
             }
 
-
-            _mySQLCommand.Parameters[0] = new MySqlParameter("@Values", JsonConvert.SerializeObject(values, new JsonSerializerSettings
+            var jsonString = JsonConvert.SerializeObject(values, new JsonSerializerSettings
             {
                 NullValueHandling = NullValueHandling.Ignore,
                 DefaultValueHandling = DefaultValueHandling.Ignore,
-                Formatting = Newtonsoft.Json.Formatting.None
-            }).ToString());
+                Formatting = Formatting.None
+            });
 
-            _mySQLCommand.Parameters[1] = new MySqlParameter("@Created", DateTimeOffset.Now);
+            try
+            {
+                lock (_syncRoot)
+                {
+                    // Проверяем соединение
+                    if (_sqlConnection.State != System.Data.ConnectionState.Open)
+                        _sqlConnection.Open();
 
-            _mySQLCommand.ExecuteNonQuery();
+                    _sqlCommand.Parameters["@Values"].Value = jsonString;
+                    _sqlCommand.Parameters["@Created"].Value = DateTime.UtcNow;
+
+                    _sqlCommand.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                // Никогда не выбрасываем наружу — лог должен быть безопасным
+                System.Diagnostics.Debug.WriteLine("DbLogger error: " + ex.Message);
+                System.Diagnostics.Debug.WriteLine(ex.StackTrace);
+            }
         }
     }
 }

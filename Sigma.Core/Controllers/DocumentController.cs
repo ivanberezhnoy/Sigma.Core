@@ -1,4 +1,5 @@
 ﻿using HotelManager;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Query.Internal;
 using Sigma.Core.Controllers.Query;
@@ -19,6 +20,7 @@ namespace Sigma.Core.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public List<DocumentEntity>? documents(GetDocumentsQuery? query)
         {
             UserClient? userClient = GetClient();
@@ -49,6 +51,7 @@ namespace Sigma.Core.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public RequestResult setDocuments(HotelManager.Document[] documents)
         {
             UserClient? userClient = GetClient();
@@ -63,6 +66,7 @@ namespace Sigma.Core.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public RequestResult updateDocument(string documentId)
         {
             _storageProvider.Documents.UpdateDocument(documentId);

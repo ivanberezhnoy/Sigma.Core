@@ -30,6 +30,7 @@ namespace Sigma.Core.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public RequestResult BindCharacteristic(string productId, string characteristicId, string easyMSRoomId)
         {
             UserClient? userClient = GetClient();

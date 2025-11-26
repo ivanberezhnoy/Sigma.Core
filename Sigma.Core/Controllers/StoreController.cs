@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Sigma.Core.DataStorage;
 using System.Net;
@@ -16,6 +17,7 @@ namespace Sigma.Core.Controllers
         }
 
         [HttpGet(Name = "GetStorages")]
+        [Authorize]
         public StoresDicrionary? Get()
         {
             UserClient? userClient = GetClient();

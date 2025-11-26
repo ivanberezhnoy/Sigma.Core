@@ -1,4 +1,5 @@
 ﻿using HotelManager;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Sigma.Core.DataStorage;
 using Sigma.Core.Utils;
@@ -17,6 +18,7 @@ namespace Sigma.Core.Controllers
         }
 
         [HttpGet(Name = "GetMoneyStores")]
+        [Authorize]
         public MoneyStoresDicrionary? GetMoneyStores()
         {
             UserClient? userClient = GetClient();
@@ -31,6 +33,7 @@ namespace Sigma.Core.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public RequestResult GetBalance(string moneyStoreID)
         {
             UserClient? userClient = GetClient();

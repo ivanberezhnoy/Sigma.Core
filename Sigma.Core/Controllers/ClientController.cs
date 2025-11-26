@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Sigma.Core.DataStorage;
 using System.Net;
 using static Sigma.Core.DataStorage.ClientDataStorage;
@@ -15,6 +16,7 @@ namespace Sigma.Core.Controllers
         }
 
         [HttpGet(Name = "GetClients")]
+        [Authorize]
         public ClientDicrionary? Get()
         {
             UserClient? userClient = GetClient();
