@@ -1,5 +1,6 @@
 ﻿using HotelManager;
 using Microsoft.AspNetCore.Mvc;
+using Mysqlx;
 using Mysqlx.Expr;
 using MySqlX.XDevAPI;
 using MySqlX.XDevAPI.Common;
@@ -9,6 +10,7 @@ using Sigma.Core.RemoteHotelEntry;
 using Sigma.Core.Utils;
 using System.Linq;
 using System.Reflection.Metadata;
+using System.Xml.Linq;
 
 namespace Sigma.Core.DataStorage
 {
@@ -448,7 +450,7 @@ namespace Sigma.Core.DataStorage
             fillDocuments(session, documents, null, newDocuments, false);
             updateCashedDocumentsFilters(newDocuments);
 
-            return new RequestResult(result, new { Documents = newDocuments, DocumentMappings = result.documetsMapping });
+            return new RequestResult(result.errors, newDocuments);
         }
     }
 }
