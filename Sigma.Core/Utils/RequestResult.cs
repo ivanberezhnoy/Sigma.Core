@@ -1,4 +1,7 @@
-﻿namespace Sigma.Core.Utils
+using HotelManager;
+using System.Collections.Generic;
+
+namespace Sigma.Core.Utils
 {
     public enum ErrorCode
     {
@@ -27,16 +30,19 @@
             this.description = description;
         }
 
-        public Error(HotelManager.Error error) 
+        public Error(HotelManager.Error error)
         {
             errorCode = (ErrorCode)error.errorCode;
             description = error.errorDescription;
         }
     }
+
     public class RequestResult
     {
         List<Error>? errors;
         dynamic? data;
+
+        public DocumentMapping[]? DocumentMappings { get; }
 
         public bool HasError
         {
@@ -48,7 +54,7 @@
 
         public List<Error>? Errors
         {
-            get 
+            get
             {
                 return errors;
             }
@@ -56,7 +62,7 @@
 
         public dynamic? Data
         {
-            get 
+            get
             {
                 return data;
             }
@@ -69,19 +75,20 @@
                 errors = new List<Error>();
                 errors.Add(error);
             }
-            
+
+            DocumentMappings = null;
             this.data = data;
         }
 
         public RequestResult(ErrorCode errorCode, string errorDescription) : this(new Error(errorCode, errorDescription), null, false)
-        { 
+        {
 
         }
 
 
-        public RequestResult(HotelManager.Error[] resultErrors, dynamic? data = null)
+        public RequestResult(HotelManager.Error[]? resultErrors, dynamic? data = null)
         {
-            if (resultErrors.Length > 0)
+            if (resultErrors != null && resultErrors.Length > 0)
             {
                 errors = new List<Error>();
 
@@ -91,8 +98,25 @@
                 }
             }
 
+            DocumentMappings = null;
             this.data = data;
         }
-        
+
+        public RequestResult(HotelManager.Result result, dynamic? data = null)
+        {
+            if (result.errors != null && result.errors.Length > 0)
+            {
+                errors = new List<Error>();
+
+                foreach (HotelManager.Error resultError in result.errors)
+                {
+                    errors.Add(new Error(resultError));
+                }
+            }
+
+            DocumentMappings = result.documetsMapping;
+            this.data = data;
+        }
+
     }
 }

@@ -417,21 +417,38 @@ namespace Sigma.Core.DataStorage
             HotelManager.DocumentsList documentsList = new DocumentsList();
             documentsList.data = documents;
 
-            HotelManager.Error[] errors = session.setDocuments(documentsList);
+            HotelManager.Result result = session.setDocuments(documentsList);
 
-            foreach (HotelManager.Error error in errors)
+            if (result.errors != null)
             {
-                _logger.LogError("setDocuments errorCode: {ErrorCode}, desciption: {ErrorDescription}", error.errorCode, error.errorDescription);
+                foreach (HotelManager.Error error in result.errors)
+                {
+                    _logger.LogError("setDocuments errorCode: {ErrorCode}, desciption: {ErrorDescription}", error.errorCode, error.errorDescription);
+                }
+            }
+
+            if (result.documetsMapping != null)
+            {
+                Dictionary<string, string> documentsMapping = new Dictionary<string, string>();
+                foreach (HotelManager.DocumentMapping mapping in result.documetsMapping)
+                {
+                    documentsMapping[mapping.guidID] = mapping.number;
+                }
+
+                foreach (HotelManager.Document document in documents)
+                {
+                    if (documentsMapping.TryGetValue(document.Id, out string? mappedId))
+                    {
+                        document.Id = mappedId;
+                    }
+                }
             }
 
             DocumentsDictionary newDocuments = new DocumentsDictionary();
             fillDocuments(session, documents, null, newDocuments, false);
-
             updateCashedDocumentsFilters(newDocuments);
 
-            RequestResult result = new RequestResult(errors, newDocuments);
-
-            return result;
+            return new RequestResult(result, new { Documents = newDocuments, DocumentMappings = result.documetsMapping });
         }
     }
 }
