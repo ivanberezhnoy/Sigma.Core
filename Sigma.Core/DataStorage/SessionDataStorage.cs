@@ -287,8 +287,23 @@ namespace Sigma.Core.DataStorage
         public UserClient? GetClientForHttpContext(HttpContext context)
         {
             var userName = GetCurrentUserName(context);
-            var endpoint = GetCurrentEndpoint(context);
-            return GetClientForUserWithName(userName, endpoint);
+            var requestedEndpoint = GetCurrentEndpoint(context);
+
+            // Client applications should always see the same data set, so prefer the production session
+            // regardless of the requested endpoint. Only fall back to the requested endpoint if there is
+            // no production session available.
+            var client = GetClientForUserWithName(userName, EndpointType.Production, false);
+
+            if (client == null)
+            {
+                client = GetClientForUserWithName(userName, requestedEndpoint);
+            }
+            else if (requestedEndpoint != EndpointType.Production)
+            {
+                _logger.LogInformation("User {UserName} requested endpoint {RequestedEndpoint}, but returning production session to keep responses consistent.", userName, requestedEndpoint);
+            }
+
+            return client;
         }
 
     }
