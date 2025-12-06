@@ -80,8 +80,9 @@ namespace Sigma.Core.DataStorage
 
             if (!client.Agreements.TryGetValue(agreemntID, out result))
             {
+                ClientDicrionary clients = GetClients(session);
                 _logger.LogInformation("Unable to find agreement with ID: {AgreementID}. Try to reload client with ID: {ClientID}", agreemntID, clientID);
-                client = fillClients(session, clientID);
+                client = fillClients(session, clients, clientID);
             }
 
             if (client != null)

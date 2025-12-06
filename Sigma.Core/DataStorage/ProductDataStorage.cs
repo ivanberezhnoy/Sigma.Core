@@ -44,11 +44,11 @@ namespace Sigma.Core.DataStorage
 
             if (products != null)
             {
-                ProductsList products = session.getProducts(productID);
+                ProductsList productsList = session.getProducts(productID);
 
-                if (products != null && products.data != null)
+                if (productsList != null && productsList.data != null)
                 {
-                    foreach (Product product in products.data)
+                    foreach (Product product in productsList.data)
                     {
                         ProductEntity? productEntity = null;
 

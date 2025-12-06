@@ -69,7 +69,7 @@ namespace Sigma.Core.DataStorage
                 if (!usersDictionary.ContainsKey(user.Id))
                 {
                     UserEntity newUser = new UserEntity(user.Name, null, user.Id);
-                    var userKey = BuildUserKey(endpoint, newUser.Name);
+                    var userKey = BuildUserKey(endpoint, newUser.Id);
 
                     if (_usersClient.ContainsKey(userKey))
                     {
