@@ -70,6 +70,7 @@ namespace Sigma.Core.DataStorage
         {
             AgreementEntity? result = null;
 
+            ClientDicrionary clients = GetClients(session);
             var client = GetClient(session, clientID);
 
             if (client == null)
