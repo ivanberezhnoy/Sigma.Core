@@ -1,27 +1,30 @@
 ﻿using HotelManager;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using MySqlX.XDevAPI;
 using Sigma.Core.RemoteHotelEntry;
+using Sigma.Core.Utils;
 
 namespace Sigma.Core.DataStorage
 {
     public class MoneyStoreDataStorage : BaseDataStorage
     {
         public class MoneyStoresDicrionary : Dictionary<string, MoneyStoreEntity> { };
-        public MoneyStoresDicrionary? _moneyStores;
+        private readonly Dictionary<EndpointType, MoneyStoresDicrionary> _moneyStoresByEndpoint;
 
         public MoneyStoreDataStorage(ILogger<MoneyStoreDataStorage> logger, StorageProvider storageProvider) : base(logger, storageProvider)
         {
             _storageProvider.MoneyStores = this;
+            _moneyStoresByEndpoint = new Dictionary<EndpointType, MoneyStoresDicrionary>();
         }
 
-        private MoneyStoreEntity? fillMoneyStores(HotelManagerPortTypeClient session, string? moneyStoreID = null)
+        private MoneyStoreEntity? fillMoneyStores(HotelManagerPortTypeClient session, MoneyStoresDicrionary moneyStoresCache, string? moneyStoreID = null)
         {
             MoneyStoreEntity? result = null;
 
             MoneyStoresList moneyStores = session.getMoneyStoresList(moneyStoreID);
 
-            if (_moneyStores != null)
+            if (moneyStoresCache != null)
             {
                 if (moneyStores.error != null && moneyStores.error.Length > 0)
                 {
@@ -37,7 +40,7 @@ namespace Sigma.Core.DataStorage
                     if (organization != null)
                     {
                         MoneyStoreEntity newMoneyStore = new MoneyStoreEntity(moneyStore.Id, moneyStore.Name, organization, moneyStore.IsDeleted);
-                        _moneyStores[newMoneyStore.Id] = newMoneyStore;
+                        moneyStoresCache[newMoneyStore.Id] = newMoneyStore;
 
                         result = newMoneyStore;
                     }
@@ -53,13 +56,16 @@ namespace Sigma.Core.DataStorage
 
         public MoneyStoresDicrionary GetMoneyStores(HotelManagerPortTypeClient session)
         {
-            if (_moneyStores == null)
+            var endpoint = GetEndpoint(session);
+            if (!_moneyStoresByEndpoint.TryGetValue(endpoint, out var moneyStores))
             {
-                _moneyStores = new MoneyStoresDicrionary();
+                moneyStores = new MoneyStoresDicrionary();
+                _moneyStoresByEndpoint[endpoint] = moneyStores;
 
-                fillMoneyStores(session);
+                fillMoneyStores(session, moneyStores);
             }
-            return _moneyStores;
+
+            return moneyStores;
         }
 
 
@@ -77,7 +83,7 @@ namespace Sigma.Core.DataStorage
             if (!moneyStores.TryGetValue(moneyStoreID, out result))
             {
                 _logger.LogInformation("Loading money store with ID {MoenyStoreID}", moneyStoreID);
-                result = fillMoneyStores(session, moneyStoreID);
+                result = fillMoneyStores(session, moneyStores, moneyStoreID);
             }
 
             return result;

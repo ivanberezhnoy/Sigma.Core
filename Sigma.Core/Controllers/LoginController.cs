@@ -42,11 +42,13 @@ namespace Sigma.Core.Controllers
             return Convert.ToBase64String(bytes);
         }
 
-        private string CreateJwtToken(string userName)
+        private string CreateJwtToken(string userName, EndpointType endpoint)
         {
+            var endpointKey = EndpointResolver.GetEndpointKey(endpoint);
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, userName),
+                new Claim("endpoint", endpointKey),
                 // сюда можно добавить роли, id клиента и т.п.
             };
 
@@ -75,6 +77,7 @@ namespace Sigma.Core.Controllers
                 return Results.Unauthorized();
             }
 
+            var endpoint = _clientProvier.ResolveEndpoint(userCredentional.Endpoint);
             bool connectionResult = _clientProvier.ConnectClient(userCredentional);
 
             if (!connectionResult)
@@ -83,7 +86,7 @@ namespace Sigma.Core.Controllers
             }
 
             // 1) Access token (твой CreateJwtToken)
-            var accessToken = CreateJwtToken(userCredentional.UserName);
+            var accessToken = CreateJwtToken(userCredentional.UserName, endpoint);
 
             // 2) Refresh token
             var refreshToken = GenerateRefreshToken();
@@ -95,7 +98,8 @@ namespace Sigma.Core.Controllers
                 UserName = userCredentional.UserName,
                 TokenHash = refreshTokenHash,
                 CreatedAt = DateTime.UtcNow,
-                ExpiresAt = DateTime.UtcNow.AddDays(7)
+                ExpiresAt = DateTime.UtcNow.AddDays(7),
+                DeviceInfo = EndpointResolver.GetEndpointKey(endpoint)
             };
 
             _refreshTokenRepository.Save(entity);
@@ -104,7 +108,8 @@ namespace Sigma.Core.Controllers
             {
                 accessToken = accessToken,
                 refreshToken = refreshToken,
-                userName = userCredentional.UserName
+                userName = userCredentional.UserName,
+                endpoint = EndpointResolver.GetEndpointKey(endpoint)
             });
         }
 
@@ -126,7 +131,8 @@ namespace Sigma.Core.Controllers
                 return Results.Unauthorized();
             }
 
-            var accessToken = CreateJwtToken(tokenEntity.UserName);
+            var endpoint = EndpointResolver.ParseEndpointKey(tokenEntity.DeviceInfo);
+            var accessToken = CreateJwtToken(tokenEntity.UserName, endpoint);
 
             return Results.Ok(new
             {

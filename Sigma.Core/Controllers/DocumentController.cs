@@ -69,7 +69,14 @@ namespace Sigma.Core.Controllers
         [Authorize]
         public RequestResult updateDocument(string documentId)
         {
-            _storageProvider.Documents.UpdateDocument(documentId);
+            UserClient? userClient = GetClient();
+
+            if (userClient?.Client == null)
+            {
+                return new RequestResult(ErrorCode.NotAuthorizied, "updateDocument: user not authorized");
+            }
+
+            _storageProvider.Documents.UpdateDocument(userClient.Client, documentId);
 
             return new RequestResult(null, null, true);
         }

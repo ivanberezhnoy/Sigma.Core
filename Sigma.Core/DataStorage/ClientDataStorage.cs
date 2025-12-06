@@ -1,28 +1,31 @@
 ﻿using HotelManager;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using MySqlX.XDevAPI;
 using Sigma.Core.Controllers;
 using Sigma.Core.RemoteHotelEntry;
+using Sigma.Core.Utils;
 
 namespace Sigma.Core.DataStorage
 {
     public class ClientDataStorage : BaseDataStorage
     {
         public class ClientDicrionary : Dictionary<string, ClientEntity> { };
-        public ClientDicrionary? _clients;
+        private readonly Dictionary<EndpointType, ClientDicrionary> _clientsByEndpoint;
 
         public ClientDataStorage(ILogger<ClientDataStorage> logger, StorageProvider storageProvider) : base(logger, storageProvider)
         {
             _storageProvider.Clients = this;
+            _clientsByEndpoint = new Dictionary<EndpointType, ClientDicrionary>();
         }
 
-        private ClientEntity? fillClients(HotelManagerPortTypeClient session, string? clientID = null)
+        private ClientEntity? fillClients(HotelManagerPortTypeClient session, ClientDicrionary clients, string? clientID = null)
         {
             ClientEntity? result = null;
 
             AgreementDataStorage AgreementDataStorage = _storageProvider.Agreements;
 
-            if (_clients != null)
+            if (clients != null)
             {
                 ClientsList clientsList = session.getClients(clientID);
 
@@ -48,10 +51,10 @@ namespace Sigma.Core.DataStorage
                         }
                     }
 
-                    if (!_clients.TryGetValue(client.Id, out result))
+                    if (!clients.TryGetValue(client.Id, out result))
                     {
                         result = new ClientEntity(client, agreements, mainAgreement);
-                        _clients[client.Id] = result;
+                        clients[client.Id] = result;
                     }
                     else
                     {
@@ -94,16 +97,18 @@ namespace Sigma.Core.DataStorage
 
         public ClientDicrionary GetClients(HotelManagerPortTypeClient session)
         {
-            if (_clients == null)
+            var endpoint = GetEndpoint(session);
+            if (!_clientsByEndpoint.TryGetValue(endpoint, out var clients))
             {
-                _clients = new ClientDicrionary();
+                clients = new ClientDicrionary();
+                _clientsByEndpoint[endpoint] = clients;
 
                 _logger.LogInformation("Reloading clients list");
 
-                fillClients(session);
+                fillClients(session, clients);
             }
 
-            return _clients;
+            return clients;
         }
 
         public ClientEntity? GetClient(HotelManagerPortTypeClient session, string? clientID)
@@ -121,7 +126,7 @@ namespace Sigma.Core.DataStorage
             {
                 _logger.LogInformation("Loading client with ID {ClientID}", clientID);
 
-                result = fillClients(session, clientID);
+                result = fillClients(session, clients, clientID);
             }
 
             return result;
