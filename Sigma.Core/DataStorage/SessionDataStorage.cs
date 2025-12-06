@@ -289,18 +289,19 @@ namespace Sigma.Core.DataStorage
             var userName = GetCurrentUserName(context);
             var requestedEndpoint = GetCurrentEndpoint(context);
 
-            // Client applications should always see the same data set, so prefer the production session
-            // regardless of the requested endpoint. Only fall back to the requested endpoint if there is
-            // no production session available.
-            var client = GetClientForUserWithName(userName, EndpointType.Production, false);
+            // Always try to return the session that matches the endpoint embedded in the token.
+            var client = GetClientForUserWithName(userName, requestedEndpoint);
 
-            if (client == null)
+            // If there is no session for the requested endpoint, fall back to production when available
+            // to preserve backward compatibility for tokens without explicit endpoint claims.
+            if (client == null && requestedEndpoint != EndpointType.Production)
             {
-                client = GetClientForUserWithName(userName, requestedEndpoint);
-            }
-            else if (requestedEndpoint != EndpointType.Production)
-            {
-                _logger.LogInformation("User {UserName} requested endpoint {RequestedEndpoint}, but returning production session to keep responses consistent.", userName, requestedEndpoint);
+                client = GetClientForUserWithName(userName, EndpointType.Production, false);
+
+                if (client != null)
+                {
+                    _logger.LogInformation("User {UserName} requested endpoint {RequestedEndpoint}, but returning production session as a fallback.", userName, requestedEndpoint);
+                }
             }
 
             return client;
