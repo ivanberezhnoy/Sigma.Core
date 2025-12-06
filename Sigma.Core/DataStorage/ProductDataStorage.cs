@@ -13,22 +13,24 @@ namespace Sigma.Core.DataStorage
 {
     public class ProductDataStorage : BaseDataStorage
     {
-        private ProductsDicrionary? _products;
+        private readonly Dictionary<EndpointType, ProductsDicrionary> _productsByEndpoint;
 
         public ProductDataStorage(ILogger<ProductDataStorage> logger, StorageProvider storageProvider) : base(logger, storageProvider)
         {
             _storageProvider.Products = this;
+            _productsByEndpoint = new Dictionary<EndpointType, ProductsDicrionary>();
         }
 
         public void ReloadProduct(HotelManagerPortTypeClient session, ProductEntity product)
         {
-            if (_products != null)
+            var products = GetProducts(session);
+            if (products != null)
             {
-                if (!_products.ContainsKey(product.Id))
+                if (!products.ContainsKey(product.Id))
                 {
                     _logger.LogError("ReloadProduct. Products container does not contain product with ID: {ProductID}", product.Id);
                 }
-                fillProducts(session, product.Id);
+                fillProducts(session, products, product.Id);
             }
             else
             {
@@ -36,11 +38,11 @@ namespace Sigma.Core.DataStorage
             }
         }
 
-        private ProductEntity? fillProducts(HotelManagerPortTypeClient session, string? productID = null, bool fullReload = false)
+        private ProductEntity? fillProducts(HotelManagerPortTypeClient session, ProductsDicrionary products, string? productID = null, bool fullReload = false)
         {
             ProductEntity? firstProduct = null;
 
-            if (_products != null)
+            if (products != null)
             {
                 ProductsList products = session.getProducts(productID);
 
@@ -50,7 +52,7 @@ namespace Sigma.Core.DataStorage
                     {
                         ProductEntity? productEntity = null;
 
-                        if (!fullReload && _products.TryGetValue(product.Id, out productEntity))
+                        if (!fullReload && products.TryGetValue(product.Id, out productEntity))
                         {
                             productEntity.Reload(product);
                         }
@@ -58,7 +60,7 @@ namespace Sigma.Core.DataStorage
                         if (productEntity == null)
                         {
                             productEntity = new ProductEntity(product);
-                            _products[product.Id] = productEntity;
+                            products[product.Id] = productEntity;
                         }
 
                         if (firstProduct == null)
@@ -73,18 +75,19 @@ namespace Sigma.Core.DataStorage
         }
         public ProductsDicrionary GetProducts(HotelManagerPortTypeClient session)
         {
-
-            if (_products == null)
+            var endpoint = GetEndpoint(session);
+            if (!_productsByEndpoint.TryGetValue(endpoint, out var products))
             {
                 _logger.LogInformation("Reloading all products list started");
-                _products = new ProductsDicrionary();
+                products = new ProductsDicrionary();
+                _productsByEndpoint[endpoint] = products;
 
-                fillProducts(session);
+                fillProducts(session, products);
 
                 _logger.LogInformation("Reloading all products list finished");
             }
 
-            return _products;
+            return products;
         }
 
         public RequestResult BingCharacteristic(
@@ -189,7 +192,7 @@ namespace Sigma.Core.DataStorage
             {
                 _logger.LogInformation("Loading product with ID {OrganizationID}", productID);
 
-                result = fillProducts(session, productID);
+                result = fillProducts(session, products, productID);
             }
 
             return result;

@@ -1,7 +1,9 @@
 ﻿using HotelManager;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Sigma.Core.RemoteHotelEntry;
+using Sigma.Core.Utils;
 using System.Reflection.Metadata;
 
 namespace Sigma.Core.DataStorage
@@ -9,18 +11,19 @@ namespace Sigma.Core.DataStorage
     public class OrganizationDataStorage : BaseDataStorage
     {
         public class OrganizationsDicrionary : Dictionary<string, OrganizationEntity> { };
-        public OrganizationsDicrionary? _organizations;
+        private readonly Dictionary<EndpointType, OrganizationsDicrionary> _organizationsByEndpoint;
 
         public OrganizationDataStorage(ILogger<OrganizationDataStorage> logger, StorageProvider storageProvider) : base(logger, storageProvider)
         {
             _storageProvider.Organizations = this;
+            _organizationsByEndpoint = new Dictionary<EndpointType, OrganizationsDicrionary>();
         }
 
-        private OrganizationEntity? fillOrganizations(HotelManagerPortTypeClient session, string? organizationID = null)
+        private OrganizationEntity? fillOrganizations(HotelManagerPortTypeClient session, OrganizationsDicrionary organizations, string? organizationID = null)
         {
             OrganizationEntity? result = null;
 
-            if (_organizations != null)
+            if (organizations != null)
             {
                 OrganizationsList organizationsList = session.getOrganizationsList(organizationID);
 
@@ -32,7 +35,7 @@ namespace Sigma.Core.DataStorage
                 foreach (var organization in organizationsList.data)
                 {
                     OrganizationEntity newOrganization = new OrganizationEntity(organization);
-                    _organizations[newOrganization.Id] = newOrganization;
+                    organizations[newOrganization.Id] = newOrganization;
 
                     result = newOrganization;
                 }
@@ -43,16 +46,18 @@ namespace Sigma.Core.DataStorage
 
         public OrganizationsDicrionary GetOrganizations(HotelManagerPortTypeClient session)
         {
-            if (_organizations == null)
+            var endpoint = GetEndpoint(session);
+            if (!_organizationsByEndpoint.TryGetValue(endpoint, out var organizations))
             {
-                _organizations = new OrganizationsDicrionary();
+                organizations = new OrganizationsDicrionary();
+                _organizationsByEndpoint[endpoint] = organizations;
 
                 _logger.LogInformation("Reloading organizations list");
 
-                fillOrganizations(session);
+                fillOrganizations(session, organizations);
             }
 
-            return _organizations;
+            return organizations;
         }
 
         public OrganizationEntity? GetOrganization(HotelManagerPortTypeClient session, string? organizationID)
@@ -70,7 +75,7 @@ namespace Sigma.Core.DataStorage
             {
                 _logger.LogInformation("Loading organization with ID {OrganizationID}", organizationID);
 
-                result = fillOrganizations(session, organizationID);
+                result = fillOrganizations(session, organizations, organizationID);
             }
 
             return result;

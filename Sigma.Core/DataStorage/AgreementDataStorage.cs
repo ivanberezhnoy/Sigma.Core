@@ -1,36 +1,39 @@
 ﻿using HotelManager;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Sigma.Core.RemoteHotelEntry;
+using Sigma.Core.Utils;
 
 namespace Sigma.Core.DataStorage
 {
     public class AgreementDataStorage : BaseDataStorage
     {
         public class AgreementsDicrionary : Dictionary<string, AgreementEntity> { };
-        public AgreementsDicrionary? _agreements;
+        private readonly Dictionary<EndpointType, AgreementsDicrionary> _agreementsByEndpoint;
 
         public AgreementDataStorage(ILogger<AgreementDataStorage> logger, StorageProvider storageProvider) : base(logger, storageProvider)
         {
             _storageProvider.Agreements = this;
+            _agreementsByEndpoint = new Dictionary<EndpointType, AgreementsDicrionary>();
         }
 
-        private AgreementEntity? fillAgreements(HotelManagerPortTypeClient session, string? agreementID = null)
+        private AgreementEntity? fillAgreements(HotelManagerPortTypeClient session, AgreementsDicrionary agreements, string? agreementID = null)
         {
             AgreementEntity? result = null;
 
-            if (_agreements != null)
+            if (agreements != null)
             {
-                AgreementsList agreements = session.getAgrementsList(agreementID);
+                AgreementsList agreementsList = session.getAgrementsList(agreementID);
 
-                if (agreements.error != null && agreements.error.Length > 0)
+                if (agreementsList.error != null && agreementsList.error.Length > 0)
                 {
-                    _logger.LogError("Failed to load agreements list. Error : {Error}, stores: {Agreements}", agreements.error, agreements);
+                    _logger.LogError("Failed to load agreements list. Error : {Error}, stores: {Agreements}", agreementsList.error, agreementsList);
                 }
 
-                foreach (var agreement in agreements.data)
+                foreach (var agreement in agreementsList.data)
                 {
                     AgreementEntity newAgreement = new AgreementEntity(agreement);
-                    _agreements[newAgreement.Id] = newAgreement;
+                    agreements[newAgreement.Id] = newAgreement;
 
                     if (result == null)
                     {
@@ -44,13 +47,16 @@ namespace Sigma.Core.DataStorage
 
         private AgreementsDicrionary getAgreements(HotelManagerPortTypeClient session)
         {
-            if (_agreements == null)
+            var endpoint = GetEndpoint(session);
+            if (!_agreementsByEndpoint.TryGetValue(endpoint, out var agreements))
             {
-                _agreements = new AgreementsDicrionary();
+                agreements = new AgreementsDicrionary();
+                _agreementsByEndpoint[endpoint] = agreements;
 
-                fillAgreements(session);
+                fillAgreements(session, agreements);
             }
-            return _agreements;
+
+            return agreements;
         }
 
         public AgreementEntity? GetAgreement(HotelManagerPortTypeClient session, string? agreementID)
@@ -68,7 +74,7 @@ namespace Sigma.Core.DataStorage
             {
                 _logger.LogInformation("Loading agreement with ID {AgreementID}", agreementID);
 
-                result = fillAgreements(session, agreementID);
+                result = fillAgreements(session, agreements, agreementID);
             }
 
             return result;

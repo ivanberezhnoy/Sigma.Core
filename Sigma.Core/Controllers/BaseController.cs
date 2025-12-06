@@ -17,7 +17,7 @@ namespace Sigma.Core.Controllers
 
         protected UserClient? GetClient()
         {
-            var userClient = _storageProvider.Sessions.GetClientForUserWithName(SessionDataStorage.GetCurrentUserName(HttpContext));
+            var userClient = _storageProvider.Sessions.GetClientForHttpContext(HttpContext);
 
             if (userClient == null || userClient.Client == null)
             {

@@ -1,26 +1,29 @@
 ﻿using HotelManager;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Sigma.Core.Controllers;
 using Sigma.Core.RemoteHotelEntry;
+using Sigma.Core.Utils;
 
 namespace Sigma.Core.DataStorage
 {
     public class StoreDataStorage : BaseDataStorage
     {
         public class StoresDicrionary : Dictionary<string, StoreEntity> { };
-        public StoresDicrionary? _stores;
+        private readonly Dictionary<EndpointType, StoresDicrionary> _storesByEndpoint;
 
         public StoreDataStorage(ILogger<StoreDataStorage> logger, StorageProvider storageProvider) : base(logger, storageProvider)
         {
             _storageProvider.Stores = this;
+            _storesByEndpoint = new Dictionary<EndpointType, StoresDicrionary>();
         }
 
-        private StoreEntity? fillStores(HotelManagerPortTypeClient session, string? storeID = null)
+        private StoreEntity? fillStores(HotelManagerPortTypeClient session, StoresDicrionary storesCache, string? storeID = null)
         {
             StoreEntity? result = null;
 
-            if (_stores != null)
+            if (storesCache != null)
             {
                 StoresList stores = session.getStoresList(storeID);
 
@@ -32,7 +35,7 @@ namespace Sigma.Core.DataStorage
                 foreach (var store in stores.data)
                 {
                     StoreEntity newStore = new StoreEntity(store);
-                    _stores[newStore.Id] = newStore;
+                    storesCache[newStore.Id] = newStore;
 
                     if (result == null)
                     {
@@ -45,13 +48,15 @@ namespace Sigma.Core.DataStorage
         }
         public StoresDicrionary GetStores(HotelManagerPortTypeClient session)
         {
-            if (_stores == null)
+            var endpoint = GetEndpoint(session);
+            if (!_storesByEndpoint.TryGetValue(endpoint, out var stores))
             {
-                _stores = new StoresDicrionary();
+                stores = new StoresDicrionary();
+                _storesByEndpoint[endpoint] = stores;
 
-                fillStores(session);
+                fillStores(session, stores);
             }
-            return _stores;
+            return stores;
         }
 
         public StoreEntity? GetStore(HotelManagerPortTypeClient session, string? storeID)
@@ -69,7 +74,7 @@ namespace Sigma.Core.DataStorage
             {
                 _logger.LogInformation("Loading store with ID {StoreID}", storeID);
 
-                result = fillStores(session, storeID);
+                result = fillStores(session, stores, storeID);
             }
 
             return result;

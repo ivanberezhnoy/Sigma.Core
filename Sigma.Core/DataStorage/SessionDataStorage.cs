@@ -1,4 +1,5 @@
-﻿using HotelManager;
+using System;
+using HotelManager;
 using System.Collections.Generic;
 using Sigma.Core.RemoteHotelEntry;
 using Sigma.Core.Utils;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using MySqlX.XDevAPI.Common;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 
 namespace Sigma.Core.DataStorage
 {
@@ -19,10 +21,13 @@ namespace Sigma.Core.DataStorage
 
         public HotelManagerPortTypeClient? Client { get; set; }
 
-        public UserClient(UserEntity user, HotelManagerPortTypeClient? client)
+        public EndpointType Endpoint { get; set; }
+
+        public UserClient(UserEntity user, HotelManagerPortTypeClient? client, EndpointType endpoint)
         {
             User = user;
             Client = client;
+            Endpoint = endpoint;
         }
     }
 
@@ -31,20 +36,28 @@ namespace Sigma.Core.DataStorage
         public SessionDataStorage(ILogger<SessionDataStorage> logger, StorageProvider storageProvider) : base(logger, storageProvider)
         {
             _usersClient = new Dictionary<UserName, UserClient>();
+            _usersDictionaryByEndpoint = new Dictionary<EndpointType, Dictionary<UserName, UserEntity>>();
 
             _storageProvider.Sessions = this;
+        }
+
+        private string BuildUserKey(EndpointType endpoint, string userName)
+        {
+            return $"{endpoint}|{userName.Trim()}";
         }
 
         // Users by name
         private Dictionary<UserName, UserClient> _usersClient;
         // Users by ID
-        private Dictionary<string, UserEntity>? _usersDictionary;
+        private Dictionary<EndpointType, Dictionary<UserName, UserEntity>> _usersDictionaryByEndpoint;
 
         private Dictionary<UserName, UserEntity> reloadUsers(HotelManagerPortTypeClient client)
         {
-            if (_usersDictionary == null)
+            var endpoint = GetEndpoint(client);
+            if (!_usersDictionaryByEndpoint.TryGetValue(endpoint, out var usersDictionary))
             {
-                _usersDictionary = new Dictionary<UserName, UserEntity>();
+                usersDictionary = new Dictionary<UserName, UserEntity>();
+                _usersDictionaryByEndpoint[endpoint] = usersDictionary;
             }
 
             _logger.LogInformation("Reload all users");
@@ -53,38 +66,43 @@ namespace Sigma.Core.DataStorage
 
             foreach (var user in users.data)
             {
-                if (!_usersDictionary.ContainsKey(user.Id))
+                if (!usersDictionary.ContainsKey(user.Id))
                 {
                     UserEntity newUser = new UserEntity(user.Name, null, user.Id);
+                    var userKey = BuildUserKey(endpoint, newUser.Name);
 
-                    if (_usersClient.ContainsKey(newUser.Name))
+                    if (_usersClient.ContainsKey(userKey))
                     {
                         _logger.LogError("Inconsistensy for users storage for user with name {UserName}", newUser.Name);
                     }
 
-                    _usersClient[newUser.Id.Trim()] = new UserClient(newUser, null);
+                    _usersClient[userKey] = new UserClient(newUser, null, endpoint);
 
-                    _usersDictionary[newUser.Id.Trim()] = newUser;
+                    usersDictionary[newUser.Id.Trim()] = newUser;
                 }
             }
 
-            return _usersDictionary;
+            return usersDictionary;
         }
         public Dictionary<string, UserEntity> GetUsers(HotelManagerPortTypeClient client)
         {
-            if (_usersDictionary == null)
+            var endpoint = GetEndpoint(client);
+            if (!_usersDictionaryByEndpoint.TryGetValue(endpoint, out var usersDictionary))
             {
                 return reloadUsers(client);
             }
 
-            return _usersDictionary;
+            return usersDictionary;
         }
         public UserEntity? GetUserByID(HotelManagerPortTypeClient client, string userID)
         {
             UserEntity? result = null;
             bool usersReloaded = false;
 
-            Dictionary<UserName, UserEntity>? usersDictionary = _usersDictionary;
+            var endpoint = GetEndpoint(client);
+            Dictionary<UserName, UserEntity>? usersDictionary = null;
+
+            _usersDictionaryByEndpoint.TryGetValue(endpoint, out usersDictionary);
 
             userID = userID.Trim();
 
@@ -117,7 +135,11 @@ namespace Sigma.Core.DataStorage
         {
             _logger.LogInformation("Try to connect user: {UserName}", userCredential.UserName);
 
-            UserClient? userClient = GetClientForUserWithName(userCredential.UserName, false);
+            var endpointType = EndpointResolver.Normalize(userCredential.Endpoint);
+            var endpointUrl = EndpointResolver.GetEndpointUrl(endpointType);
+            var userKey = BuildUserKey(endpointType, userCredential.UserName);
+
+            UserClient? userClient = GetClientForUserWithName(userCredential.UserName, endpointType, false);
 
             if (userClient != null && userClient.Client != null)
             {
@@ -156,8 +178,7 @@ namespace Sigma.Core.DataStorage
             hotelManagerBinding.CloseTimeout = timeout;
 #endif
 
-            //var hotelManagerEndpoint = new System.ServiceModel.EndpointAddress("http://192.168.1.152/ApartmentDeveloper/ws/ws2.1cws");
-            var hotelManagerEndpoint = new System.ServiceModel.EndpointAddress("http://192.168.1.152/HotelManager/ws/ws2.1cws");
+            var hotelManagerEndpoint = new System.ServiceModel.EndpointAddress(endpointUrl);
 
             HotelManagerPortTypeClient client = new HotelManagerPortTypeClient(hotelManagerBinding, hotelManagerEndpoint);
             client.ClientCredentials.UserName.UserName = userCredential.UserName;
@@ -192,7 +213,7 @@ namespace Sigma.Core.DataStorage
 
             // Get user from cache or create new in cache
             user = GetUserByID(client, userSettings.UserID.Trim());
-            userClient = GetClientForUserWithName(userCredential.UserName, true);
+            userClient = GetClientForUserWithName(userCredential.UserName, endpointType, true);
 
             if (user == null || userClient == null)
             {
@@ -218,6 +239,7 @@ namespace Sigma.Core.DataStorage
             user.DefaultClient = ClientDataStorage.GetClient(client, userSettings.DefaultClientId);
 
             userClient.Client = client;
+            userClient.Endpoint = endpointType;
 
              _logger.LogInformation("New user {UserName} session", userCredential.UserName);
 
@@ -230,7 +252,18 @@ namespace Sigma.Core.DataStorage
                    ?? context.User.FindFirst(ClaimTypes.Name)?.Value;
         }
 
-        public UserClient? GetClientForUserWithName(String? userName, bool logWarning = true)
+        static public EndpointType GetCurrentEndpoint(HttpContext context)
+        {
+            var endpointClaim = context.User.FindFirst("endpoint")?.Value;
+            return EndpointResolver.ParseEndpointKey(endpointClaim);
+        }
+
+        public EndpointType ResolveEndpoint(EndpointType? endpoint)
+        {
+            return EndpointResolver.Normalize(endpoint);
+        }
+
+        public UserClient? GetClientForUserWithName(String? userName, EndpointType endpoint, bool logWarning = true)
         {
             if (userName == null)
             {
@@ -240,14 +273,22 @@ namespace Sigma.Core.DataStorage
             }
             UserClient? result;
 
-            _usersClient.TryGetValue(userName, out result);
+            var userKey = BuildUserKey(endpoint, userName);
+            _usersClient.TryGetValue(userKey, out result);
 
             if (result == null && logWarning)
             {
-                _logger.LogWarning("Unable to find client for User with name: {}", userName);
+                _logger.LogWarning("Unable to find client for User with name: {} and endpoint {Endpoint}", userName, endpoint);
             }
 
             return result;
+        }
+
+        public UserClient? GetClientForHttpContext(HttpContext context)
+        {
+            var userName = GetCurrentUserName(context);
+            var endpoint = GetCurrentEndpoint(context);
+            return GetClientForUserWithName(userName, endpoint);
         }
 
     }

@@ -1,4 +1,7 @@
-﻿namespace Sigma.Core.DataStorage
+using Microsoft.Extensions.Logging;
+using Sigma.Core.Utils;
+
+namespace Sigma.Core.DataStorage
 {
     public class BaseDataStorage
     {
@@ -9,6 +12,11 @@
         {
             _logger = logger;
             _storageProvider = storageProvider;
+        }
+
+        protected EndpointType GetEndpoint(HotelManager.HotelManagerPortTypeClient session)
+        {
+            return EndpointResolver.GetEndpointTypeFromUrl(session.Endpoint.Address.Uri.AbsoluteUri);
         }
     }
 }
