@@ -11,12 +11,14 @@ namespace Sigma.Core.DataStorage
     public class ClientDataStorage : BaseDataStorage
     {
         public class ClientDicrionary : Dictionary<string, ClientEntity> { };
-        private readonly Dictionary<EndpointType, ClientDicrionary> _clientsByEndpoint;
+        private readonly ClientDicrionary _clients;
+        private readonly HashSet<EndpointType> _loadedEndpoints;
 
         public ClientDataStorage(ILogger<ClientDataStorage> logger, StorageProvider storageProvider) : base(logger, storageProvider)
         {
             _storageProvider.Clients = this;
-            _clientsByEndpoint = new Dictionary<EndpointType, ClientDicrionary>();
+            _clients = new ClientDicrionary();
+            _loadedEndpoints = new HashSet<EndpointType>();
         }
 
         private ClientEntity? fillClients(HotelManagerPortTypeClient session, ClientDicrionary clients, string? clientID = null)
@@ -81,7 +83,7 @@ namespace Sigma.Core.DataStorage
             if (!client.Agreements.TryGetValue(agreemntID, out result))
             {
                 _logger.LogInformation("Unable to find agreement with ID: {AgreementID}. Try to reload client with ID: {ClientID}", agreemntID, clientID);
-                client = fillClients(session, clientID);
+                client = fillClients(session, _clients, clientID);
             }
 
             if (client != null)
@@ -97,18 +99,8 @@ namespace Sigma.Core.DataStorage
 
         public ClientDicrionary GetClients(HotelManagerPortTypeClient session)
         {
-            var endpoint = GetEndpoint(session);
-            if (!_clientsByEndpoint.TryGetValue(endpoint, out var clients))
-            {
-                clients = new ClientDicrionary();
-                _clientsByEndpoint[endpoint] = clients;
-
-                _logger.LogInformation("Reloading clients list");
-
-                fillClients(session, clients);
-            }
-
-            return clients;
+            EnsureEndpointLoaded(session);
+            return _clients;
         }
 
         public ClientEntity? GetClient(HotelManagerPortTypeClient session, string? clientID)
@@ -120,16 +112,32 @@ namespace Sigma.Core.DataStorage
                 return result;
             }
 
-            ClientDicrionary clients = GetClients(session);
+            var endpoint = EnsureEndpointLoaded(session);
+            ClientDicrionary clients = _clients;
 
             if (!clients.TryGetValue(clientID, out result))
             {
                 _logger.LogInformation("Loading client with ID {ClientID}", clientID);
 
                 result = fillClients(session, clients, clientID);
+                _loadedEndpoints.Add(endpoint);
             }
 
             return result;
+        }
+
+        private EndpointType EnsureEndpointLoaded(HotelManagerPortTypeClient session)
+        {
+            var endpoint = GetEndpoint(session);
+
+            if (!_loadedEndpoints.Contains(endpoint))
+            {
+                _logger.LogInformation("Reloading clients list");
+                fillClients(session, _clients);
+                _loadedEndpoints.Add(endpoint);
+            }
+
+            return endpoint;
         }
     }
 }
